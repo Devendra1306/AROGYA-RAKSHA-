@@ -53,8 +53,8 @@ const GlobalLayout = ({ children }) => {
     <div className="min-h-screen bg-surface dark:bg-slate-900 text-on-surface dark:text-slate-100 flex flex-col">
       {/* Sticky Navbar */}
       <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-800 shadow-sm transition-colors">
-        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
-          <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-9 w-9 rounded-full object-cover shadow-sm border border-outline-variant/30" />
+        <div className="flex items-center gap-2.5 cursor-pointer animate-fade-in" onClick={() => navigate('/')}>
+          <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-10 w-10 rounded-full object-cover ring-2 ring-primary dark:ring-secondary ring-offset-1 ring-offset-white dark:ring-offset-slate-900 shadow-md transition-all duration-300 hover:scale-105" />
           <span className="text-xl font-bold text-primary dark:text-secondary tracking-wide">Arogya Raksha</span>
         </div>
 
@@ -155,7 +155,7 @@ const GlobalLayout = ({ children }) => {
             <img 
               src="/logo.jpg" 
               alt="Arogya Raksha Logo" 
-              className="h-14 w-14 rounded-full object-cover shadow-lg border border-slate-700" 
+              className="h-16 w-16 rounded-full object-cover ring-2 ring-primary dark:ring-secondary ring-offset-2 ring-offset-slate-900 shadow-xl transition-all duration-300 hover:scale-105 hover:rotate-3" 
             />
             <div>
               <h3 className="text-white font-bold text-xl tracking-wide">Arogya Raksha</h3>
