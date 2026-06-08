@@ -8,6 +8,15 @@ const { seedDatabase } = require('./config/seed');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
+const { connectDB } = require('./config/db');
+connectDB().then(() => {
+  seedDatabase();
+}).catch(err => {
+  console.error('Failed to initialize database connection:', err);
+});
+
 // Set security HTTP headers
 app.use(helmet({
   crossOriginResourcePolicy: false
@@ -31,11 +40,22 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 // Health check endpoint
-app.use('/api/health', (req, res) => {
+const mongoose = require('mongoose');
+
+app.use('/api/health', async (req, res) => {
+  if (mongoose.connection.readyState === 2) {
+    try {
+      await mongoose.connection.asPromise();
+    } catch (e) {
+      // Catch connection errors, reported in dbError
+    }
+  }
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    isMockDB: global.isMockDB
+    dbState: mongoose.connection.readyState,
+    isMockDB: global.isMockDB,
+    dbError: global.dbError
   });
 });
 

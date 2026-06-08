@@ -25,6 +25,7 @@ async function connectDB() {
     console.warn('⚠️  Falling back to a local JSON-based persistent file database.\n');
     isMockDB = true;
     global.isMockDB = true;
+    global.dbError = err.message;
   }
 }
 
