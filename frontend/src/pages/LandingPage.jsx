@@ -175,20 +175,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 px-margin-desktop border-t border-slate-800">
-        <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-gutter text-center md:text-left">
-          <div>
-            <h3 className="text-white font-bold text-xl">🚨 Arogya Raksha</h3>
-            <p className="text-xs opacity-75 mt-1">Empowering communities through AI precision & safe medical disclaimers.</p>
-          </div>
-          <div className="flex gap-gutter text-xs font-semibold">
-            <span className="cursor-pointer hover:text-white">Privacy Policy</span>
-            <span className="cursor-pointer hover:text-white">Terms of Use</span>
-            <span className="cursor-pointer hover:text-white">Contact Center</span>
-          </div>
-        </div>
-      </footer>
+
 
     </div>
   );
