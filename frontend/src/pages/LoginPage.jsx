@@ -41,7 +41,7 @@ export default function LoginPage() {
         navigate('/profile-setup');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid credentials or connection error.');
+      setError(err.response?.data?.error || err.message || 'Invalid credentials or connection error.');
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export default function LoginPage() {
         navigate('/profile-setup');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Google login failed.');
+      setError(err.response?.data?.error || err.message || 'Google login failed.');
     } finally {
       setLoading(false);
     }

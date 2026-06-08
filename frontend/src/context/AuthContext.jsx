@@ -53,12 +53,44 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error("API Call Error Details:", error);
-    // Custom friendly message for network/connection failures
-    if (!error.response && (error.message === 'Network Error' || error.code === 'ERR_NETWORK')) {
-      error.message = "Unable to connect to server. Please check your internet connection or try again.";
-    } else if (error.response && error.response.status === 405) {
-      error.message = "Request failed with status code 405 (Method Not Allowed). This indicates the API request went to Vercel's static server instead of the backend. Please check VITE_API_URL or run/test using local IP.";
+    
+    // Check if error is timeout
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      error.message = "Request timeout: The server took too long to respond. Please try again.";
+    } 
+    // Check if there is no response (network disconnect, DNS error, CORS block)
+    else if (!error.response) {
+      const isHttps = window.location.protocol === 'https:';
+      const isLocalBackend = API_URL.startsWith('http://localhost') || 
+                            API_URL.startsWith('http://127.0.0.1') || 
+                            API_URL.startsWith('http://192.168.') || 
+                            API_URL.startsWith('http://10.') ||
+                            API_URL.startsWith('http://172.16.');
+      
+      if (isHttps && isLocalBackend) {
+        error.message = "CORS / Mixed Content blocked: Secure HTTPS frontend cannot call insecure HTTP backend. Please use local dev network URL or deploy backend to HTTPS.";
+      } else if (!window.navigator.onLine) {
+        error.message = "Network Error: You appear to be offline. Please check your internet connection.";
+      } else {
+        error.message = "Server unavailable: Could not connect to the backend API server. Ensure it is running and accessible.";
+      }
+    } 
+    // Check response status
+    else {
+      const status = error.response.status;
+      if (status === 405) {
+        error.message = "API URL missing (405 Method Not Allowed): Request sent to static Vercel host instead of API backend. Ensure VITE_API_URL is configured on Vercel.";
+      } else if (status === 404) {
+        error.message = "API endpoint not found (404). Please verify backend route configuration.";
+      } else if (status === 401 || status === 403) {
+        if (!error.response.data?.error) {
+          error.message = "Invalid credentials: Access denied.";
+        }
+      } else if (status >= 500) {
+        error.message = `Server error (${status}): The backend server encountered an error. Please try again later.`;
+      }
     }
+    
     return Promise.reject(error);
   }
 );

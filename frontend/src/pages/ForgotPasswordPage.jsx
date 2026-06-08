@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
       setMessage(response.data.message || 'Reset link sent successfully!');
       setEmail('');
     } catch (err) {
-      const errMsg = err.response?.data?.error || 'Failed to request password reset link. Please try again.';
+      const errMsg = err.response?.data?.error || err.message || 'Failed to request password reset link. Please try again.';
       
       // Check if it is a Google Login managed account
       if (errMsg.includes('Google Sign-In')) {

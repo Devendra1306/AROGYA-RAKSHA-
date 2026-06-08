@@ -54,7 +54,7 @@ export default function SignupPage() {
       await register(firstName, lastName, email, mobile, password);
       navigate('/profile-setup');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed. Try again.');
+      setError(err.response?.data?.error || err.message || 'Registration failed. Try again.');
     } finally {
       setLoading(false);
     }
@@ -81,7 +81,7 @@ export default function SignupPage() {
         navigate('/profile-setup');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Google login failed.');
+      setError(err.response?.data?.error || err.message || 'Google login failed.');
     } finally {
       setLoading(false);
     }

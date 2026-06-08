@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
       }, 1000);
 
     } catch (err) {
-      const errMsg = err.response?.data?.error || 'Failed to update password. Try again.';
+      const errMsg = err.response?.data?.error || err.message || 'Failed to update password. Try again.';
       setError(errMsg);
     } finally {
       setLoading(false);
