@@ -5,11 +5,26 @@ const AuthContext = createContext(null);
 
 // Resolve the API URL dynamically, defaulting to local backend
 const getApiUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  const envUrl = import.meta.env.VITE_API_URL;
+  const hostname = window.location.hostname;
+  
+  // If we are testing locally on a mobile device (connected to the same Wi-Fi)
+  if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1' && /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname)) {
+    return `http://${hostname}:5000/api`;
   }
-  // Default to local backend for testing on both localhost and Vercel
-  return 'http://localhost:5000/api';
+  
+  // If we are on localhost/127.0.0.1
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:5000/api';
+  }
+
+  // If in production on Vercel or other platforms, and envUrl is set to a non-localhost endpoint
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+
+  // Fallback for production: relative path
+  return '/api';
 };
 
 export const API_URL = getApiUrl();
@@ -29,6 +44,19 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Configure Axios response interceptor to globally intercept and customize network connection errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API Call Error Details:", error);
+    // Custom friendly message for network/connection failures
+    if (!error.response && (error.message === 'Network Error' || error.code === 'ERR_NETWORK')) {
+      error.message = "Unable to connect to server. Please check your internet connection or try again.";
+    }
     return Promise.reject(error);
   }
 );

@@ -296,7 +296,7 @@ export default function EmergencyHelp() {
         )}
 
         {aiResult && !loading && (
-          <div className="bg-red-50/50 dark:bg-red-950/20 border border-red-200/40 p-5 rounded-2xl mb-6 space-y-4 animate-fade-in">
+          <div className="bg-red-50/50 dark:bg-red-950/20 border border-red-200/40 p-5 rounded-2xl mb-6 space-y-4">
             <div className="flex justify-between items-center border-b border-red-100 dark:border-red-900/30 pb-2.5">
               <h3 className="font-bold text-sm text-red-600 dark:text-red-400">{aiResult.possibleEmergency || 'AI Symptoms Assessment'}</h3>
               <span className="bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
@@ -495,8 +495,8 @@ export default function EmergencyHelp() {
 
         {/* Modal guidance inside mobile view too */}
         {selectedGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-xl w-full p-5 shadow-2xl border border-outline-variant/30 space-y-4 animate-scale-up max-h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-xl w-full p-5 shadow-md border border-slate-200 dark:border-slate-700 space-y-4 max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center border-b border-border-grey/30 pb-3">
                 <div>
                   <h3 className="text-base font-bold text-red-650 dark:text-red-400">{selectedGuide.title} Instructions</h3>
@@ -539,8 +539,8 @@ export default function EmergencyHelp() {
 
               {selectedGuide.warnings && (
                 <div className="bg-red-50/30 dark:bg-red-950/10 border border-red-200/55 p-3 rounded-2xl text-xs space-y-1.5">
-                  <h4 className="font-bold text-red-650 dark:text-red-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
-                    ⚠️ Warnings:
+                  <h4 className="font-bold text-red-650 dark:text-red-400 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-xs text-red-500">warning</span> Warnings:
                   </h4>
                   <ul className="space-y-1">
                     {selectedGuide.warnings.map((w, idx) => (

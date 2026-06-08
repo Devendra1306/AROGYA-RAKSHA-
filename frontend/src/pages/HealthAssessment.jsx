@@ -180,7 +180,7 @@ export default function HealthAssessment() {
   if (isMobile) {
     // Mobile Assessment view (Multi-step wizard and results)
     return (
-      <div className="max-w-[1280px] mx-auto px-margin-mobile py-6 text-slate-800 dark:text-slate-100 font-body-md animate-fade-in">
+      <div className="max-w-[1280px] mx-auto px-margin-mobile py-6 text-slate-800 dark:text-slate-100 font-body-md">
         
         {wizardStep !== null ? (
           // Mobile Wizard Form
@@ -371,11 +371,11 @@ export default function HealthAssessment() {
                 {/* Breakdown grid */}
                 <div className="grid grid-cols-5 gap-1.5">
                   {[
-                    { name: '🏃 Phys', val: latestAssessment.activityScore || 0, color: 'text-primary' },
-                    { name: '🥗 Nutr', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
-                    { name: '😴 Sleep', val: latestAssessment.sleepScore || 0, color: 'text-indigo-500' },
-                    { name: '💧 Hydr', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
-                    { name: '🧠 Stres', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
+                    { name: 'Phys', val: latestAssessment.activityScore || 0, color: 'text-primary' },
+                    { name: 'Nutr', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
+                    { name: 'Sleep', val: latestAssessment.sleepScore || 0, color: 'text-indigo-500' },
+                    { name: 'Hydr', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
+                    { name: 'Stres', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
                   ].map(f => (
                     <div key={f.name} className="bg-white dark:bg-slate-800 border p-2 rounded-xl text-center shadow-xs">
                       <span className="text-[8px] text-slate-400 font-bold block">{f.name}</span>
@@ -407,9 +407,9 @@ export default function HealthAssessment() {
 
               </div>
             ) : (
-              <div className="text-center py-10 bg-white dark:bg-slate-800 border rounded-xl p-5 shadow-xs">
-                <span className="text-3xl">📊</span>
-                <h3 className="font-bold text-sm mt-3">Start Vitals Assessment</h3>
+              <div className="text-center py-10 bg-white dark:bg-slate-800 border rounded-xl p-5 shadow-xs flex flex-col items-center">
+                <span className="material-symbols-outlined text-3xl text-primary mb-2">assessment</span>
+                <h3 className="font-bold text-sm mt-1">Start Vitals Assessment</h3>
                 <p className="text-xs text-slate-400 mt-1 mb-4">Update habits and generate scores in real-time.</p>
                 <button onClick={startAssessmentWizard} className="bg-primary text-white font-bold px-5 py-2 rounded-lg text-xs">Start Wizard</button>
               </div>

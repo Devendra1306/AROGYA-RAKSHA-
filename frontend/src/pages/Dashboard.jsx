@@ -46,17 +46,17 @@ export default function Dashboard() {
   }, [profile]);
 
   const quickActions = [
-    { name: 'Medical Assistant', desc: 'Symptom checker & chat', icon: '🩺', path: '/medical-assistant', color: 'border-l-primary' },
-    { name: 'Health Assessment', desc: 'Wellness check & report', icon: '📊', path: '/health-assessment', color: 'border-l-secondary' },
-    { name: 'Diet Planner', desc: 'Daily calories & grocery', icon: '🥗', path: '/diet-planner', color: 'border-l-emerald-500' },
-    { name: 'Search Medicine', desc: 'Interactions & warnings', icon: '💊', path: '/medicine-info', color: 'border-l-indigo-500' },
-    { name: 'Home Remedies', desc: 'Kitchen remedies finder', icon: '🏠', path: '/home-remedies', color: 'border-l-orange-500' }
+    { name: 'Medical Assistant', desc: 'Symptom checker & chat', icon: 'smart_toy', path: '/medical-assistant', color: 'border-l-primary', iconColor: 'text-primary' },
+    { name: 'Health Assessment', desc: 'Wellness check & report', icon: 'analytics', path: '/health-assessment', color: 'border-l-secondary', iconColor: 'text-secondary' },
+    { name: 'Diet Planner', desc: 'Daily calories & grocery', icon: 'restaurant', path: '/diet-planner', color: 'border-l-emerald-500', iconColor: 'text-emerald-500' },
+    { name: 'Search Medicine', desc: 'Interactions & warnings', icon: 'pill', path: '/medicine-info', color: 'border-l-indigo-500', iconColor: 'text-indigo-500' },
+    { name: 'Home Remedies', desc: 'Kitchen remedies finder', icon: 'eco', path: '/home-remedies', color: 'border-l-orange-500', iconColor: 'text-orange-500' }
   ];
 
   if (isMobile) {
     // Mobile View following mobile.zip (health_assessment/code.html)
     return (
-      <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-12 font-body-md animate-fade-in">
+      <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen pb-12 font-body-md">
         
         {/* Welcome Section */}
         <section className="px-4 pt-6 pb-4">
@@ -70,7 +70,7 @@ export default function Dashboard() {
             onClick={() => navigate('/health-assessment')}
             className="w-full py-3.5 bg-primary text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow active:scale-98 transition-transform"
           >
-            <span>▶</span> Start Assessment
+            <span className="material-symbols-outlined text-xs">play_arrow</span> Start Assessment
           </button>
         </div>
 
@@ -118,7 +118,7 @@ export default function Dashboard() {
                   onClick={() => navigate(act.path)}
                   className="bg-white dark:bg-slate-800 p-3.5 rounded-xl border border-slate-150 shadow-xs flex items-center gap-3 shrink-0 w-44 cursor-pointer active:scale-95 transition-transform"
                 >
-                  <span className="text-2xl">{act.icon}</span>
+                  <span className={`material-symbols-outlined text-xl shrink-0 ${act.iconColor}`}>{act.icon}</span>
                   <div className="overflow-hidden">
                     <h4 className="font-extrabold text-[11px] text-slate-800 dark:text-white truncate">{act.name}</h4>
                     <p className="text-[9px] text-slate-400 truncate mt-0.5">{act.desc}</p>
@@ -298,7 +298,7 @@ export default function Dashboard() {
             <p className="text-label-md text-red-700 dark:text-red-300 mt-2">Get immediate first-aid instructions and share live coordinates.</p>
           </div>
           <span className="text-red-600 font-bold text-label-md mt-4 inline-flex items-center gap-1 hover:underline">
-            Launch SOS Guides 🚨
+            Launch SOS Guides
           </span>
         </div>
       </div>
@@ -316,7 +316,7 @@ export default function Dashboard() {
               <h4 className="font-bold text-lg">{act.name}</h4>
               <p className="text-label-md text-on-surface-variant dark:text-slate-400 mt-1">{act.desc}</p>
             </div>
-            <span className="text-3xl">{act.icon}</span>
+            <span className={`material-symbols-outlined text-2xl ${act.iconColor}`}>{act.icon}</span>
           </div>
         ))}
       </div>

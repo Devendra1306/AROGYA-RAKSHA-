@@ -41,52 +41,58 @@ export default function LandingPage() {
   ];
 
   if (isMobile) {
-    // Mobile View following mobile.zip (arogya_raksha_mobile_home/code.html)
+    // Clean, mobile-optimized Landing Page without heavy animations/gradients/emojis
     return (
-      <div className="bg-background text-on-surface pb-6 animate-fade-in font-body-md">
-        {/* Hero Section */}
-        <section className="px-4 pt-8 pb-10 flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-primary-fixed text-on-primary-fixed rounded-full mb-5 text-[10px] font-bold uppercase tracking-wider">
-            <span>✨</span>
+      <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 pb-16 font-body-md">
+        {/* Clean Hero Section */}
+        <section className="px-4 pt-10 pb-8 flex flex-col items-center text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 rounded-full mb-4 text-[10px] font-bold uppercase tracking-wider">
             <span>Your AI Healthcare Companion</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-primary mb-3 leading-tight tracking-tight">
+          <h1 className="text-2xl font-extrabold text-primary dark:text-secondary mb-2.5 leading-tight tracking-tight">
             Comprehensive Care,<br/>Instant Guidance.
           </h1>
-          <p className="text-xs text-slate-500 mb-8 max-w-xs mx-auto leading-relaxed">
-            Get instant emergency guides, personalized health insights, nutrition plans, medicine details, and clinical support — all in one dashboard.
+          <p className="text-xs text-slate-550 dark:text-slate-400 mb-6 max-w-xs mx-auto leading-relaxed">
+            Access emergency guides, health assessment scoring, custom diet plans, medicine databases, and clinical voice assistant guidance.
           </p>
-          <div className="flex flex-col w-full gap-2.5 px-2">
+          <div className="flex flex-col w-full gap-2 px-2">
             <button 
-              onClick={() => navigate('/emergency')}
-              className="bg-emergency-red text-white py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-transform"
+              onClick={() => navigate('/login')}
+              className="bg-primary text-white py-3 rounded-xl font-bold text-xs shadow-sm active:scale-98 transition-all"
             >
-              <span>🚨</span> Emergency Help
+              Sign In to Your Account
             </button>
             <button 
-              onClick={() => navigate('/medical-assistant')}
-              className="bg-white border border-primary text-primary py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-98 transition-transform shadow-xs"
+              onClick={() => navigate('/signup')}
+              className="bg-white border border-slate-300 dark:bg-slate-800 dark:border-slate-700 text-slate-750 dark:text-slate-200 py-3 rounded-xl font-bold text-xs shadow-xs active:scale-98 transition-all"
             >
-              <span>🩺</span> Get Medical Guidance
+              Create Free Account
             </button>
           </div>
         </section>
 
-        {/* Emergency Quick Access (Bento Grid Inspired) */}
-        <section className="bg-alert-bg py-8 px-4 border-t border-b border-red-100/30">
-          <div className="text-center mb-6">
-            <h2 className="text-lg font-extrabold text-emergency-red">Emergency Quick Access</h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">One-click immediate first-aid guidance for critical health threats.</p>
+        {/* Emergency Quick Access (Minimal Grid) */}
+        <section className="bg-red-50/40 dark:bg-red-950/10 py-6 px-4 border-t border-b border-red-150/20">
+          <div className="text-center mb-5">
+            <h2 className="text-base font-extrabold text-red-650">Emergency Quick Access</h2>
+            <p className="text-[9px] text-slate-400 mt-0.5">First-aid instructions for critical health situations.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {emergencyQuick.map((eq, i) => (
+            {[
+              { title: 'Heart Attack', desc: 'Chest pressure, numbness.', icon: 'cardiology', color: 'text-red-500' },
+              { title: 'Stroke', desc: 'Face drooping, slurring.', icon: 'psychology', color: 'text-blue-500' },
+              { title: 'Choking', desc: 'Inability to breathe.', icon: 'airwave', color: 'text-emerald-500' },
+              { title: 'Burns', desc: 'Cool water, sterilize.', icon: 'local_fire_department', color: 'text-orange-500' },
+              { title: 'Poisoning', desc: 'Check airways.', icon: 'skull', color: 'text-purple-500' },
+              { title: 'Bleeding', desc: 'Direct firm pressure.', icon: 'bloodtype', color: 'text-rose-500' }
+            ].map((eq, i) => (
               <div 
                 key={i} 
                 onClick={() => navigate('/emergency')}
-                className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-150 shadow-xs active:scale-98 transition-transform cursor-pointer"
+                className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-750 shadow-xs cursor-pointer hover:border-red-400 active:scale-98 transition-all"
               >
-                <span className="text-2xl block mb-2">{eq.icon}</span>
-                <h3 className="font-bold text-xs text-primary dark:text-secondary mb-0.5">{eq.title}</h3>
+                <span className={`material-symbols-outlined text-lg block mb-1.5 ${eq.color}`}>{eq.icon}</span>
+                <h3 className="font-bold text-[11px] text-primary dark:text-secondary mb-0.5">{eq.title}</h3>
                 <p className="text-[9px] leading-tight text-slate-400">{eq.desc}</p>
               </div>
             ))}
@@ -94,33 +100,33 @@ export default function LandingPage() {
         </section>
 
         {/* Our Healthcare Services (Modern List) */}
-        <section className="py-8 px-4 bg-white dark:bg-slate-900">
-          <div className="text-center mb-6">
-            <h2 className="text-lg font-extrabold text-primary dark:text-secondary">Our Healthcare Services</h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">Comprehensive health management pipelines at your fingertips.</p>
+        <section className="py-6 px-4 bg-white dark:bg-slate-900">
+          <div className="text-center mb-5">
+            <h2 className="text-base font-extrabold text-primary dark:text-secondary">Our Healthcare Services</h2>
+            <p className="text-[9px] text-slate-400 mt-0.5">Comprehensive health management pipelines at your fingertips.</p>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
-              { title: "Emergency Help", desc: "Immediate first-aid instructions and clinical guidelines.", icon: "🚨", path: "/emergency" },
-              { title: "Medical Assistant", desc: "Clinical symptom checks & disease lookups powered by AI.", icon: "🤖", path: "/medical-assistant" },
-              { title: "Health Assessment", desc: "Calibrate your daily score & track vitals details.", icon: "📊", path: "/health-assessment" },
-              { title: "Diet Planner", desc: "Calorie-needs macro splits & grocery check list.", icon: "🥗", path: "/diet-planner" },
-              { title: "Medicine Info", desc: "Verify interactions, dosages, and drug safety warnings.", icon: "💊", path: "/medicine-info" },
-              { title: "Home Remedies", desc: "Kitchen remedies matching and traditional healing steps.", icon: "🌿", path: "/home-remedies" },
-              { title: "Nearby Healthcare", desc: "Search hospitals, clinics, and doctors in your area.", icon: "🏥", path: "/nearby" }
+              { title: "Emergency Help", desc: "Immediate first-aid instructions and clinical guidelines.", icon: "emergency", path: "/emergency", color: "text-red-500 bg-red-50 dark:bg-red-950/20" },
+              { title: "Medical Assistant", desc: "Clinical symptom checks & disease lookups powered by AI.", icon: "smart_toy", path: "/medical-assistant", color: "text-primary bg-slate-50 dark:bg-slate-800" },
+              { title: "Health Assessment", desc: "Calibrate your daily score & track vitals details.", icon: "analytics", path: "/health-assessment", color: "text-secondary bg-slate-50 dark:bg-slate-800" },
+              { title: "Diet Planner", desc: "Calorie-needs macro splits & grocery check list.", icon: "restaurant", path: "/diet-planner", color: "text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20" },
+              { title: "Medicine Info", desc: "Verify interactions, dosages, and drug safety warnings.", icon: "pill", path: "/medicine-info", color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20" },
+              { title: "Home Remedies", desc: "Kitchen remedies matching and traditional healing steps.", icon: "eco", path: "/home-remedies", color: "text-orange-500 bg-orange-50 dark:bg-orange-950/20" },
+              { title: "Nearby Healthcare", desc: "Search hospitals, clinics, and doctors in your area.", icon: "local_hospital", path: "/nearby", color: "text-blue-500 bg-blue-50 dark:bg-blue-950/20" }
             ].map((s, i) => (
               <div 
                 key={i}
                 onClick={() => navigate(s.path)}
-                className="flex gap-3.5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-750 cursor-pointer active:scale-98 transition-all"
+                className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-750 cursor-pointer active:scale-98 transition-all"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 dark:bg-secondary/15 flex items-center justify-center text-xl shrink-0">
-                  {s.icon}
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${s.color}`}>
+                  <span className="material-symbols-outlined text-lg">{s.icon}</span>
                 </div>
-                <div>
-                  <h4 className="font-bold text-xs text-primary dark:text-secondary mb-0.5">{s.title}</h4>
-                  <p className="text-[10px] leading-tight text-slate-550 dark:text-slate-350">{s.desc}</p>
+                <div className="flex-grow min-w-0">
+                  <h4 className="font-bold text-xs text-primary dark:text-secondary truncate">{s.title}</h4>
+                  <p className="text-[9px] leading-tight text-slate-400 truncate">{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -128,21 +134,21 @@ export default function LandingPage() {
         </section>
 
         {/* How it Works (Vertical Timeline) */}
-        <section className="py-8 px-4 bg-primary text-white">
-          <div className="text-center mb-6">
-            <h2 className="text-lg font-extrabold text-white">How Arogya Raksha Works</h2>
-            <p className="text-[10px] opacity-80 mt-0.5">Simple steps to smarter health management.</p>
+        <section className="py-6 px-4 bg-primary text-white">
+          <div className="text-center mb-5">
+            <h2 className="text-base font-extrabold text-white">How Arogya Raksha Works</h2>
+            <p className="text-[9px] opacity-80 mt-0.5">Simple steps to smarter health management.</p>
           </div>
-          <div className="relative space-y-6 pl-4 max-w-xs mx-auto">
-            <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-white/20"></div>
+          <div className="relative space-y-4 pl-3 max-w-xs mx-auto">
+            <div className="absolute left-4 top-2 bottom-2 w-[1px] bg-white/20"></div>
             {[
               { step: "1", title: "Create Account", desc: "Secure register and password hashing to keep data private." },
               { step: "2", title: "Complete Profile", desc: "Input vitals, medical conditions and goals for personalization." },
               { step: "3", title: "Retrieve Advice", desc: "AI reviews profile and medical database context for guidance." },
               { step: "4", title: "Improve Well-being", desc: "Follow roadmaps, trackers, and diet plans to hit goals." }
             ].map((t, i) => (
-              <div key={i} className="relative flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-white text-primary flex items-center justify-center font-bold text-xs shrink-0 z-10">
+              <div key={i} className="relative flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-white text-primary flex items-center justify-center font-bold text-[10px] shrink-0 z-10">
                   {t.step}
                 </div>
                 <div>
@@ -155,21 +161,21 @@ export default function LandingPage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-8 px-4">
-          <h2 className="text-lg font-extrabold text-primary text-center mb-5">Frequently Asked Questions</h2>
-          <div className="space-y-3 max-w-xs mx-auto">
+        <section className="py-6 px-4">
+          <h2 className="text-base font-extrabold text-primary text-center mb-4">Frequently Asked Questions</h2>
+          <div className="space-y-2.5 max-w-xs mx-auto">
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-150 overflow-hidden">
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-150 overflow-hidden shadow-xs">
                 <button 
                   type="button"
                   onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-3.5 text-left font-bold text-xs text-primary dark:text-secondary outline-none"
+                  className="w-full flex items-center justify-between p-3 text-left font-bold text-[11px] text-primary dark:text-secondary outline-none"
                 >
                   <span>{faq.q}</span>
-                  <span>{activeFaq === i ? '▲' : '▼'}</span>
+                  <span className="material-symbols-outlined text-xs">{activeFaq === i ? 'expand_less' : 'expand_more'}</span>
                 </button>
                 {activeFaq === i && (
-                  <div className="px-3.5 pb-3 text-[10px] leading-relaxed text-slate-500 dark:text-slate-350">
+                  <div className="px-3 pb-3 text-[9px] leading-relaxed text-slate-500 dark:text-slate-450 border-t border-slate-50 dark:border-slate-700/50 pt-2">
                     {faq.a}
                   </div>
                 )}

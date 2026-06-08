@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { API_URL } from '../context/AuthContext';
+import { api } from '../context/AuthContext';
 import { FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
 
 export default function ResetPasswordPage() {
@@ -53,7 +52,7 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/auth/reset-password`, {
+      const response = await api.post('/auth/reset-password', {
         token,
         password
       });

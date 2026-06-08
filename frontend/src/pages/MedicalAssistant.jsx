@@ -334,10 +334,10 @@ export default function MedicalAssistant() {
   };
 
   const suggestionChips = [
-    { text: "🤢 Remedy for stomach acidity", query: "Can you provide some natural home remedies for treating stomach acidity and indigestion?" },
-    { text: "🤕 Persistent tension headache", query: "I have a persistent tension headache since morning. What are the common causes and self-care steps?" },
-    { text: "💊 Explain Paracetamol limits", query: "What is the standard dosage limit and side-effects of Paracetamol / Acetaminophen?" },
-    { text: "🥦 Diet plan for high blood sugar", query: "What kind of daily diet plan and food restrictions are recommended for a pre-diabetic patient?" }
+    { text: "Remedy for stomach acidity", query: "Can you provide some natural home remedies for treating stomach acidity and indigestion?" },
+    { text: "Persistent tension headache", query: "I have a persistent tension headache since morning. What are the common causes and self-care steps?" },
+    { text: "Explain Paracetamol limits", query: "What is the standard dosage limit and side-effects of Paracetamol / Acetaminophen?" },
+    { text: "Diet plan for high blood sugar", query: "What kind of daily diet plan and food restrictions are recommended for a pre-diabetic patient?" }
   ];
 
   if (isMobile) {
@@ -356,7 +356,7 @@ export default function MedicalAssistant() {
               onClick={startNewChat}
               className="w-full bg-primary hover:opacity-90 text-white font-bold py-2.5 px-4 rounded-xl mb-4 transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm"
             >
-              ➕ New Consultation
+              <span className="material-symbols-outlined text-xs">add</span> New Consultation
             </button>
             <div className="flex-grow overflow-y-auto space-y-1.5 pr-1">
               {conversations.length > 0 ? (
@@ -364,9 +364,10 @@ export default function MedicalAssistant() {
                   <button 
                     key={convo._id}
                     onClick={() => loadConversation(convo._id)}
-                    className={`w-full p-3 rounded-xl cursor-pointer text-left text-xs transition-all truncate block ${currentConvoId === convo._id ? 'bg-primary/10 text-primary font-bold dark:text-secondary dark:bg-secondary/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-650'}`}
+                    className={`w-full p-3 rounded-xl cursor-pointer text-left text-xs transition-all truncate flex items-center gap-1.5 ${currentConvoId === convo._id ? 'bg-primary/10 text-primary font-bold dark:text-secondary dark:bg-secondary/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-650'}`}
                   >
-                    💬 {convo.conversationTitle}
+                    <span className="material-symbols-outlined text-xs">chat</span>
+                    <span className="truncate">{convo.conversationTitle}</span>
                   </button>
                 ))
               ) : (
@@ -388,12 +389,12 @@ export default function MedicalAssistant() {
             <div className="flex items-center gap-2.5">
               <button 
                 onClick={() => setHistoryOpen(true)}
-                className="p-1.5 text-xl text-slate-500 hover:bg-slate-100 rounded-xl"
+                className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-xl flex items-center justify-center"
               >
-                💬
+                <span className="material-symbols-outlined text-lg">menu</span>
               </button>
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-base font-bold">
-                🤖
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                <span className="material-symbols-outlined text-lg text-primary">smart_toy</span>
               </div>
               <div>
                 <h3 className="font-extrabold text-sm">Arogya AI Assistant</h3>
@@ -414,7 +415,7 @@ export default function MedicalAssistant() {
               const isUser = msg.role === 'user';
               const isStructured = hasStructuredSections(msg.content);
               return (
-                <div key={idx} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`}>
+                <div key={idx} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
                   <div 
                     className={`max-w-[85%] leading-relaxed ${
                       isUser
@@ -455,7 +456,7 @@ export default function MedicalAssistant() {
                     onClick={() => handleSend(chip.query)}
                     className="p-2.5 text-left bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary rounded-xl text-[11px] font-semibold flex items-center gap-2"
                   >
-                    <span>🔍</span>
+                    <span className="material-symbols-outlined text-xs">search</span>
                     <span className="truncate">{chip.text}</span>
                   </button>
                 ))}
@@ -464,8 +465,8 @@ export default function MedicalAssistant() {
           )}
 
           {/* Disclaimer and Input */}
-          <div className="bg-alert-bg p-3 border-t border-slate-150 text-[10px] text-red-800 flex gap-2">
-            <span>⚠️</span>
+          <div className="bg-alert-bg p-3 border-t border-slate-150 text-[10px] text-red-800 flex gap-2 items-center">
+            <span className="material-symbols-outlined text-xs text-red-650">warning</span>
             <p className="leading-snug">
               <strong>Disclaimer:</strong> This AI assistant provides info only. Call 112 for critical health emergencies.
             </p>
@@ -484,9 +485,9 @@ export default function MedicalAssistant() {
               <button
                 type="button"
                 onClick={startSpeechRecognition}
-                className={`p-3 rounded-xl border text-sm transition-all ${listening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 border-slate-200'}`}
+                className={`p-3 rounded-xl border transition-all flex items-center justify-center ${listening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 border-slate-200'}`}
               >
-                🎤
+                <span className="material-symbols-outlined text-sm">mic</span>
               </button>
               <button
                 type="submit"
