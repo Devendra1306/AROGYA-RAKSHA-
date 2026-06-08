@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY || 're_Z1B2qbtH_LhxFu4y1W4Nqw9KHB5XZ3GfM');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const HealthProfile = require('../models/HealthProfile');
@@ -495,6 +498,156 @@ const authController = {
         }
       });
     } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  forgotPassword: async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Please enter your email address.' });
+    }
+
+    try {
+      const isMock = global.isMockDB;
+      let user;
+
+      if (isMock) {
+        user = localDb.findOne('users', { email });
+      } else {
+        user = await User.findOne({ email });
+      }
+
+      if (!user) {
+        return res.status(404).json({ error: 'No account found with this email address.' });
+      }
+
+      if (user.authProvider === 'google') {
+        return res.status(400).json({
+          error: 'This account is managed through Google Sign-In. Please use your Google account to access Arogya Raksha.'
+        });
+      }
+
+      const token = crypto.randomBytes(20).toString('hex');
+      const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+      if (isMock) {
+        localDb.findByIdAndUpdate('users', user._id, {
+          resetPasswordToken: token,
+          resetPasswordExpires: expires.toISOString()
+        });
+      } else {
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = expires;
+        await user.save();
+      }
+
+      const origin = req.headers.origin || 'http://localhost:5173';
+      const resetLink = `${origin}/reset-password/${token}`;
+
+      // Premium-styled Email HTML Template
+      const emailHtml = `
+        <div style="font-family: 'Inter', sans-serif; background-color: #f8fafc; padding: 40px 20px; text-align: center; color: #334155;">
+          <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; text-align: left;">
+            
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="display: inline-block; padding: 12px; background-color: #0284c7; border-radius: 16px; color: #ffffff; font-weight: bold; font-size: 20px; text-decoration: none;">
+                🏥 Arogya Raksha
+              </div>
+            </div>
+
+            <h2 style="font-size: 22px; font-weight: bold; color: #0f172a; margin-top: 0; margin-bottom: 12px; text-align: center;">Reset Your Password</h2>
+            
+            <p style="font-size: 15px; line-height: 1.6; margin-top: 0; margin-bottom: 20px;">Hello,</p>
+            
+            <p style="font-size: 15px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">We received a request to reset your password. Click the button below to create a new password:</p>
+            
+            <div style="text-align: center; margin-bottom: 24px;">
+              <a href="${resetLink}" style="display: inline-block; background-color: #0284c7; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 14px; font-weight: bold; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3); transition: all 0.2s;">
+                Reset Password
+              </a>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-top: 0; margin-bottom: 20px; text-align: center;">This link expires in 15 minutes.</p>
+            
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px; font-size: 13px; color: #94a3b8; text-align: center;">
+              <p style="margin: 0 0 8px 0;">If you did not request this password reset, please ignore this email.</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      await resend.emails.send({
+        from: 'Arogya Raksha <onboarding@resend.dev>',
+        to: user.email,
+        subject: 'Reset Your Arogya Raksha Password',
+        html: emailHtml
+      });
+
+      res.status(200).json({ message: 'Password reset link sent to your email.' });
+    } catch (err) {
+      console.error('Error in forgotPassword:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  resetPassword: async (req, res) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Token and new password are required.' });
+    }
+
+    try {
+      const isMock = global.isMockDB;
+      let user;
+
+      if (isMock) {
+        user = localDb.findOne('users', { resetPasswordToken: token });
+      } else {
+        user = await User.findOne({ resetPasswordToken: token });
+      }
+
+      if (!user) {
+        return res.status(400).json({ error: 'Invalid password reset link.' });
+      }
+
+      const expiryTime = isMock ? new Date(user.resetPasswordExpires) : user.resetPasswordExpires;
+      if (new Date() > expiryTime) {
+        return res.status(400).json({ error: 'This password reset link has expired. Please request a new password reset link.' });
+      }
+
+      // Password rules validation
+      const hasUppercase = /[A-Z]/.test(password);
+      const hasLowercase = /[a-z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      const isLongEnough = password.length >= 8;
+
+      if (!isLongEnough || !hasUppercase || !hasLowercase || !hasNumber) {
+        return res.status(400).json({
+          error: 'Password does not meet rules: must be at least 8 characters, with 1 uppercase, 1 lowercase, and 1 number.'
+        });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(password, salt);
+
+      if (isMock) {
+        localDb.findByIdAndUpdate('users', user._id, {
+          passwordHash,
+          resetPasswordToken: null,
+          resetPasswordExpires: null
+        });
+      } else {
+        user.passwordHash = passwordHash;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+      }
+
+      res.status(200).json({ message: 'Password updated successfully. Please login with your new password.' });
+    } catch (err) {
+      console.error('Error in resetPassword:', err.message);
       res.status(500).json({ error: err.message });
     }
   }

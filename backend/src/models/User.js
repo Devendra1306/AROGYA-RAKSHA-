@@ -11,7 +11,9 @@ const userSchema = new mongoose.Schema({
   profilePicture: { type: String, required: false },
   role: { type: String, enum: ['User', 'Admin', 'SuperAdmin'], default: 'User' },
   emailVerified: { type: Boolean, default: false },
-  profileCompleted: { type: Boolean, default: false }
+  profileCompleted: { type: Boolean, default: false },
+  resetPasswordToken: { type: String, required: false },
+  resetPasswordExpires: { type: Date, required: false }
 }, {
   timestamps: true
 });
