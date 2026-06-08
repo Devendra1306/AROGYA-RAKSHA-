@@ -545,42 +545,68 @@ const authController = {
       const origin = req.headers.origin || 'http://localhost:5173';
       const resetLink = `${origin}/reset-password/${token}`;
 
-      // Premium-styled Email HTML Template
+      const refId = crypto.randomBytes(4).toString('hex').toUpperCase();
+      const sentAt = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+
+      // Professional table-based Email HTML Template
       const emailHtml = `
-        <div style="font-family: 'Inter', sans-serif; background-color: #f8fafc; padding: 40px 20px; text-align: center; color: #334155;">
-          <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; text-align: left;">
-            
-            <div style="text-align: center; margin-bottom: 24px;">
-              <div style="display: inline-block; padding: 12px; background-color: #0284c7; border-radius: 16px; color: #ffffff; font-weight: bold; font-size: 20px; text-decoration: none;">
-                🏥 Arogya Raksha
-              </div>
-            </div>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 10px;">
+          <tr>
+            <td align="center">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                <!-- Blue Header Accent Line -->
+                <tr>
+                  <td height="6" style="background-color: #0284c7; line-height: 6px; font-size: 6px;">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td style="padding: 40px 30px;">
+                    <!-- Brand Header -->
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px;">
+                      <tr>
+                        <td align="center" style="font-size: 24px; font-weight: bold; color: #0284c7; font-family: inherit;">
+                          🏥 Arogya Raksha
+                        </td>
+                      </tr>
+                    </table>
 
-            <h2 style="font-size: 22px; font-weight: bold; color: #0f172a; margin-top: 0; margin-bottom: 12px; text-align: center;">Reset Your Password</h2>
-            
-            <p style="font-size: 15px; line-height: 1.6; margin-top: 0; margin-bottom: 20px;">Hello,</p>
-            
-            <p style="font-size: 15px; line-height: 1.6; margin-top: 0; margin-bottom: 24px;">We received a request to reset your password. Click the button below to create a new password:</p>
-            
-            <div style="text-align: center; margin-bottom: 24px;">
-              <a href="${resetLink}" style="display: inline-block; background-color: #0284c7; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 14px; font-weight: bold; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3); transition: all 0.2s;">
-                Reset Password
-              </a>
-            </div>
+                    <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; text-align: center; font-family: inherit;">Reset Your Password</h2>
+                    
+                    <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 16px 0; font-family: inherit;">Hello,</p>
+                    
+                    <p style="font-size: 15px; line-height: 1.6; color: #334155; margin: 0 0 24px 0; font-family: inherit;">We received a request to reset the password for your Arogya Raksha account. Click the button below to set a new password:</p>
+                    
+                    <!-- CTA Button -->
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+                      <tr>
+                        <td align="center">
+                          <a href="${resetLink}" target="_blank" style="display: inline-block; background-color: #0284c7; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; text-align: center; font-family: inherit;">Reset Password</a>
+                        </td>
+                      </tr>
+                    </table>
 
-            <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-top: 0; margin-bottom: 20px; text-align: center;">This link expires in 15 minutes.</p>
-            
-            <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 20px; font-size: 13px; color: #94a3b8; text-align: center;">
-              <p style="margin: 0 0 8px 0;">If you did not request this password reset, please ignore this email.</p>
-            </div>
-          </div>
-        </div>
+                    <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin: 0 0 24px 0; text-align: center; font-family: inherit;">This link will expire in 15 minutes. For security, it can only be used once.</p>
+                    
+                    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 0 0 24px 0;" />
+
+                    <p style="font-size: 12px; line-height: 1.5; color: #94a3b8; margin: 0; text-align: center; font-family: inherit;">If you did not request this password reset, please ignore this email; your password will remain unchanged.</p>
+                  </td>
+                </tr>
+                <!-- Footer Info Block -->
+                <tr>
+                  <td align="center" style="background-color: #f8fafc; padding: 20px 30px; border-top: 1px solid #e2e8f0;">
+                    <p style="font-size: 11px; color: #94a3b8; margin: 0; font-family: monospace;">Ref ID: ${refId} • Sent: ${sentAt}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       `;
 
       await resend.emails.send({
         from: 'Arogya Raksha <onboarding@resend.dev>',
         to: user.email,
-        subject: 'Reset Your Arogya Raksha Password',
+        subject: `Reset Your Arogya Raksha Password [Ref: ${refId}]`,
         html: emailHtml
       });
 
