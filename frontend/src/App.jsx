@@ -105,7 +105,7 @@ const GlobalLayout = ({ children }) => {
             className="p-2 text-on-surface-variant dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
             title="Toggle Dark Mode"
           >
-            {darkMode ? '☀️' : '🌙'}
+            {darkMode ? <span className="material-symbols-outlined text-base select-none align-middle">light_mode</span> : <span className="material-symbols-outlined text-base select-none align-middle">dark_mode</span>}
           </button>
 
           {user ? (
@@ -134,10 +134,18 @@ const GlobalLayout = ({ children }) => {
                       <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
                     </div>
                     <div className="space-y-1">
-                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">📊 Dashboard</button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">👤 View Profile</button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile-setup'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">⚙️ Profile Setup</button>
-                      <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 mt-2 pt-2">🚪 Logout</button>
+                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm">dashboard</span> Dashboard
+                      </button>
+                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm">person</span> View Profile
+                      </button>
+                      <button onClick={() => { setDropdownOpen(false); navigate('/profile-setup'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">
+                        <span className="material-symbols-outlined text-sm">settings</span> Profile Setup
+                      </button>
+                      <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 mt-2 pt-2">
+                        <span className="material-symbols-outlined text-sm text-red-650">logout</span> Logout
+                      </button>
                     </div>
                   </div>
                 </>
@@ -153,9 +161,9 @@ const GlobalLayout = ({ children }) => {
           {/* Mobile hamburger menu button */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-2xl text-on-surface-variant dark:text-slate-300"
+            className="p-2 text-2xl text-on-surface-variant dark:text-slate-300 flex items-center"
           >
-            ☰
+            <span className="material-symbols-outlined">menu</span>
           </button>
         </div>
       </nav>
@@ -174,7 +182,9 @@ const GlobalLayout = ({ children }) => {
             <div className="space-y-6">
               <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
                 <span className="font-extrabold text-base text-primary dark:text-secondary">App Options</span>
-                <button onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold">✕</button>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold flex items-center">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
               </div>
 
               {/* Reminder Settings Toggles */}
@@ -182,7 +192,9 @@ const GlobalLayout = ({ children }) => {
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Reminders</span>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold">💧 Water Tracker</span>
+                  <span className="text-xs font-semibold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs text-blue-500">water_drop</span> Water Tracker
+                  </span>
                   <input 
                     type="checkbox" 
                     checked={waterActive} 
@@ -192,7 +204,9 @@ const GlobalLayout = ({ children }) => {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold">🥗 Diet Log Checks</span>
+                  <span className="text-xs font-semibold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs text-emerald-500">restaurant</span> Diet Log Checks
+                  </span>
                   <input 
                     type="checkbox" 
                     checked={dietActive} 
@@ -202,7 +216,9 @@ const GlobalLayout = ({ children }) => {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold">📊 Weekly Vitals</span>
+                  <span className="text-xs font-semibold flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs text-indigo-500">analytics</span> Weekly Vitals
+                  </span>
                   <input 
                     type="checkbox" 
                     checked={healthActive} 
@@ -215,9 +231,9 @@ const GlobalLayout = ({ children }) => {
               {/* App links */}
               <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-700">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Information</span>
-                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>ℹ️ About Arogya</Link>
-                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>🔒 Privacy Policy</Link>
-                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>📄 Terms of Service</Link>
+                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>About Arogya</Link>
+                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Privacy Policy</Link>
+                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Terms of Service</Link>
               </div>
             </div>
 
@@ -227,7 +243,7 @@ const GlobalLayout = ({ children }) => {
                 onClick={() => { setMobileMenuOpen(false); logout(); navigate('/'); }}
                 className="w-full bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold py-3 rounded-2xl hover:bg-red-100 transition-all text-xs"
               >
-                🚪 Log Out
+                Log Out
               </button>
             ) : (
               <div className="grid grid-cols-2 gap-2">

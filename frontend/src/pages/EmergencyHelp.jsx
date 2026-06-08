@@ -572,7 +572,7 @@ export default function EmergencyHelp() {
       {/* Red Clinical Emergency Disclaimer Banner */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-5 rounded-2xl mb-8 flex items-center justify-between shadow-lg border-l-8 border-red-800 animate-fade-in">
         <div className="flex items-center gap-4">
-          <span className="text-4xl select-none">⚠️</span>
+          <span className="material-symbols-outlined text-4xl select-none text-white">warning</span>
           <div>
             <h4 className="font-bold text-lg tracking-wide uppercase">Clinical Emergency Help Disclaimer</h4>
             <p className="text-sm opacity-90 font-light mt-1">
@@ -603,7 +603,7 @@ export default function EmergencyHelp() {
                   </svg>
                 </div>
               </div>
-              <span className="text-lg font-bold tracking-wide">📞 Call Emergency Services</span>
+              <span className="text-lg font-bold tracking-wide">Call Emergency Services</span>
             </a>
 
             {/* Nearby Healthcare */}
@@ -618,7 +618,7 @@ export default function EmergencyHelp() {
                   </svg>
                 </div>
               </div>
-              <span className="text-lg font-bold tracking-wide">🏥 Nearby Healthcare</span>
+              <span className="text-lg font-bold tracking-wide">Nearby Healthcare</span>
             </button>
 
             {/* SOS Circle Toggle */}
@@ -633,7 +633,7 @@ export default function EmergencyHelp() {
                   </svg>
                 </div>
               </div>
-              <span className="text-lg font-bold tracking-wide">👥 SOS Circle</span>
+              <span className="text-lg font-bold tracking-wide">SOS Circle</span>
             </button>
 
           </div>

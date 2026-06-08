@@ -20,7 +20,7 @@ const renderMarkdown = (text) => {
     return line + '<br />';
   }).join('\n');
   
-  escaped = escaped.replace(/(⚠️.*?)(?:<br \/>|$)/g, '<div class="my-2 p-3 bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-r-xl text-red-800 dark:text-red-300 text-sm">$1</div>');
+  escaped = escaped.replace(/⚠️\s*(.*?)(?:<br \/>|$)/g, '<div class="my-2 p-3 bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-r-xl text-red-800 dark:text-red-300 text-sm flex items-start gap-2"><span class="material-symbols-outlined text-base shrink-0 text-red-500 mt-0.5">warning</span><span class="flex-1">$1</span></div>');
   
   return <div dangerouslySetInnerHTML={{ __html: escaped }} className="space-y-1 text-sm md:text-base" />;
 };
@@ -133,7 +133,7 @@ const StructuredResponseCard = ({ text }) => {
             <div className="space-y-2">
               {medicinesList.map((med, idx) => (
                 <div key={idx} className="flex items-start gap-2">
-                  <span className="text-sm select-none">💊</span>
+                  <span className="material-symbols-outlined text-sm text-primary select-none mt-0.5">pill</span>
                   <div className="text-xs">
                     <span className="font-bold text-primary dark:text-secondary">{med.name}</span>
                     {med.purpose && (
@@ -146,8 +146,8 @@ const StructuredResponseCard = ({ text }) => {
           </div>
         ) : (
           sections.medicines && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm flex items-center justify-center text-slate-400 text-xs">
-              📭 No medications suggested.
+            <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm flex items-center justify-center text-slate-400 text-xs gap-1.5">
+               <span className="material-symbols-outlined text-sm text-slate-450 select-none">inbox</span> No medications suggested.
             </div>
           )
         )}
@@ -159,7 +159,7 @@ const StructuredResponseCard = ({ text }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {tipsList.map((tip, idx) => (
               <div key={idx} className="flex items-center gap-2 text-xs">
-                <span className="text-emerald-500 font-bold select-none">✓</span>
+                 <span className="material-symbols-outlined text-xs text-emerald-500 font-bold select-none">check</span>
                 <span className="text-slate-700 dark:text-slate-200">{tip}</span>
               </div>
             ))}
@@ -170,7 +170,7 @@ const StructuredResponseCard = ({ text }) => {
       {sections.doctor && (
         <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-500 rounded-r-2xl p-3 text-blue-900 dark:text-blue-300 text-xs shadow-sm">
           <div className="font-bold mb-0.5 flex items-center gap-1.5 text-blue-800 dark:text-blue-400">
-            <span>🩺</span> Doctor Recommendation
+            <span className="material-symbols-outlined text-xs text-blue-500">stethoscope</span> Doctor Recommendation
           </div>
           <p className="leading-relaxed">{sections.doctor}</p>
         </div>
@@ -179,7 +179,7 @@ const StructuredResponseCard = ({ text }) => {
       {sections.emergency && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-2xl p-3.5 text-red-950 dark:text-red-300 text-xs shadow-md">
           <div className="font-extrabold mb-1 flex items-center gap-1.5 text-red-700 dark:text-red-400">
-            <span>🚨</span> EMERGENCY ALERT
+            <span className="material-symbols-outlined text-xs text-red-500 animate-pulse">emergency</span> EMERGENCY ALERT
           </div>
           <p className="leading-relaxed font-semibold">{sections.emergency}</p>
         </div>
@@ -267,7 +267,7 @@ export default function MedicalAssistant() {
       });
 
       if (res.data.isEmergency) {
-        alert('🚨 EMERGENCY DETECTED: Redirecting you to the Emergency Help module immediately!');
+        alert('EMERGENCY DETECTED: Redirecting you to the Emergency Help module immediately!');
         navigate('/emergency');
         return;
       }
@@ -588,8 +588,8 @@ export default function MedicalAssistant() {
         </div>
 
         {/* Disclaimer footer banner */}
-        <div className="bg-amber-50 border-t border-b border-amber-100 p-2 text-center text-[10px] text-amber-800 dark:bg-slate-900 dark:border-slate-800 dark:text-amber-400">
-          ⚠️ Arogya Raksha provides educational health information only. Call emergency services in critical cases.
+        <div className="bg-amber-50 border-t border-b border-amber-100 p-2 text-center text-[10px] text-amber-800 dark:bg-slate-900 dark:border-slate-800 dark:text-amber-400 flex items-center justify-center gap-1">
+          <span className="material-symbols-outlined text-[10px] text-amber-500 align-middle">warning</span> Arogya Raksha provides educational health information only. Call emergency services in critical cases.
         </div>
 
         {/* Input Form */}
@@ -605,10 +605,10 @@ export default function MedicalAssistant() {
           <button
             type="button"
             onClick={startSpeechRecognition}
-            className={`p-3 rounded-xl border border-outline-variant hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-xl ${listening ? 'bg-red-100 text-red-600 border-red-300 animate-pulse' : ''}`}
+            className={`p-3 rounded-xl border border-outline-variant hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-xl flex items-center justify-center ${listening ? 'bg-red-100 text-red-600 border-red-300 animate-pulse' : ''}`}
             title="Speech to text input"
           >
-            🎤
+            <span className="material-symbols-outlined text-base">mic</span>
           </button>
           <button
             type="submit"

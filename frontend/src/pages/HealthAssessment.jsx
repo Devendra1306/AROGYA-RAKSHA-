@@ -427,15 +427,17 @@ export default function HealthAssessment() {
       {/* Header */}
       <header className="mb-stack-md flex flex-col md:flex-row justify-between items-start md:items-end gap-base">
         <div>
-          <h1 className="text-3xl font-bold text-primary dark:text-secondary">📊 Health Assessment</h1>
+          <h1 className="text-3xl font-bold text-primary dark:text-secondary flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-3xl text-primary">analytics</span> Health Assessment
+          </h1>
           <p className="text-on-surface-variant dark:text-slate-300">Understand your overall wellness metrics and risks.</p>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={handleDownloadReport}
-            className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 rounded-xl text-label-md font-bold transition-all"
+            className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 rounded-xl text-label-md font-bold transition-all flex items-center gap-1.5"
           >
-            📥 Export report
+            <span className="material-symbols-outlined text-base">download</span> Export report
           </button>
           <button 
             onClick={startAssessmentWizard}
@@ -532,14 +534,16 @@ export default function HealthAssessment() {
             <h3 className="text-xl font-bold mb-4">Wellness Factors Breakdown</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-base">
               {[
-                { name: '🏃 Physical', val: latestAssessment.activityScore || 0, color: 'text-primary' },
-                { name: '🥗 Nutrition', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
-                { name: '😴 Sleep', val: latestAssessment.sleepScore || 0, color: 'text-indigo-500' },
-                { name: '💧 Hydration', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
-                { name: '🧠 Stress', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
+                { name: 'Physical', icon: 'directions_run', val: latestAssessment.activityScore || 0, color: 'text-primary' },
+                { name: 'Nutrition', icon: 'restaurant', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
+                { name: 'Sleep', icon: 'bedtime', val: latestAssessment.sleepScore || 0, color: 'text-indigo-500' },
+                { name: 'Hydration', icon: 'water_drop', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
+                { name: 'Stress', icon: 'psychology', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
               ].map(f => (
                 <div key={f.name} className="glass-card rounded-xl p-4 bg-white dark:bg-slate-800 text-center shadow-sm">
-                  <span className="text-label-sm text-outline">{f.name}</span>
+                  <span className="text-label-sm text-outline flex items-center justify-center gap-1">
+                    <span className={`material-symbols-outlined text-xs ${f.color}`}>{f.icon}</span> {f.name}
+                  </span>
                   <p className={`text-2xl font-extrabold mt-2 ${f.color}`}>{f.val}%</p>
                 </div>
               ))}
@@ -561,7 +565,9 @@ export default function HealthAssessment() {
                         <span className="bg-red-200 text-red-800 px-2 py-0.5 rounded text-[8px] font-bold uppercase">{risk.level}</span>
                       </div>
                       <p className="text-label-sm text-on-surface-variant dark:text-slate-300">{risk.description}</p>
-                      <p className="text-[10px] text-red-650 dark:text-red-400 font-medium">✓ Advice: {risk.advice}</p>
+                      <p className="text-[10px] text-red-650 dark:text-red-400 font-medium flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[10px] text-red-500">check_circle</span> Advice: {risk.advice}
+                      </p>
                     </div>
                   ))
                 ) : (
@@ -596,7 +602,7 @@ export default function HealthAssessment() {
         </div>
       ) : (
         <div className="glass-card rounded-2xl p-8 bg-white/70 dark:bg-slate-800/70 shadow-md text-center max-w-md mx-auto mt-12">
-          <p className="text-3xl">📊</p>
+          <p className="text-3xl flex justify-center"><span className="material-symbols-outlined text-4xl text-primary">analytics</span></p>
           <h3 className="font-bold text-xl mt-4">Generate Your Health Report</h3>
           <p className="text-on-surface-variant dark:text-slate-300 text-label-md mt-2 mb-6">
             Arogya Raksha can evaluate your habits, conditions, and vitals to calibrate a detailed health scorecard.

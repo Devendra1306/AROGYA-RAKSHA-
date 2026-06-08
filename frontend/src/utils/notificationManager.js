@@ -41,7 +41,7 @@ export const sendLocalNotification = (title, body, tag = 'general') => {
 export const startNotificationScheduler = () => {
   if (typeof window === 'undefined') return;
 
-  console.log('⚡ Health Alerts Reminder Scheduler initialized.');
+  console.log('[Notification] Health Alerts Reminder Scheduler initialized.');
 
   // Interval check (every 1 minute for testing, simulating alerts)
   setInterval(() => {
@@ -52,7 +52,7 @@ export const startNotificationScheduler = () => {
       const now = Date.now();
       // Simulate water reminder every 10 minutes for test mode (600,000ms), normally 2 hours
       if (now - lastWater > 600000) {
-        sendLocalNotification('💧 Hydration Check-in', 'Time to drink a glass of water and log it on your Arogya Dashboard!', 'water');
+        sendLocalNotification('Hydration Check-in', 'Time to drink a glass of water and log it on your Arogya Dashboard!', 'water');
         localStorage.setItem('last_remind_water', now.toString());
       }
     }
@@ -64,7 +64,7 @@ export const startNotificationScheduler = () => {
       const now = Date.now();
       // Simulate diet reminders every 15 minutes
       if (now - lastDiet > 900000) {
-        sendLocalNotification('🥗 Meal Log Check-in', 'Log your recent meal on your daily macro planner to keep your health score updated.', 'diet');
+        sendLocalNotification('Meal Log Check-in', 'Log your recent meal on your daily macro planner to keep your health score updated.', 'diet');
         localStorage.setItem('last_remind_diet', now.toString());
       }
     }
@@ -76,7 +76,7 @@ export const startNotificationScheduler = () => {
       const now = Date.now();
       // Simulate health checklist reminders every 30 minutes
       if (now - lastHealth > 1800000) {
-        sendLocalNotification('📊 Wellness Tracker Check', 'Time to update your vitals data on Health Assessment to recalculate your wellness score.', 'health');
+        sendLocalNotification('Wellness Tracker Check', 'Time to update your vitals data on Health Assessment to recalculate your wellness score.', 'health');
         localStorage.setItem('last_remind_health', now.toString());
       }
     }

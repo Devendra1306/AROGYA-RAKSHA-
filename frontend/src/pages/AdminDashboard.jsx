@@ -56,14 +56,16 @@ export default function AdminDashboard() {
       {/* Header */}
       <header className="mb-stack-md flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-primary dark:text-secondary">🛡️ Executive Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-primary dark:text-secondary flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-3xl text-primary">security</span> Executive Admin Dashboard
+          </h1>
           <p className="text-on-surface-variant dark:text-slate-300">Track platform usage metrics, user demographics, and AI gateway operations.</p>
         </div>
         <button 
           onClick={fetchAdminData}
-          className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2.5 rounded-xl text-label-md font-bold transition-all"
+          className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2.5 rounded-xl text-label-md font-bold transition-all flex items-center gap-1.5"
         >
-          🔄 Refresh Analytics
+          <span className="material-symbols-outlined text-base">refresh</span> Refresh Analytics
         </button>
       </header>
 

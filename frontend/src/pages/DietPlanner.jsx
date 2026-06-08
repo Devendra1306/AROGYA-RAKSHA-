@@ -127,7 +127,7 @@ export default function DietPlanner() {
     try {
       const res = await api.post('/diet/analyze-food', { query: foodQuery });
       if (res.data._isError) {
-        alert('⚠️ AI analysis temporarily unavailable. Please try again.');
+        alert('AI analysis temporarily unavailable. Please try again.');
         return;
       }
       setSearchResult(res.data);
@@ -267,7 +267,7 @@ export default function DietPlanner() {
       <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
         <div>
           <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
-            🥗 Diet Planner
+            <span className="material-symbols-outlined text-xl text-primary">restaurant</span> Diet Planner
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">Manage weight goals, calorie rings, and personalized recipes.</p>
         </div>
@@ -367,7 +367,7 @@ export default function DietPlanner() {
                   </div>
                   <div className="flex flex-col items-end gap-3 justify-between">
                     {isActiveMealChecked ? (
-                      <span className="text-primary text-lg font-bold">✓ Logged</span>
+                      <span className="text-primary text-xs font-bold flex items-center gap-1"><span className="material-symbols-outlined text-sm">check_circle</span> Logged</span>
                     ) : (
                       <span className="text-slate-350 text-xs font-semibold">Log Meal</span>
                     )}
@@ -376,9 +376,9 @@ export default function DietPlanner() {
                         e.stopPropagation();
                         handleSwapMeal(activeMealObj.mealType);
                       }}
-                      className="text-[9px] font-bold text-primary dark:text-secondary hover:underline"
+                      className="text-[9px] font-bold text-primary dark:text-secondary hover:underline flex items-center gap-0.5"
                     >
-                      🔄 Swap Option
+                      <span className="material-symbols-outlined text-[10px]">swap_horiz</span> Swap Option
                     </button>
                   </div>
                 </div>
@@ -485,7 +485,9 @@ export default function DietPlanner() {
             {/* Water Tracker */}
             <section className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
               <div className="flex justify-between items-center">
-                <h3 className="font-extrabold text-sm flex items-center gap-1">💧 Water Log</h3>
+                <h3 className="font-extrabold text-sm flex items-center gap-1">
+                  <span className="material-symbols-outlined text-base text-blue-500">water_drop</span> Water Log
+                </h3>
                 <button 
                   onClick={handleResetWater}
                   className="text-[9px] text-slate-400 hover:underline font-bold"
@@ -559,9 +561,9 @@ export default function DietPlanner() {
                   </div>
                   <button 
                     onClick={handleAddToDiet}
-                    className="w-full bg-secondary text-slate-900 font-bold py-1.5 rounded-lg text-center text-xs"
+                    className="w-full bg-secondary text-slate-900 font-bold py-1.5 rounded-lg text-center text-xs flex items-center justify-center gap-1"
                   >
-                    ➕ Log to My Diet
+                    <span className="material-symbols-outlined text-sm">add</span> Log to My Diet
                   </button>
                 </div>
               )}

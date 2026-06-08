@@ -6,7 +6,8 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function SignupPage() {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '173236579751-t2aa0hq2d83eo0939a37qbed74351np5.apps.googleusercontent.com';
-  const hasRealClientId = clientId && clientId !== 'mock';
+  const isIPAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(window.location.hostname);
+  const hasRealClientId = clientId && clientId !== 'mock' && !isIPAddress;
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -256,7 +257,8 @@ export default function SignupPage() {
               }}
               onError={() => {
                 console.error("Google Authentication FAILED: OAuth popup flow cancelled or origin not registered.");
-                setError('Google authentication cancelled or failed.');
+                setError('Google authentication cancelled or failed. Falling back to simulated login chooser.');
+                setShowGoogleChooser(true);
               }}
               theme="outline"
               shape="pill"

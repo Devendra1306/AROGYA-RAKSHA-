@@ -201,7 +201,7 @@ export default function MedicineInfo() {
       {/* Page Header */}
       <header className="mb-6">
         <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
-          💊 Medicines
+          <span className="material-symbols-outlined text-xl text-primary animate-pulse">pill</span> Medicines
         </h1>
         <p className="text-xs text-slate-400 mt-0.5">Explore dosage guidelines, side effects, and drug safety reviews.</p>
       </header>
@@ -221,7 +221,7 @@ export default function MedicineInfo() {
               className="w-full p-4 pl-11 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-md outline-none text-xs focus:border-primary transition-all"
               placeholder="Search medicines (e.g. Paracetamol, Cetirizine)..."
             />
-            <span className="absolute left-4 top-4 text-base text-slate-400 select-none">🔍</span>
+            <span className="absolute left-4 top-4 text-base text-slate-400 select-none material-symbols-outlined">search</span>
             
             {/* Search autocomplete suggestion list */}
             {(suggestions.length > 0 || searchQuery.length > 1) && (
@@ -243,7 +243,7 @@ export default function MedicineInfo() {
                   onClick={() => handleRagLookup(searchQuery)}
                   className="w-full text-left p-4 hover:bg-blue-50 dark:hover:bg-slate-700/60 cursor-pointer text-primary dark:text-secondary font-bold text-xs flex items-center justify-between border-t border-slate-100 dark:border-slate-800 bg-blue-50/10"
                 >
-                  <span className="flex items-center gap-1.5">🔬 Run AI/RAG clinical lookup for "{searchQuery}"</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs">science</span> Run AI/RAG clinical lookup for "{searchQuery}"</span>
                   <span className="text-[8px] bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded font-extrabold">Gemini RAG</span>
                 </button>
               </div>
@@ -301,7 +301,10 @@ export default function MedicineInfo() {
                     onClick={toggleSaveMedicine}
                     className={`text-xs px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 border transition-all ${isBookmarked ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-250 dark:border-slate-700 text-slate-450 hover:bg-slate-50'}`}
                   >
-                    <span>{isBookmarked ? '★ Saved' : '☆ Save'}</span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">{isBookmarked ? 'star' : 'star_border'}</span>
+                      {isBookmarked ? 'Saved' : 'Save'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -312,7 +315,7 @@ export default function MedicineInfo() {
                   onClick={() => toggleSection('uses')}
                   className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
                 >
-                  <span>📋 Uses & Indications</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-slate-550">assignment</span> Uses & Indications</span>
                   <span>{expandedSections.uses ? '▼' : '▶'}</span>
                 </button>
                 {expandedSections.uses && (
@@ -333,7 +336,7 @@ export default function MedicineInfo() {
                     onClick={() => toggleSection('dosage')}
                     className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
                   >
-                    <span>🥄 Dosage Considerations</span>
+                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-slate-550">restaurant</span> Dosage Considerations</span>
                     <span>{expandedSections.dosage ? '▼' : '▶'}</span>
                   </button>
                   {expandedSections.dosage && (
@@ -351,7 +354,7 @@ export default function MedicineInfo() {
                     onClick={() => toggleSection('sideEffects')}
                     className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left text-red-600 dark:text-red-400"
                   >
-                    <span>⚠️ Possible Side Effects</span>
+                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-red-500">warning</span> Possible Side Effects</span>
                     <span>{expandedSections.sideEffects ? '▼' : '▶'}</span>
                   </button>
                   {expandedSections.sideEffects && (
@@ -373,7 +376,7 @@ export default function MedicineInfo() {
                     onClick={() => toggleSection('precautions')}
                     className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left text-amber-600"
                   >
-                    <span>🛑 Precautions & Warnings</span>
+                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-amber-500">block</span> Precautions & Warnings</span>
                     <span>{expandedSections.precautions ? '▼' : '▶'}</span>
                   </button>
                   {expandedSections.precautions && (
@@ -395,7 +398,7 @@ export default function MedicineInfo() {
                     onClick={() => toggleSection('interactions')}
                     className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
                   >
-                    <span>🔗 Drug Interactions</span>
+                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-slate-550">link</span> Drug Interactions</span>
                     <span>{expandedSections.interactions ? '▼' : '▶'}</span>
                   </button>
                   {expandedSections.interactions && (
@@ -413,7 +416,9 @@ export default function MedicineInfo() {
               {/* Storage details panel */}
               {selectedMed.storageInfo && (
                 <div className="bg-slate-50 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700 text-xs">
-                  <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block mb-1">📦 Storage & Manufacturer Details</span>
+                  <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs text-slate-400">inventory_2</span> Storage & Manufacturer Details
+                  </span>
                   <p className="italic text-slate-600 dark:text-slate-350">{selectedMed.storageInfo}</p>
                 </div>
               )}
@@ -480,8 +485,8 @@ export default function MedicineInfo() {
               {/* Potency & Clinical Analysis */}
               {comparison.comparisonText && (
                 <div className="space-y-2">
-                  <h4 className="font-bold text-xs text-primary dark:text-secondary">
-                    ⚖️ Potency & Clinical Suitability Analysis
+                  <h4 className="font-bold text-xs text-primary dark:text-secondary flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-sm text-primary">balance</span> Potency & Clinical Suitability Analysis
                   </h4>
                   <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-xl leading-relaxed">
                     {renderCompareMarkdown(comparison.comparisonText)}

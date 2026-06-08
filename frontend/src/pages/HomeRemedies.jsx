@@ -15,10 +15,10 @@ const renderMarkdown = (text) => {
   escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
   escaped = escaped.replace(/^\s*[-*]\s+(.*?)$/gm, '<div class="flex items-start gap-1.5 my-1 text-xs"><span class="text-emerald-500 font-bold select-none">•</span><span class="flex-1">$1</span></div>');
   escaped = escaped.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<div class="flex items-start gap-1.5 my-1 text-xs"><span class="text-primary dark:text-secondary font-bold min-w-[15px]">$1.</span><span class="flex-1">$2</span></div>');
-  escaped = escaped.replace(/(⚠️.*?)(?:<br \/?>|$)/g, '<div class="my-1.5 p-3 bg-amber-50 dark:bg-amber-950/20 border-l-4 border-amber-500 rounded-r-xl text-amber-800 dark:text-amber-300 text-xs">$1</div>');
+  escaped = escaped.replace(/⚠️\s*(.*?)(?:<br \/?>|$)/g, '<div class="my-1.5 p-3 bg-amber-50 dark:bg-amber-950/20 border-l-4 border-amber-500 rounded-r-xl text-amber-800 dark:text-amber-300 text-xs flex items-center gap-1.5"><span class="material-symbols-outlined text-sm shrink-0 text-amber-500">warning</span><span class="flex-1">$1</span></div>');
   
   escaped = escaped.split('\n').map(line => {
-    if (line.includes('flex items-start') || line.includes('<h') || line.includes('⚠️') || line.trim() === '') {
+    if (line.includes('flex items-start') || line.includes('<h') || line.includes('bg-amber-50') || line.trim() === '') {
       return line;
     }
     return line ? line + '<br />' : '<br />';
@@ -163,7 +163,7 @@ export default function HomeRemedies() {
       {/* Header */}
       <header className="mb-6">
         <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
-          🌱 Home Remedies
+          <span className="material-symbols-outlined text-xl text-primary animate-pulse">nature</span> Home Remedies
         </h1>
         <p className="text-xs text-slate-400 mt-0.5">Explore natural preparation guides and AI kitchen ingredients matchers.</p>
       </header>
@@ -204,8 +204,8 @@ export default function HomeRemedies() {
                   <h2 className="text-xl font-extrabold text-primary dark:text-secondary">{selectedRemedy.condition} Care Plan</h2>
                   <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Potential causes: {selectedRemedy.causes?.join(', ')}</p>
                 </div>
-                <span className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-100 rounded-full px-2.5 py-0.5 text-[10px] font-bold">
-                  🟢 Mild Symptom
+                <span className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-100 rounded-full px-2.5 py-0.5 text-[10px] font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block"></span> Mild Symptom
                 </span>
               </div>
 
@@ -223,9 +223,9 @@ export default function HomeRemedies() {
                         <h4 className="text-base font-extrabold text-primary dark:text-secondary">{rem.name}</h4>
                         <button 
                           onClick={() => toggleSaveRemedy(rem.name, rem.ingredients)}
-                          className={`text-[10px] px-2.5 py-1 rounded-xl font-bold border transition-all ${isSaved ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-250 dark:border-slate-700 text-slate-450 hover:bg-white'}`}
+                          className={`text-[10px] px-2.5 py-1 rounded-xl font-bold border transition-all flex items-center gap-1 ${isSaved ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-250 dark:border-slate-700 text-slate-450 hover:bg-white'}`}
                         >
-                          {isSaved ? '★ Saved' : '☆ Save'}
+                          <span className="material-symbols-outlined text-[10px]">{isSaved ? 'star' : 'star_border'}</span> {isSaved ? 'Saved' : 'Save'}
                         </button>
                       </div>
 
@@ -273,8 +273,8 @@ export default function HomeRemedies() {
                       )}
 
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-150/40 text-[10px] text-slate-400 font-bold">
-                        <div>⏱ Relief: <span className="text-slate-650 dark:text-slate-250 font-normal">{rem.reliefTime}</span></div>
-                        <div>🥄 Intake: <span className="text-slate-650 dark:text-slate-250 font-normal">{rem.usageInstructions}</span></div>
+                        <div className="flex items-center gap-1"><span className="material-symbols-outlined text-xs text-slate-450">schedule</span> Relief: <span className="text-slate-650 dark:text-slate-250 font-normal">{rem.reliefTime}</span></div>
+                        <div className="flex items-center gap-1"><span className="material-symbols-outlined text-xs text-slate-450">restaurant</span> Intake: <span className="text-slate-650 dark:text-slate-250 font-normal">{rem.usageInstructions}</span></div>
                       </div>
 
                     </div>
@@ -284,7 +284,9 @@ export default function HomeRemedies() {
 
               {/* Warning flags */}
               <div className="bg-amber-50 dark:bg-slate-900 border border-amber-250/20 p-4 rounded-xl text-amber-800 dark:text-amber-300 text-xs leading-relaxed font-semibold">
-                <h4 className="font-bold text-amber-600 mb-1">⚠️ Medical Warnings & Safe-Use Indicators:</h4>
+                <h4 className="font-bold text-amber-600 mb-1 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-amber-500">warning</span> Medical Warnings & Safe-Use Indicators:
+                </h4>
                 <ul className="list-disc list-inside space-y-1">
                   {selectedRemedy.warnings?.map((w, idx) => (
                     <li key={idx}>{w}</li>
@@ -299,7 +301,7 @@ export default function HomeRemedies() {
           {kitchenSuggestions && (
             <div className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-850 shadow-md space-y-4">
               <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-700 pb-2.5">
-                <span className="text-xl">🌿</span>
+                <span className="material-symbols-outlined text-xl text-emerald-600">nature</span>
                 <div>
                   <h3 className="text-sm font-extrabold text-primary dark:text-secondary">AI Kitchen Remedy Plan</h3>
                   <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Matched from your pantry</p>
@@ -367,7 +369,7 @@ export default function HomeRemedies() {
               disabled={kitchenLoading || kitchenIngredients.length === 0}
               className="w-full bg-primary hover:opacity-95 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-sm disabled:opacity-40"
             >
-              {kitchenLoading ? 'Matching...' : '🔍 Match Pantry remedies'}
+              {kitchenLoading ? 'Matching...' : <span className="flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-xs">search</span> Match Pantry remedies</span>}
             </button>
           </div>
 

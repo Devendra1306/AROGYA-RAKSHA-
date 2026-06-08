@@ -218,7 +218,7 @@ export default function Dashboard() {
           {/* Health Recommendation Card */}
           <div className="bg-slate-100/60 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-150/40 flex gap-4 items-center">
             <div className="w-14 h-14 bg-secondary-container rounded-lg flex items-center justify-center shrink-0 text-xl shadow-xs">
-              🧘
+              <span className="material-symbols-outlined text-primary">self_improvement</span>
             </div>
             <div className="overflow-hidden">
               <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/15 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide">Activity Advice</span>
@@ -233,7 +233,7 @@ export default function Dashboard() {
               <h3 className="font-extrabold text-sm mb-0.5">Device Connected</h3>
               <p className="opacity-75 text-[10px]">Last synced: 4 minutes ago</p>
               <div className="flex items-center gap-3 mt-4">
-                <span className="text-lg">⌚</span>
+                <span className="material-symbols-outlined text-lg">watch</span>
                 <span className="font-bold text-[9px] uppercase tracking-wider">Garmin Wearable Active</span>
               </div>
             </div>
@@ -256,9 +256,9 @@ export default function Dashboard() {
         </div>
         <button 
           onClick={() => navigate('/profile-setup')}
-          className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 rounded-xl text-label-md font-bold transition-all"
+          className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 rounded-xl text-label-md font-bold transition-all flex items-center gap-1.5"
         >
-          ✏️ Edit Profile
+          <span className="material-symbols-outlined text-base">edit</span> Edit Profile
         </button>
       </header>
 
@@ -328,15 +328,15 @@ export default function Dashboard() {
           <h3 className="text-lg font-bold mb-4">Daily Wellness Log</h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span>💧 Water Intake Target</span>
+              <span className="flex items-center"><span className="material-symbols-outlined text-base text-blue-500 mr-1.5">water_drop</span> Water Intake Target</span>
               <span className="font-bold">{kpis.waterGoal} Liters</span>
             </div>
             <div className="flex justify-between items-center">
-              <span>😴 Sleep Target</span>
+              <span className="flex items-center"><span className="material-symbols-outlined text-base text-indigo-500 mr-1.5">bedtime</span> Sleep Target</span>
               <span className="font-bold">{kpis.sleepGoal} Hours</span>
             </div>
             <div className="flex justify-between items-center">
-              <span>🧠 Stress Profile</span>
+              <span className="flex items-center"><span className="material-symbols-outlined text-base text-orange-500 mr-1.5">psychology</span> Stress Profile</span>
               <span className="font-bold">{profile?.stressLevel || 'Moderate'}</span>
             </div>
           </div>

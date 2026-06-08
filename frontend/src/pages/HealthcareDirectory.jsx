@@ -76,8 +76,8 @@ export default function HealthcareDirectory() {
       
       {/* Directory Hero Title */}
       <section className="space-y-4 mb-8">
-        <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-4 py-1.5 rounded-full text-label-sm font-extrabold uppercase inline-block">
-          🏥 Nearby Healthcare
+        <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-4 py-1.5 rounded-full text-label-sm font-extrabold uppercase inline-flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm">local_hospital</span> Nearby Healthcare
         </span>
         <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
           Find Healthcare & Clinical Facilities
@@ -91,7 +91,7 @@ export default function HealthcareDirectory() {
       <section className="space-y-4 mb-8">
         {/* Text Search Box */}
         <div className="relative w-full max-w-3xl">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">🔍</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-base material-symbols-outlined select-none">search</span>
           <input 
             type="text" 
             placeholder="Search by location, hospital name, clinic type, or doctor specialization (e.g. Tadepalligudem, Cardiologist)..."
@@ -113,7 +113,7 @@ export default function HealthcareDirectory() {
                   : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-350 dark:hover:border-slate-600 text-slate-650 dark:text-slate-300'
               }`}
             >
-              {cat === 'All' ? '🌐 All Categories' : cat}
+              {cat === 'All' ? <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">language</span> All Categories</span> : cat}
             </button>
           ))}
         </div>
@@ -123,7 +123,7 @@ export default function HealthcareDirectory() {
       <section className="space-y-6">
         {error && (
           <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-2xl text-xs text-red-650 dark:text-red-400 font-medium">
-            ⚠️ {error}
+            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm text-red-500">error</span> {error}</span>
           </div>
         )}
 
@@ -175,15 +175,14 @@ export default function HealthcareDirectory() {
                     {f.name}
                   </h3>
 
-                  {/* Rating Stars */}
                   <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500 mb-3">
-                    <span>★ {f.rating ? f.rating.toFixed(1) : '0.0'}</span>
+                    <span className="flex items-center gap-0.5"><span className="material-symbols-outlined text-xs text-amber-500">star</span> {f.rating ? f.rating.toFixed(1) : '0.0'}</span>
                     <span className="text-slate-400 dark:text-slate-500 font-normal">({f.reviewCount || 0} reviews)</span>
                   </div>
 
                   {/* Address */}
-                  <p className="text-xs text-on-surface-variant dark:text-slate-350 leading-relaxed mb-4 font-light">
-                    📍 {f.address}
+                  <p className="text-xs text-on-surface-variant dark:text-slate-350 leading-relaxed mb-4 font-light flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs text-slate-450">location_on</span> {f.address}
                   </p>
 
                   {/* Core Services badges */}
@@ -194,9 +193,9 @@ export default function HealthcareDirectory() {
                         {f.services.map(s => (
                           <span 
                             key={s} 
-                            className="bg-slate-100 dark:bg-slate-700 text-slate-650 dark:text-slate-200 px-2 py-0.5 rounded-lg text-[9px] font-bold"
+                            className="bg-slate-100 dark:bg-slate-700 text-slate-650 dark:text-slate-200 px-2 py-0.5 rounded-lg text-[9px] font-bold flex items-center gap-0.5"
                           >
-                            ✓ {s}
+                            <span className="material-symbols-outlined text-[9px] text-slate-450">check</span> {s}
                           </span>
                         ))}
                       </div>
@@ -211,9 +210,9 @@ export default function HealthcareDirectory() {
                         {f.departments.map(d => (
                           <span 
                             key={d} 
-                            className="bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-lg text-[9px] font-extrabold"
+                            className="bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-lg text-[9px] font-extrabold flex items-center gap-0.5"
                           >
-                            🩺 {d}
+                            <span className="material-symbols-outlined text-[9px] text-emerald-600">stethoscope</span> {d}
                           </span>
                         ))}
                       </div>
@@ -230,7 +229,7 @@ export default function HealthcareDirectory() {
                     }}
                     className="bg-primary hover:opacity-95 text-white font-bold py-3 rounded-2xl text-[10px] text-center flex items-center justify-center gap-1.5 shadow transition-all duration-200"
                   >
-                    🔍 View Profile
+                    <span className="material-symbols-outlined text-[10px]">search</span> View Profile
                   </button>
                   <a 
                     href={f.website !== 'N/A' ? f.website : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.name + ' ' + f.address)}`} 
@@ -239,7 +238,7 @@ export default function HealthcareDirectory() {
                     onClick={(e) => e.stopPropagation()}
                     className="border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 rounded-2xl text-[10px] text-center flex items-center justify-center gap-1.5 transition-all duration-200"
                   >
-                    🌐 Visit Website
+                    <span className="material-symbols-outlined text-[10px]">language</span> Visit Website
                   </a>
                 </div>
               </div>
@@ -247,7 +246,7 @@ export default function HealthcareDirectory() {
           </div>
         ) : (
           <div className="text-center py-20 border border-dashed border-slate-200 dark:border-slate-700 rounded-3xl space-y-3">
-            <span className="text-3xl block">🔍</span>
+            <span className="text-3xl block flex justify-center"><span className="material-symbols-outlined text-4xl text-slate-400">search</span></span>
             <p className="text-xs text-outline dark:text-slate-400 font-medium italic">
               No hospitals found for this search.
             </p>
@@ -281,7 +280,9 @@ export default function HealthcareDirectory() {
 
             {detailsError && (
               <div className="py-10 text-center space-y-3">
-                <p className="text-xs text-red-500 font-bold">⚠️ {detailsError}</p>
+                <p className="text-xs text-red-500 font-bold flex items-center justify-center gap-1.5">
+                  <span className="material-symbols-outlined text-sm text-red-500">warning</span> {detailsError}
+                </p>
                 <button 
                   onClick={handleCloseDetails} 
                   className="px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl text-xs font-bold"
@@ -312,7 +313,7 @@ export default function HealthcareDirectory() {
                     {selectedDetails.name}
                   </h2>
                   <div className="flex items-center gap-2 mt-2 text-xs font-bold text-amber-500">
-                    <span>★ {selectedDetails.rating ? selectedDetails.rating.toFixed(1) : '0.0'}</span>
+                    <span className="flex items-center gap-0.5"><span className="material-symbols-outlined text-xs text-amber-500">star</span> {selectedDetails.rating ? selectedDetails.rating.toFixed(1) : '0.0'}</span>
                     <span className="text-slate-400 dark:text-slate-500 font-normal">({selectedDetails.reviewCount || 0} reviews)</span>
                   </div>
                 </div>
@@ -341,28 +342,36 @@ export default function HealthcareDirectory() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-100 dark:border-slate-800">
                   <div className="space-y-3">
                     <div>
-                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">📍 Address</h4>
+                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">location_on</span> Address
+                      </h4>
                       <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                         {selectedDetails.address}
                       </p>
                     </div>
                     <div>
-                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">📞 Contact</h4>
-                      <p className="text-xs text-slate-750 dark:text-slate-300 font-bold">
+                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">call</span> Contact
+                      </h4>
+                      <p className="text-xs text-slate-755 dark:text-slate-300 font-bold">
                         {selectedDetails.phone}
                       </p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">🕒 Working Hours</h4>
+                      <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">schedule</span> Working Hours
+                      </h4>
                       <p className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed font-medium">
                         {selectedDetails.openingHours}
                       </p>
                     </div>
                     {selectedDetails.website !== 'N/A' && (
                       <div>
-                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">🌐 Website</h4>
+                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-xs">language</span> Website
+                        </h4>
                         <a 
                           href={selectedDetails.website} 
                           target="_blank" 
@@ -383,8 +392,8 @@ export default function HealthcareDirectory() {
                       <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Services</h4>
                       <div className="flex flex-wrap gap-1.5">
                         {selectedDetails.services.map(s => (
-                          <span key={s} className="bg-slate-100 dark:bg-slate-700 text-slate-750 dark:text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold">
-                            ✓ {s}
+                          <span key={s} className="bg-slate-100 dark:bg-slate-700 text-slate-750 dark:text-slate-200 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[10px] text-slate-450">check</span> {s}
                           </span>
                         ))}
                       </div>
@@ -396,8 +405,8 @@ export default function HealthcareDirectory() {
                       <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Departments</h4>
                       <div className="flex flex-wrap gap-1.5">
                         {selectedDetails.departments.map(d => (
-                          <span key={d} className="bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-lg text-[10px] font-extrabold">
-                            🩺 {d}
+                          <span key={d} className="bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-0.5">
+                            <span className="material-symbols-outlined text-[10px] text-emerald-600">stethoscope</span> {d}
                           </span>
                         ))}
                       </div>
@@ -416,7 +425,9 @@ export default function HealthcareDirectory() {
                             <span className="font-extrabold text-slate-800 dark:text-slate-200">{r.author}</span>
                             <span className="text-slate-400">{r.date}</span>
                           </div>
-                          <div className="text-[10px] text-amber-500 font-bold">★ {r.rating}.0</div>
+                           <div className="text-[10px] text-amber-500 font-bold flex items-center gap-0.5">
+                             <span className="material-symbols-outlined text-[10px] text-amber-500">star</span> {r.rating}.0
+                           </div>
                           <p className="text-xs text-slate-650 dark:text-slate-350 leading-relaxed font-light">
                             "{r.text}"
                           </p>
@@ -430,20 +441,20 @@ export default function HealthcareDirectory() {
 
                 {/* Footer Action Buttons */}
                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
-                  <a 
-                    href={`tel:${selectedDetails.phone}`} 
-                    className="bg-primary hover:opacity-95 text-white font-bold py-3 rounded-2xl text-xs text-center flex items-center justify-center gap-1.5 shadow transition-all duration-200"
-                  >
-                    📞 Call: {selectedDetails.phone}
-                  </a>
-                  <a 
-                    href={selectedDetails.website !== 'N/A' ? selectedDetails.website : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedDetails.name + ' ' + selectedDetails.address)}`} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 rounded-2xl text-xs text-center flex items-center justify-center gap-1.5 transition-all duration-200"
-                  >
-                    🌐 Visit Website
-                  </a>
+                   <a 
+                     href={`tel:${selectedDetails.phone}`} 
+                     className="bg-primary hover:opacity-95 text-white font-bold py-3 rounded-2xl text-xs text-center flex items-center justify-center gap-1.5 shadow transition-all duration-200"
+                   >
+                     <span className="material-symbols-outlined text-xs">call</span> Call: {selectedDetails.phone}
+                   </a>
+                   <a 
+                     href={selectedDetails.website !== 'N/A' ? selectedDetails.website : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedDetails.name + ' ' + selectedDetails.address)}`} 
+                     target="_blank" 
+                     rel="noreferrer"
+                     className="border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 rounded-2xl text-xs text-center flex items-center justify-center gap-1.5 transition-all duration-200"
+                   >
+                     <span className="material-symbols-outlined text-xs">language</span> Visit Website
+                   </a>
                 </div>
 
               </div>

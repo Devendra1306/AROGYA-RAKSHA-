@@ -490,15 +490,15 @@ export default function ProfilePage() {
           <h2 className="text-xl font-bold truncate">{user?.firstName} {user?.lastName}</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{user?.email}</p>
           <span className="inline-block bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-2.5 py-0.5 rounded-full text-[10px] font-bold mt-2">
-            👤 Active Member
+            <span className="material-symbols-outlined text-[10px] text-primary align-middle mr-1">verified_user</span> Active Member
           </span>
         </div>
         <button 
           onClick={() => navigate('/profile-setup')}
-          className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 p-2.5 rounded-2xl transition-all"
+          className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 p-2.5 rounded-2xl transition-all flex items-center justify-center"
           title="Edit Profile Settings"
         >
-          ✏️
+          <span className="material-symbols-outlined text-xs">edit</span>
         </button>
       </section>
 
@@ -532,7 +532,7 @@ export default function ProfilePage() {
 
       {/* Medical Profile Summary */}
       <section className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-sm border border-slate-200/50 dark:border-slate-700/50 mb-6">
-        <h3 className="font-bold text-base mb-3 flex items-center gap-1.5">🩺 Medical Summary</h3>
+        <h3 className="font-bold text-base mb-3 flex items-center gap-1.5"><span className="material-symbols-outlined text-base text-primary">stethoscope</span> Medical Summary</h3>
         <div className="space-y-3">
           <div className="flex justify-between items-center text-sm py-1 border-b border-slate-100 dark:border-slate-700">
             <span className="text-slate-500">Target Duration</span>
@@ -561,7 +561,7 @@ export default function ProfilePage() {
 
       {/* Saved Medicines */}
       <section className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-sm border border-slate-200/50 dark:border-slate-700/50 mb-6">
-        <h3 className="font-bold text-base mb-3 flex items-center gap-1.5">💊 Saved Medicines ({savedMedicines.length})</h3>
+        <h3 className="font-bold text-base mb-3 flex items-center gap-1.5"><span className="material-symbols-outlined text-base text-primary">pill</span> Saved Medicines ({savedMedicines.length})</h3>
         {savedMedicines.length > 0 ? (
           <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
             {savedMedicines.map(m => (
@@ -572,10 +572,10 @@ export default function ProfilePage() {
                 </div>
                 <button 
                   onClick={() => removeMedicine(m.id)}
-                  className="text-xs hover:text-red-500 p-1 ml-2 text-slate-400"
+                  className="text-xs hover:text-red-500 p-1 ml-2 text-slate-400 flex items-center justify-center"
                   title="Remove bookmark"
                 >
-                  ❌
+                  <span className="material-symbols-outlined text-xs">close</span>
                 </button>
               </div>
             ))}
@@ -587,7 +587,7 @@ export default function ProfilePage() {
 
       {/* Saved Remedies */}
       <section className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-sm border border-slate-200/50 dark:border-slate-700/50 mb-6">
-        <h3 className="font-bold text-base mb-3 flex items-center gap-1.5">🏠 Saved Remedies ({savedRemedies.length})</h3>
+        <h3 className="font-bold text-base mb-3 flex items-center gap-1.5"><span className="material-symbols-outlined text-base text-primary">local_hospital</span> Saved Remedies ({savedRemedies.length})</h3>
         {savedRemedies.length > 0 ? (
           <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
             {savedRemedies.map(r => (
@@ -598,10 +598,10 @@ export default function ProfilePage() {
                 </div>
                 <button 
                   onClick={() => removeRemedy(r.id)}
-                  className="text-xs hover:text-red-500 p-1 ml-2 text-slate-400"
+                  className="text-xs hover:text-red-500 p-1 ml-2 text-slate-400 flex items-center justify-center"
                   title="Remove bookmark"
                 >
-                  ❌
+                  <span className="material-symbols-outlined text-xs">close</span>
                 </button>
               </div>
             ))}
@@ -613,11 +613,11 @@ export default function ProfilePage() {
 
       {/* Settings & Reminder Notifications */}
       <section className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-sm border border-slate-200/50 dark:border-slate-700/50 mb-6">
-        <h3 className="font-bold text-base mb-4 flex items-center gap-1.5">⚙️ Health Alert Reminders</h3>
+        <h3 className="font-bold text-base mb-4 flex items-center gap-1.5"><span className="material-symbols-outlined text-base text-primary">settings</span> Health Alert Reminders</h3>
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-sm font-bold block">💧 Water Intakes alert</span>
+              <span className="text-sm font-bold block flex items-center gap-1"><span className="material-symbols-outlined text-xs text-blue-500">water_drop</span> Water Intakes alert</span>
               <span className="text-[10px] text-slate-400 block mt-0.5">Remind me to log hydration every 2 hours</span>
             </div>
             <input 
@@ -630,7 +630,7 @@ export default function ProfilePage() {
           
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-sm font-bold block">🥗 Diet Intake Check</span>
+              <span className="text-sm font-bold block flex items-center gap-1"><span className="material-symbols-outlined text-xs text-emerald-500">restaurant</span> Diet Intake Check</span>
               <span className="text-[10px] text-slate-400 block mt-0.5">Remind me to log meals during breakfast, lunch, and dinner</span>
             </div>
             <input 
@@ -643,7 +643,7 @@ export default function ProfilePage() {
 
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-sm font-bold block">📊 Wellness Checkup Logs</span>
+              <span className="text-sm font-bold block flex items-center gap-1"><span className="material-symbols-outlined text-xs text-indigo-500">analytics</span> Wellness Checkup Logs</span>
               <span className="text-[10px] text-slate-400 block mt-0.5">Remind me to take assessment weekly</span>
             </div>
             <input 
@@ -664,7 +664,7 @@ export default function ProfilePage() {
         }}
         className="w-full bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold border border-red-100 dark:border-red-900/40 py-3.5 rounded-2xl hover:bg-red-100 dark:hover:bg-red-950/45 transition-all text-sm flex items-center justify-center gap-2"
       >
-        🚪 Log Out Account
+        <span className="material-symbols-outlined text-sm">logout</span> Log Out Account
       </button>
     </motion.div>
   );

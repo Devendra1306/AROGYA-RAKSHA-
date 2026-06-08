@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arogya-raksha-v1';
+const CACHE_NAME = 'arogya-raksha-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -39,6 +39,25 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   
+  // Network First strategy for navigation/HTML requests to prevent stale asset hashes from rendering blank pages
+  if (e.request.mode === 'navigate' || e.request.url.endsWith('.html') || e.request.url === self.location.origin + '/') {
+    e.respondWith(
+      fetch(e.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        return caches.match('/').then(cached => cached || caches.match('/index.html'));
+      })
+    );
+    return;
+  }
+  
+  // Cache First strategy for static assets (JS, CSS, images) which are immutable and have unique hashes
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -57,11 +76,6 @@ self.addEventListener('fetch', (e) => {
         });
         
         return networkResponse;
-      }).catch(() => {
-        // Return index.html fallback for client-side routing when offline
-        if (e.request.mode === 'navigate') {
-          return caches.match('/');
-        }
       });
     })
   );
