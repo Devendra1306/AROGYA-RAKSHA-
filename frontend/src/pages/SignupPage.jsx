@@ -262,6 +262,7 @@ export default function SignupPage() {
               shape="pill"
               size="large"
               width="382"
+              auto_select={false}
             />
           </div>
         ) : (

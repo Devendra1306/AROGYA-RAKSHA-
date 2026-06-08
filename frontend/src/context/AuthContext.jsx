@@ -3,7 +3,21 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Resolve the API URL dynamically to avoid local network loopback calls in production
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // If running locally, connect to local backend
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]') {
+    return 'http://localhost:5000/api';
+  }
+  // In production (Vercel), default to relative /api so it queries the same host and doesn't trigger LNA prompts
+  return '/api';
+};
+
+export const API_URL = getApiUrl();
 
 // Create a configured axios instance
 export const api = axios.create({

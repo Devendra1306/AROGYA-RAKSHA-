@@ -186,6 +186,7 @@ export default function LoginPage() {
               shape="pill"
               size="large"
               width="382"
+              auto_select={false}
             />
           </div>
         ) : (
