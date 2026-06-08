@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
         {/* Success Alert */}
         {success && (
           <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 rounded-xl text-label-md border border-emerald-100 flex items-start gap-3">
-            <span className="text-lg">🎉</span>
+            <span className="material-symbols-outlined text-emerald-600 text-lg">task_alt</span>
             <div>
               <p className="font-semibold">Success!</p>
               <p className="text-xs mt-0.5">{success}</p>
@@ -106,7 +106,7 @@ export default function ResetPasswordPage() {
         {/* Error Alert */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-xl text-label-md border border-red-100 flex items-start gap-3">
-            <span className="text-lg">⚠️</span>
+            <span className="material-symbols-outlined text-red-650 text-lg">warning</span>
             <div>
               <p className="font-semibold">Reset Failed</p>
               <p className="text-xs mt-0.5 leading-relaxed">{error}</p>

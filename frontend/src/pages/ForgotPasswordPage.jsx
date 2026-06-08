@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
         {/* Success Alert */}
         {message && (
           <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 rounded-xl text-label-md border border-emerald-100 flex items-start gap-3">
-            <span className="text-lg">📧</span>
+            <span className="material-symbols-outlined text-emerald-600 text-lg">mail</span>
             <div>
               <p className="font-semibold">Reset Link Sent</p>
               <p className="text-xs mt-0.5">{message}</p>
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
         {/* Error Alert */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-xl text-label-md border border-red-100 flex items-start gap-3">
-            <span className="text-lg">⚠️</span>
+            <span className="material-symbols-outlined text-red-650 text-lg">warning</span>
             <div>
               <p className="font-semibold">Reset Request Failed</p>
               <p className="text-xs mt-0.5">{error}</p>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
         {/* Google Managed Account Alert */}
         {isGoogleAccount && (
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-300 rounded-xl text-label-md border border-blue-100 flex items-start gap-3">
-            <span className="text-lg">🔑</span>
+            <span className="material-symbols-outlined text-blue-600 text-lg">key</span>
             <div>
               <p className="font-semibold">Google Account Detected</p>
               <p className="text-xs mt-1 leading-relaxed">

@@ -127,7 +127,12 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (err) {
           console.error('Failed to fetch user profile:', err.message);
-          logout();
+          // Only log out if it is an explicit authentication failure
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            logout();
+          } else {
+            console.warn('Backend server is unreachable or returned network error. Retaining local session.');
+          }
         }
       } else {
         localStorage.removeItem('token');

@@ -18,19 +18,19 @@ export default function LandingPage() {
   }, []);
 
   const emergencyQuick = [
-    { title: 'Heart Attack', desc: 'Chest pressure, numbness, sweating.', icon: '❤️' },
-    { title: 'Stroke', desc: 'Face drooping, speech slurring.', icon: '🧠' },
-    { title: 'Choking', desc: 'Inability to breathe, talk or speak.', icon: '🌬️' },
-    { title: 'Burns', desc: 'Cool running water, sterilize area.', icon: '🔥' },
-    { title: 'Poisoning', desc: 'Save package container, airway check.', icon: '🧪' },
-    { title: 'Bleeding', desc: 'Direct firm continuous pressure.', icon: '🩸' }
+    { title: 'Heart Attack', desc: 'Chest pressure, numbness, sweating.', icon: 'cardiology', color: 'text-red-500' },
+    { title: 'Stroke', desc: 'Face drooping, speech slurring.', icon: 'psychology', color: 'text-blue-500' },
+    { title: 'Choking', desc: 'Inability to breathe, talk or speak.', icon: 'airwave', color: 'text-emerald-500' },
+    { title: 'Burns', desc: 'Cool running water, sterilize area.', icon: 'local_fire_department', color: 'text-orange-500' },
+    { title: 'Poisoning', desc: 'Save package container, airway check.', icon: 'skull', color: 'text-purple-500' },
+    { title: 'Bleeding', desc: 'Direct firm continuous pressure.', icon: 'bloodtype', color: 'text-rose-500' }
   ];
 
   const services = [
-    { title: 'Emergency Help', desc: 'First aid instructions & emergency maps.', icon: '🚨', path: '/emergency' },
-    { title: 'Medical Assistant', desc: 'Clinical symptom checks & disease lookups.', icon: '🤖', path: '/medical-assistant' },
-    { title: 'Health Assessment', desc: 'Daily health score & vitals tracking.', icon: '📊', path: '/health-assessment' },
-    { title: 'Diet Planner', desc: 'Calorie needs macro splits & groceries.', icon: '🥗', path: '/diet-planner' }
+    { title: 'Emergency Help', desc: 'First aid instructions & emergency maps.', icon: 'emergency', path: '/emergency', color: 'text-red-500' },
+    { title: 'Medical Assistant', desc: 'Clinical symptom checks & disease lookups.', icon: 'smart_toy', path: '/medical-assistant', color: 'text-primary' },
+    { title: 'Health Assessment', desc: 'Daily health score & vitals tracking.', icon: 'analytics', path: '/health-assessment', color: 'text-secondary' },
+    { title: 'Diet Planner', desc: 'Calorie needs macro splits & groceries.', icon: 'restaurant', path: '/diet-planner', color: 'text-emerald-500' }
   ];
 
   const faqs = [
@@ -195,7 +195,7 @@ export default function LandingPage() {
       <section className="px-margin-desktop py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-gutter max-w-[1280px] mx-auto">
         <div className="flex-1 space-y-6">
           <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-4 py-1.5 rounded-full text-label-sm font-extrabold uppercase">
-            🩺 Your AI-Powered Healthcare Companion
+            Your AI-Powered Healthcare Companion
           </span>
           <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight">
             Comprehensive Care, Instant Guidance.
@@ -208,13 +208,13 @@ export default function LandingPage() {
               onClick={() => navigate('/emergency')}
               className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 rounded-2xl shadow-lg transition-all flex items-center gap-2 text-label-md"
             >
-              🚨 Emergency Help
+              Emergency Help
             </button>
             <button 
               onClick={() => navigate('/medical-assistant')}
               className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 font-bold px-8 py-4 rounded-2xl transition-all text-label-md"
             >
-              🩺 Get Medical Guidance
+              Get Medical Guidance
             </button>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function LandingPage() {
                 onClick={() => navigate('/emergency')}
                 className="glass-card rounded-2xl p-5 bg-white hover:border-red-500 cursor-pointer shadow-sm hover:shadow-md hover:scale-105 transition-all text-center"
               >
-                <span className="text-3xl block mb-2">{e.icon}</span>
+                <span className={`material-symbols-outlined text-3xl block mb-2 ${e.color}`}>{e.icon}</span>
                 <h4 className="font-bold text-label-md">{e.title}</h4>
                 <p className="text-[9px] text-outline mt-1">{e.desc}</p>
               </div>
@@ -270,7 +270,7 @@ export default function LandingPage() {
               className="glass-card rounded-2xl p-6 bg-white dark:bg-slate-800 border hover:border-primary cursor-pointer hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>
-                <span className="text-3xl block mb-3">{s.icon}</span>
+                <span className={`material-symbols-outlined text-3xl block mb-3 ${s.color}`}>{s.icon}</span>
                 <h3 className="font-bold text-lg">{s.title}</h3>
                 <p className="text-label-md text-on-surface-variant dark:text-slate-400 mt-2">{s.desc}</p>
               </div>

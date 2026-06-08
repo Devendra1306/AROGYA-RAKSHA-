@@ -270,7 +270,7 @@ export default function SignupPage() {
             onClick={handleGoogleClick}
             className="w-full border border-outline-variant py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm text-slate-800 dark:text-slate-200"
           >
-            🔑 Continue with Google
+            Continue with Google
           </button>
         )}
 

@@ -255,7 +255,7 @@ const GlobalLayout = ({ children }) => {
             </div>
           </div>
           <div className="flex gap-4">
-            <a href="mailto:devendrasagar0988@gmail.com" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-red-600"><span className="text-white text-sm">✉️</span></a>
+            <a href="mailto:devendrasagar0988@gmail.com" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-red-600"><span className="material-symbols-outlined text-sm text-white">mail</span></a>
             <a href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-[#0077b5]"><span className="text-white text-sm">in</span></a>
             <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-900"><span className="text-white text-sm">git</span></a>
           </div>
@@ -265,27 +265,27 @@ const GlobalLayout = ({ children }) => {
       {/* Sticky Bottom Navigation Bar for Mobile and Tablet viewports */}
       <div className="fixed bottom-0 left-0 w-full z-45 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-xl h-16 grid grid-cols-5 items-center px-2 lg:hidden transition-colors">
         <Link className={activeMobileClass(user ? '/dashboard' : '/')} to={user ? '/dashboard' : '/'}>
-          <span className="text-xl mb-0.5">🏠</span>
+          <span className="material-symbols-outlined text-xl mb-0.5">home</span>
           <span>Home</span>
         </Link>
         
         <Link className={activeMobileClass('/emergency')} to="/emergency">
-          <span className="text-xl mb-0.5">🚨</span>
+          <span className="material-symbols-outlined text-xl mb-0.5">emergency</span>
           <span>SOS</span>
         </Link>
         
         <Link className={activeMobileClass('/medical-assistant')} to="/medical-assistant">
-          <span className="text-xl mb-0.5">🤖</span>
+          <span className="material-symbols-outlined text-xl mb-0.5">smart_toy</span>
           <span>Assistant</span>
         </Link>
         
         <Link className={activeMobileClass('/medicine-info')} to="/medicine-info">
-          <span className="text-xl mb-0.5">💊</span>
+          <span className="material-symbols-outlined text-xl mb-0.5">pill</span>
           <span>Medicines</span>
         </Link>
         
         <Link className={activeMobileClass(user ? '/profile' : '/login')} to={user ? '/profile' : '/login'}>
-          <span className="text-xl mb-0.5">👤</span>
+          <span className="material-symbols-outlined text-xl mb-0.5">person</span>
           <span>Profile</span>
         </Link>
       </div>
@@ -297,37 +297,41 @@ const GlobalLayout = ({ children }) => {
             {/* Call 112 */}
             <a 
               href="tel:112"
-              className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all"
+              className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
               title="Call Emergency 112"
             >
-              📞
+              <span className="material-symbols-outlined text-xl text-white">call</span>
             </a>
 
             {/* Find Nearby Help */}
             <button 
               onClick={() => { setSosOpen(false); navigate('/nearby'); }}
-              className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all"
+              className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
               title="Find Nearby Healthcare"
             >
-              🏥
+              <span className="material-symbols-outlined text-xl text-white">local_hospital</span>
             </button>
 
             {/* First-Aid Instructions */}
             <button 
               onClick={() => { setSosOpen(false); navigate('/emergency'); }}
-              className="w-12 h-12 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all"
+              className="w-12 h-12 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
               title="Emergency First-Aid Guides"
             >
-              🚨
+              <span className="material-symbols-outlined text-xl text-white">medical_services</span>
             </button>
           </div>
         )}
         <button 
           onClick={() => setSosOpen(!sosOpen)}
-          className={`w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-all select-none ${!sosOpen ? 'animate-pulse' : 'bg-slate-700 hover:bg-slate-800'}`}
+          className={`w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all select-none ${!sosOpen ? 'animate-pulse' : 'bg-slate-700 hover:bg-slate-800'}`}
           title="SOS DIAL"
         >
-          {sosOpen ? '✕' : '🚨'}
+          {sosOpen ? (
+            <span className="material-symbols-outlined text-2xl text-white">close</span>
+          ) : (
+            <span className="material-symbols-outlined text-2xl text-white">emergency</span>
+          )}
         </button>
       </div>
     </div>
