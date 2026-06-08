@@ -56,6 +56,8 @@ api.interceptors.response.use(
     // Custom friendly message for network/connection failures
     if (!error.response && (error.message === 'Network Error' || error.code === 'ERR_NETWORK')) {
       error.message = "Unable to connect to server. Please check your internet connection or try again.";
+    } else if (error.response && error.response.status === 405) {
+      error.message = "Request failed with status code 405 (Method Not Allowed). This indicates the API request went to Vercel's static server instead of the backend. Please check VITE_API_URL or run/test using local IP.";
     }
     return Promise.reject(error);
   }
