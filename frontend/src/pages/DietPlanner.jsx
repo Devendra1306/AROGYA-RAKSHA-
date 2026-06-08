@@ -17,32 +17,31 @@ const getMealImage = (mealType) => {
   return MEAL_IMAGES.snack;
 };
 
-const getGroceryPrice = (index) => {
-  return ['12.50', '8.00', '22.00', '4.20', '6.50', '15.00'][index % 6];
-};
-
 export default function DietPlanner() {
   const { profile } = useAuth();
   const [dietPlan, setDietPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Dropdown states
+  // Tab State: Breakfast, Lunch, Snack, Dinner
+  const [activeMealTab, setActiveMealTab] = useState('Breakfast');
+
+  // Preferences
   const [dietPreference, setDietPreference] = useState(profile?.dietPreference || 'Vegetarian');
   const [budgetPreference, setBudgetPreference] = useState(profile?.budgetPreference || 'Medium Budget');
 
   // Trackers local state
   const [waterIntake, setWaterIntake] = useState(2.1);
-  const [currentWeight, setCurrentWeight] = useState(profile?.weight || 100);
+  const [currentWeight, setCurrentWeight] = useState(profile?.weight || 75);
   const [weightInput, setWeightInput] = useState('');
 
-  // Consumed meals (matching index from mealPlan)
-  const [consumedMeals, setConsumedMeals] = useState([1]); // default lunch (index 1) checked
+  // Consumed meals (indices of mealPlan)
+  const [consumedMeals, setConsumedMeals] = useState([1]); // default lunch checked
 
   // Grocery checked items
   const [checkedGroceries, setCheckedGroceries] = useState([]);
 
-  // Extra food log items (User logs apart from the diet plan)
+  // Extra food log items
   const [extraFoods, setExtraFoods] = useState([]);
   const [foodQuery, setFoodQuery] = useState('');
   const [foodLoading, setFoodLoading] = useState(false);
@@ -74,7 +73,7 @@ export default function DietPlanner() {
       setDietPlan(res.data);
       setWaterIntake(res.data.waterGoal - 1.4);
       setConsumedMeals([1]); // default checked lunch
-      setExtraFoods([]); // clear extra foods on regeneration
+      setExtraFoods([]); 
       setSearchResult(null);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to generate meal plan. Try again.');
@@ -120,7 +119,6 @@ export default function DietPlanner() {
     }
   };
 
-  // Search recipe nutrition details (doesn't log it directly yet)
   const handleSearchFoodSubmit = async (e) => {
     e.preventDefault();
     if (!foodQuery.trim()) return;
@@ -129,24 +127,18 @@ export default function DietPlanner() {
     try {
       const res = await api.post('/diet/analyze-food', { query: foodQuery });
       if (res.data._isError) {
-        alert('⚠️ AI analysis temporarily unavailable. Please try again in a moment. The AI is processing your request.');
+        alert('⚠️ AI analysis temporarily unavailable. Please try again.');
         return;
       }
       setSearchResult(res.data);
     } catch (err) {
       console.error(err);
-      if (err.response?.status === 503) {
-        alert('⚠️ AI service is temporarily unavailable. Please try again in a moment.');
-      } else {
-        alert('Failed to analyze recipe details. Make sure to specify quantity (e.g. "Chicken 500g", "2 rotis", "1 cup rice").');
-      }
+      alert('Failed to analyze recipe details. Make sure to specify quantity (e.g. "Chicken 500g", "2 rotis").');
     } finally {
       setFoodLoading(false);
     }
   };
 
-
-  // Add the analyzed recipe directly to user's daily diet plan in database
   const handleAddToDiet = async () => {
     if (!searchResult) return;
     try {
@@ -157,11 +149,10 @@ export default function DietPlanner() {
       setFoodQuery('');
     } catch (err) {
       console.error(err);
-      alert('Failed to add food to your active diet plan.');
+      alert('Failed to add food to your diet plan.');
     }
   };
 
-  // Clear persistent extra food logs from database
   const handleClearExtraFoods = async () => {
     try {
       const res = await api.post('/diet/clear-extra-foods');
@@ -174,7 +165,6 @@ export default function DietPlanner() {
     }
   };
 
-  // Dynamic swap meal calling the backend API to generate alternatives on the fly
   const handleSwapMeal = async (mealType) => {
     if (!activePlan) return;
     const currentMeal = activePlan.mealPlan.find(m => m.mealType === mealType);
@@ -189,7 +179,6 @@ export default function DietPlanner() {
       });
 
       if (dietPlan) {
-        // Swap directly in existing user plan
         setDietPlan(prev => {
           const updatedPlan = prev.mealPlan.map(m => {
             if (m.mealType === mealType) {
@@ -207,7 +196,6 @@ export default function DietPlanner() {
           return { ...prev, mealPlan: updatedPlan };
         });
       } else {
-        // Fallback or custom update
         alert(`Alternative generated: ${res.data.foodItems}`);
       }
     } catch (err) {
@@ -217,12 +205,12 @@ export default function DietPlanner() {
     }
   };
 
-  // Helper values / local fallback plan
+  // Default values
   const activePlan = dietPlan || {
-    dailyCalories: 2200,
-    protein: 150,
-    carbs: 220,
-    fats: 65,
+    dailyCalories: 2000,
+    protein: 140,
+    carbs: 210,
+    fats: 60,
     waterGoal: 3.5,
     mealPlan: [
       { mealType: 'Breakfast', foodItems: 'Greek Yogurt & Berry Medley', calories: 350, protein: 25, carbs: 40, fats: 5, time: '08:30 AM' },
@@ -237,7 +225,7 @@ export default function DietPlanner() {
     ]
   };
 
-  // Calorie Progress calculations
+  // Macro progress variables
   const targetCals = activePlan.dailyCalories;
   const baseCals = activePlan.mealPlan.reduce((acc, meal, idx) => {
     return acc + (consumedMeals.includes(idx) ? meal.calories : 0);
@@ -245,9 +233,7 @@ export default function DietPlanner() {
   const extraCals = extraFoods.reduce((acc, food) => acc + food.calories, 0);
   const consumedCals = baseCals + extraCals;
   const progressPercent = Math.min(1, consumedCals / targetCals);
-  const strokeOffset = 440 * (1 - progressPercent);
 
-  // Macro Progress calculations including extra logged foods
   const consumedProtein = activePlan.mealPlan.reduce((acc, meal, idx) => {
     return acc + (consumedMeals.includes(idx) ? meal.protein : 0);
   }, 0) + extraFoods.reduce((acc, f) => acc + f.protein, 0);
@@ -264,30 +250,34 @@ export default function DietPlanner() {
   const carbsPercent = Math.min(100, Math.round((consumedCarbs / activePlan.carbs) * 100));
   const fatsPercent = Math.min(100, Math.round((consumedFats / activePlan.fats) * 100));
 
-  // Weight goal remaining metrics
-  const targetWeight = profile?.weight ? profile.weight - 15 : 85;
+  const targetWeight = profile?.weight ? profile.weight - 5 : 70;
   const weightToGo = Math.max(0, currentWeight - targetWeight);
 
+  // Find index of the currently active tab inside activePlan.mealPlan
+  const activeMealIndex = activePlan.mealPlan.findIndex(
+    m => m.mealType.toLowerCase() === activeMealTab.toLowerCase()
+  );
+  const activeMealObj = activeMealIndex !== -1 ? activePlan.mealPlan[activeMealIndex] : null;
+  const isActiveMealChecked = activeMealIndex !== -1 && consumedMeals.includes(activeMealIndex);
+
   return (
-    <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors animate-fadeIn">
+    <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors animate-fade-in">
       
-      {/* Header */}
-      <header className="mb-stack-md flex flex-col md:flex-row justify-between items-start md:items-end gap-base border-b border-outline-variant/20 pb-6">
+      {/* Header Panel */}
+      <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-3xl font-headline-lg font-bold text-primary dark:text-secondary flex items-center gap-2">
+          <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
             🥗 Diet Planner
           </h1>
-          <p className="text-on-surface-variant dark:text-slate-300 text-body-md mt-1">
-            Your clinically personalized nutrition journey for a healthier tomorrow.
-          </p>
+          <p className="text-xs text-slate-400 mt-0.5">Manage weight goals, calorie rings, and personalized recipes.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
+        <div className="flex flex-wrap items-center gap-2">
           <select 
             value={dietPreference}
             onChange={(e) => setDietPreference(e.target.value)}
-            className="bg-white dark:bg-slate-800 border border-outline-variant rounded-xl px-4 py-2.5 text-label-md font-medium text-on-surface-variant dark:text-slate-200 focus:border-primary outline-none shadow-sm cursor-pointer"
+            className="bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold focus:border-primary outline-none cursor-pointer"
           >
-            <option value="Vegetarian">Vegetarian</option>
+            <option value="Vegetarian">Veg</option>
             <option value="Non-Veg">Non-Veg</option>
             <option value="Vegan">Vegan</option>
             <option value="Keto">Keto</option>
@@ -295,444 +285,327 @@ export default function DietPlanner() {
           <select 
             value={budgetPreference}
             onChange={(e) => setBudgetPreference(e.target.value)}
-            className="bg-white dark:bg-slate-800 border border-outline-variant rounded-xl px-4 py-2.5 text-label-md font-medium text-on-surface-variant dark:text-slate-200 focus:border-primary outline-none shadow-sm cursor-pointer"
+            className="bg-white dark:bg-slate-855 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold focus:border-primary outline-none cursor-pointer"
           >
-            <option value="Medium Budget">Medium Budget</option>
-            <option value="Low Budget">Low Budget</option>
+            <option value="Medium Budget">Mid-Budget</option>
+            <option value="Low Budget">Low-Budget</option>
             <option value="Premium">Premium</option>
           </select>
           <button 
             onClick={handleGenerate}
             disabled={loading}
-            className="bg-primary hover:opacity-95 dark:bg-secondary dark:text-slate-900 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2"
+            className="bg-primary hover:opacity-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm"
           >
-            {loading ? 'Generating...' : 'Regenerate Plan'}
+            {loading ? 'Wait...' : 'Regenerate'}
           </button>
         </div>
       </header>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/50 rounded-2xl">
+        <div className="mb-5 p-3.5 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-350 border border-red-100/40 rounded-xl text-xs">
           {error}
         </div>
       )}
 
       {loading && !dietPlan ? (
-        <div className="flex justify-center py-24">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+        <div className="flex flex-col justify-center items-center py-20 gap-2">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Compiling Daily Macros...</p>
         </div>
       ) : (
-        <div className="space-y-gutter">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Top Row: Goal Progress & Daily Target Ring */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+          {/* Main Content Area: Meal Planner & Vitals Logs */}
+          <div className="lg:col-span-8 space-y-6">
             
-            {/* Weight Loss Journey */}
-            <section className="lg:col-span-8 glass-card rounded-3xl p-6 bg-white/80 dark:bg-slate-800/80 shadow-md relative overflow-hidden flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="font-bold text-xl text-on-surface dark:text-slate-100">Weight Loss Journey</h2>
-                    <p className="text-xs text-outline">Estimated 6-month transformation timeline</p>
-                  </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-3 py-1 rounded-full text-xs font-bold">
-                    On Track
-                  </div>
-                </div>
+            {/* Horizontal Swipe Tabs for Meals */}
+            <section className="glass-card rounded-2xl p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-700">
+                <h3 className="font-extrabold text-sm">Today's Meal Tabs</h3>
+                <span className="text-[10px] text-slate-400 font-semibold">Tap to log macros</span>
+              </div>
+              
+              {/* Tab Selector Buttons */}
+              <div className="flex justify-between bg-slate-100 dark:bg-slate-900 p-1 rounded-xl gap-1 overflow-x-auto">
+                {['Breakfast', 'Lunch', 'Snack', 'Dinner'].map((mealName) => (
+                  <button
+                    key={mealName}
+                    onClick={() => setActiveMealTab(mealName)}
+                    className={`flex-1 text-center py-2 rounded-lg font-bold text-xs transition-all ${activeMealTab === mealName ? 'bg-primary text-white dark:bg-secondary dark:text-slate-900 shadow' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50'}`}
+                  >
+                    {mealName}
+                  </button>
+                ))}
+              </div>
 
-                <div className="grid grid-cols-3 gap-4 items-center my-4">
-                  <div className="text-center">
-                    <p className="text-[10px] text-outline uppercase font-bold">Current</p>
-                    <p className="text-3xl font-extrabold text-primary dark:text-secondary">{currentWeight}<span className="text-xs font-normal text-outline">kg</span></p>
+              {/* Active Tab Meal Card Details */}
+              {activeMealObj ? (
+                <div 
+                  onClick={() => toggleMealConsumed(activeMealIndex)}
+                  className={`border rounded-2xl p-4 flex gap-4 items-center cursor-pointer transition-all hover:border-primary/30 relative border-l-4 ${isActiveMealChecked ? 'border-l-primary bg-blue-50/10' : 'border-l-transparent bg-slate-50/30 dark:bg-slate-900/40'}`}
+                >
+                  <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800">
+                    <img 
+                      alt={activeMealObj.mealType} 
+                      src={getMealImage(activeMealObj.mealType)}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                  <div className="flex flex-col justify-center items-center">
-                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${Math.max(10, Math.min(100, (currentWeight - targetWeight) * 4))}%` }}></div>
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] text-secondary font-bold uppercase tracking-wider">{activeMealObj.mealType}</span>
+                      <span className="text-[9px] text-slate-400 font-medium">{activeMealObj.time || 'Schedule'}</span>
                     </div>
-                    <p className="text-[10px] text-outline mt-1.5 font-bold">{weightToGo}kg to go</p>
+                    <h4 className="font-extrabold text-xs mt-0.5 leading-snug">{activeMealObj.foodItems}</h4>
+                    <div className="flex gap-2 text-[9px] text-slate-400 mt-1 font-bold">
+                      <span>{activeMealObj.calories} kcal</span>
+                      <span>•</span>
+                      <span>{activeMealObj.protein}g Protein</span>
+                      <span>•</span>
+                      <span>{activeMealObj.carbs}g Carbs</span>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-[10px] text-outline uppercase font-bold">Target</p>
-                    <p className="text-3xl font-extrabold text-secondary">{targetWeight}<span className="text-xs font-normal text-outline">kg</span></p>
+                  <div className="flex flex-col items-end gap-3 justify-between">
+                    {isActiveMealChecked ? (
+                      <span className="text-primary text-lg font-bold">✓ Logged</span>
+                    ) : (
+                      <span className="text-slate-350 text-xs font-semibold">Log Meal</span>
+                    )}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSwapMeal(activeMealObj.mealType);
+                      }}
+                      className="text-[9px] font-bold text-primary dark:text-secondary hover:underline"
+                    >
+                      🔄 Swap Option
+                    </button>
                   </div>
+                </div>
+              ) : (
+                <p className="text-xs italic text-center py-4 text-slate-450">No meal details defined for this tab.</p>
+              )}
+            </section>
+
+            {/* Weight Loss Journey */}
+            <section className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-extrabold text-sm">Weight Tracker</h3>
+                  <p className="text-[9px] text-slate-450 uppercase font-semibold">Transform roadmap</p>
+                </div>
+                <span className="bg-emerald-50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-400 border border-emerald-100 rounded-full px-2.5 py-0.5 text-[9px] font-bold">
+                  Active Goal
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center items-center py-2 bg-slate-50 dark:bg-slate-900 rounded-xl">
+                <div>
+                  <p className="text-[9px] text-slate-400 uppercase font-bold">Current</p>
+                  <p className="text-xl font-black text-primary dark:text-secondary">{currentWeight} <span className="text-[10px] font-normal text-slate-400">kg</span></p>
+                </div>
+                <div>
+                  <p className="text-[8px] text-slate-450 font-bold">{weightToGo}kg Remaining</p>
+                  <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mt-1 overflow-hidden">
+                    <div className="h-full bg-primary" style={{ width: `${Math.max(10, Math.min(100, (currentWeight - targetWeight) * 8))}%` }}></div>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-400 uppercase font-bold">Target</p>
+                  <p className="text-xl font-black text-secondary">{targetWeight} <span className="text-[10px] font-normal text-slate-400">kg</span></p>
                 </div>
               </div>
 
-              {/* simulated weight graph bar */}
-              <div className="h-28 w-full flex items-end gap-1.5 mt-4">
-                <div className="flex-1 bg-primary/10 rounded-t-lg h-[90%] transition-all hover:bg-primary/20 flex flex-col justify-end items-center pb-1 text-[9px] text-outline font-bold" title="Month 1: 100kg">100</div>
-                <div className="flex-1 bg-primary/10 rounded-t-lg h-[85%] transition-all hover:bg-primary/20 flex flex-col justify-end items-center pb-1 text-[9px] text-outline font-bold" title="Month 2: 96kg">96</div>
-                <div className="flex-1 bg-primary/10 rounded-t-lg h-[75%] transition-all hover:bg-primary/20 flex flex-col justify-end items-center pb-1 text-[9px] text-outline font-bold" title="Month 3: 92kg">92</div>
-                <div className="flex-1 bg-primary/10 rounded-t-lg h-[68%] transition-all hover:bg-primary/20 flex flex-col justify-end items-center pb-1 text-[9px] text-outline font-bold" title="Month 4: 89kg">89</div>
-                <div className="flex-1 bg-primary/30 dark:bg-primary/50 rounded-t-lg h-[60%] border-t-2 border-primary flex flex-col justify-end items-center pb-1 text-[9px] text-primary dark:text-secondary font-extrabold" title="Today">{currentWeight}</div>
-                <div className="flex-1 bg-slate-100 dark:bg-slate-700/50 rounded-t-lg h-[55%] border-t-2 border-outline-variant border-dashed flex flex-col justify-end items-center pb-1 text-[9px] text-outline" title="Month 6">85</div>
-                <div className="flex-1 bg-slate-100 dark:bg-slate-700/50 rounded-t-lg h-[50%] border-t-2 border-outline-variant border-dashed flex flex-col justify-end items-center pb-1 text-[9px] text-outline" title="Target">85</div>
-              </div>
-              <div className="flex justify-between mt-1 text-[9px] text-outline font-bold">
-                <span>Month 1</span>
-                <span>Month 2</span>
-                <span>Month 3</span>
-                <span>Month 4</span>
-                <span className="text-primary dark:text-secondary font-extrabold">Today</span>
-                <span>Month 6</span>
-                <span>Target</span>
-              </div>
-
-              {/* Inline weight logs form */}
-              <form onSubmit={handleWeightSubmit} className="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2">
-                <span className="text-xs text-outline font-medium">Log weight today:</span>
+              {/* Log Weight Form */}
+              <form onSubmit={handleWeightSubmit} className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-750">
+                <span className="text-xs text-slate-500 font-medium">Log Today's Weight:</span>
                 <input 
                   type="number" 
                   step="0.1"
                   value={weightInput}
                   onChange={(e) => setWeightInput(e.target.value)}
-                  className="w-24 p-1.5 rounded-lg border border-outline-variant bg-slate-50 dark:bg-slate-900 outline-none text-xs text-center" 
-                  placeholder="Weight (kg)"
+                  className="w-20 p-1.5 rounded-lg border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs text-center font-bold" 
+                  placeholder="kg"
                 />
-                <button type="submit" className="bg-slate-700 hover:bg-slate-800 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-all shadow-sm">
-                  Log
+                <button type="submit" className="bg-slate-700 hover:bg-slate-800 text-white font-bold py-1.5 px-3 rounded-lg text-xs">
+                  Save
                 </button>
               </form>
             </section>
 
-            {/* Daily Targets Rings */}
-            <section className="lg:col-span-4 glass-card rounded-3xl p-6 bg-white/80 dark:bg-slate-800/80 shadow-md flex flex-col justify-between">
-              <h2 className="font-bold text-lg mb-4 text-on-surface dark:text-slate-100">Daily Macro Targets</h2>
-              <div className="flex flex-col items-center gap-4">
-                
-                {/* SVG Calorie Circle Ring */}
-                <div className="relative w-36 h-36 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle cx="72" cy="72" fill="transparent" r="62" stroke="#eff4ff" strokeWidth="10" className="dark:stroke-slate-700"></circle>
-                    <circle 
-                      cx="72" 
-                      cy="72" 
-                      fill="transparent" 
-                      r="62" 
-                      stroke="#003d9b" 
-                      strokeDasharray="390" 
-                      strokeDashoffset={390 * (1 - progressPercent)} 
-                      strokeWidth="10" 
-                      className="transition-all duration-700 ease-out"
-                      strokeLinecap="round"
-                    ></circle>
-                  </svg>
-                  <div className="absolute text-center">
-                    <p className="text-3xl font-extrabold text-primary dark:text-secondary">{consumedCals}</p>
-                    <p className="text-[10px] text-outline font-bold">of {targetCals} kcal</p>
-                  </div>
-                </div>
-
-                {/* Macromolecules progress bars */}
-                <div className="w-full space-y-3">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold mb-0.5">
-                      <span>Protein</span>
-                      <span className="text-outline">{consumedProtein}g / {activePlan.protein}g</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: `${proteinPercent}%` }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold mb-0.5">
-                      <span>Carbs</span>
-                      <span className="text-outline">{consumedCarbs}g / {activePlan.carbs}g</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-secondary" style={{ width: `${carbsPercent}%` }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold mb-0.5">
-                      <span>Fats</span>
-                      <span className="text-outline">{consumedFats}g / {activePlan.fats}g</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-400" style={{ width: `${fatsPercent}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </section>
           </div>
 
-          {/* Middle Row: Meal Plan & Water Tracker */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+          {/* Right Side: Calorie Ring, Water Log, Groceries & AI search */}
+          <div className="lg:col-span-4 space-y-6">
             
-            {/* Personalized Meal Plan */}
-            <section className="lg:col-span-9 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-bold text-xl text-on-surface dark:text-slate-100">Today's Meal Plan</h2>
-                  <p className="text-xs text-outline">Click meal cards to check them as consumed and update daily calories</p>
+            {/* Calorie Ring Summary */}
+            <section className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center">
+              <h3 className="font-extrabold text-sm mb-4 self-start">Macro Balance</h3>
+              
+              {/* SVG Gauge */}
+              <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="64" cy="64" fill="transparent" r="54" stroke="#f1f5f9" strokeWidth="8" className="dark:stroke-slate-800"></circle>
+                  <circle 
+                    cx="64" 
+                    cy="64" 
+                    fill="transparent" 
+                    r="54" 
+                    stroke="#0052cc" 
+                    strokeDasharray="340" 
+                    strokeDashoffset={340 * (1 - progressPercent)} 
+                    strokeWidth="8" 
+                    className="transition-all duration-500"
+                    strokeLinecap="round"
+                  ></circle>
+                </svg>
+                <div className="absolute text-center">
+                  <p className="text-2xl font-black text-primary dark:text-secondary">{consumedCals}</p>
+                  <p className="text-[8px] text-slate-400 font-bold">of {targetCals} kcal</p>
                 </div>
+              </div>
+
+              {/* Macros breakdown pills */}
+              <div className="w-full space-y-2 text-xs">
+                <div className="flex justify-between items-center p-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                  <span className="font-semibold text-slate-500">Protein</span>
+                  <span className="font-bold">{consumedProtein}g / {activePlan.protein}g ({proteinPercent}%)</span>
+                </div>
+                <div className="flex justify-between items-center p-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                  <span className="font-semibold text-slate-500">Carbs</span>
+                  <span className="font-bold text-secondary">{consumedCarbs}g / {activePlan.carbs}g ({carbsPercent}%)</span>
+                </div>
+                <div className="flex justify-between items-center p-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                  <span className="font-semibold text-slate-500">Fats</span>
+                  <span className="font-bold text-orange-500">{consumedFats}g / {activePlan.fats}g ({fatsPercent}%)</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Water Tracker */}
+            <section className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <div className="flex justify-between items-center">
+                <h3 className="font-extrabold text-sm flex items-center gap-1">💧 Water Log</h3>
                 <button 
-                  onClick={handleGenerate}
-                  className="text-primary hover:underline text-label-md font-bold flex items-center gap-1"
+                  onClick={handleResetWater}
+                  className="text-[9px] text-slate-400 hover:underline font-bold"
                 >
-                  🔄 Regenerate Plan
+                  Reset
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activePlan.mealPlan.map((meal, idx) => {
-                  const isChecked = consumedMeals.includes(idx);
-                  return (
-                    <div 
-                      key={idx}
-                      onClick={() => toggleMealConsumed(idx)}
-                      className={`glass-card p-4 rounded-2xl flex gap-4 items-center group cursor-pointer hover:border-primary/45 transition-all relative border-l-4 ${isChecked ? 'border-l-primary bg-blue-50/15 dark:bg-slate-900/50' : 'border-l-transparent'}`}
-                    >
-                      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100">
-                        <img 
-                          alt={meal.mealType} 
-                          src={getMealImage(meal.mealType)}
-                          className="w-full h-full object-cover transition-all group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[10px] text-secondary uppercase font-extrabold">{meal.mealType}</span>
-                          <span className="text-[10px] text-outline font-bold">{meal.time || 'Meal Time'}</span>
-                        </div>
-                        <h4 className="font-bold text-label-md mt-0.5 leading-snug">{meal.foodItems}</h4>
-                        <div className="flex gap-2.5 text-[10px] text-outline mt-1 font-bold">
-                          <span>{meal.calories} kcal</span>
-                          <span>•</span>
-                          <span>{meal.protein}g Protein</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end justify-between h-full gap-2">
-                        {isChecked ? (
-                          <span className="text-primary text-xl select-none" title="Consumed">✓</span>
-                        ) : (
-                          <span className="text-slate-300 dark:text-slate-600 text-xl group-hover:text-primary transition-all select-none">○</span>
-                        )}
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSwapMeal(meal.mealType);
-                          }}
-                          className="text-[10px] font-bold text-primary hover:underline hover:text-opacity-80 py-1"
-                          title="Swap alternative foods"
-                        >
-                          Swap
-                        </button>
-                      </div>
+              <div className="text-center py-2">
+                <p className="text-2xl font-black text-blue-600 dark:text-blue-400">{waterIntake} <span className="text-xs font-bold">Liters</span></p>
+                <p className="text-[8px] text-slate-450 uppercase font-bold mt-0.5">Goal: {activePlan.waterGoal || 3.5} Liters</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => handleLogWater(0.25)} 
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/20 dark:text-blue-300 py-2 rounded-xl font-bold text-xs"
+                >
+                  +250ml
+                </button>
+                <button 
+                  onClick={() => handleLogWater(0.5)} 
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/20 dark:text-blue-300 py-2 rounded-xl font-bold text-xs"
+                >
+                  +500ml
+                </button>
+              </div>
+            </section>
+
+            {/* Custom Extra Food Log Search */}
+            <section className="glass-card rounded-2xl p-5 bg-slate-900 text-white dark:bg-slate-950 border border-slate-800 shadow-md space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="bg-secondary text-slate-900 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">AI Recipe log</span>
+                {extraFoods.length > 0 && (
+                  <button onClick={handleClearExtraFoods} className="text-[10px] text-slate-300 underline">
+                    Clear All
+                  </button>
+                )}
+              </div>
+              <div>
+                <h4 className="font-bold text-xs text-secondary">Log custom dishes & meals</h4>
+                <p className="text-[10px] text-slate-300 mt-1">Specify amount: (e.g. "2 boiled eggs", "1 cup oatmeal")</p>
+              </div>
+
+              <form onSubmit={handleSearchFoodSubmit} className="flex gap-1.5">
+                <input 
+                  type="text" 
+                  value={foodQuery}
+                  onChange={(e) => setFoodQuery(e.target.value)}
+                  placeholder="e.g. 1 bowl salad..."
+                  className="flex-grow p-2 rounded-lg text-xs bg-white text-slate-800 outline-none"
+                  required
+                />
+                <button 
+                  type="submit" 
+                  disabled={foodLoading}
+                  className="bg-secondary text-slate-900 font-bold px-3 rounded-lg text-xs"
+                >
+                  {foodLoading ? 'Analyzing' : 'Check'}
+                </button>
+              </form>
+
+              {searchResult && (
+                <div className="bg-white/10 p-3 rounded-xl text-xs space-y-2.5">
+                  <div className="flex justify-between">
+                    <div>
+                      <span className="font-bold text-white text-xs">{searchResult.foodName}</span>
+                      <span className="text-[9px] block text-slate-350">{searchResult.quantity}</span>
                     </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* Water Tracker Cylinder glass */}
-            <section className="lg:col-span-3 glass-card rounded-3xl p-6 bg-white/80 dark:bg-slate-800/80 shadow-md flex flex-col justify-between relative overflow-hidden">
-              <h3 className="font-bold text-lg mb-3 flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
-                <span className="text-xl">💧</span> Water Tracker
-              </h3>
-              
-              <div className="flex-grow flex flex-col justify-center items-center gap-4">
-                
-                {/* Cylinder filling visual animations */}
-                <div className="relative w-24 h-40 border-4 border-slate-300 dark:border-slate-600 rounded-b-3xl overflow-hidden bg-slate-100/40 dark:bg-slate-900/40 backdrop-blur-sm shadow-inner flex items-end justify-center">
-                  
-                  {/* reset water button */}
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleResetWater(); }}
-                    className="absolute top-2 left-2 text-[9px] font-bold text-blue-500 hover:text-blue-700 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-blue-200 dark:border-slate-700 z-20 shadow-sm transition-all"
-                  >
-                    Reset
-                  </button>
-
-                  <div 
-                    style={{ height: `${Math.min(100, Math.round((waterIntake / (activePlan.waterGoal || 3.5)) * 100))}%` }}
-                    className="absolute bottom-0 left-0 w-full bg-blue-500/80 dark:bg-blue-600/80 transition-all duration-1000 ease-out flex items-center justify-center animate-pulse"
-                  >
-                    {/* Underlay Wave */}
-                    <svg 
-                      className="absolute left-0 w-[200%] h-4 -top-3.5 fill-blue-500/80 dark:fill-blue-600/80"
-                      style={{ animation: 'wave 6s linear infinite' }}
-                      viewBox="0 0 120 28"
-                      preserveAspectRatio="none"
-                    >
-                      <path d="M0 15 Q 30 5, 60 15 T 120 15 T 180 15 T 240 15 L 240 28 L 0 28 Z" opacity="0.4" />
-                    </svg>
-                    {/* Overlay Wave */}
-                    <svg 
-                      className="absolute left-0 w-[200%] h-3.5 -top-3 fill-blue-500 dark:fill-blue-600"
-                      style={{ animation: 'wave 3s linear infinite' }}
-                      viewBox="0 0 120 28"
-                      preserveAspectRatio="none"
-                    >
-                      <path d="M0 15 Q 35 10, 70 15 T 140 15 T 210 15 T 280 15 L 280 28 L 0 28 Z" />
-                    </svg>
-
-                    {Math.round((waterIntake / (activePlan.waterGoal || 3.5)) * 100) > 10 && (
-                      <span className="text-white text-[10px] font-bold drop-shadow-md z-10">
-                        {Math.round((waterIntake / (activePlan.waterGoal || 3.5)) * 100)}%
-                      </span>
-                    )}
+                    <span className="text-secondary font-black">{searchResult.calories} kcal</span>
                   </div>
-
-                  {waterIntake === 0 && (
-                    <span className="absolute bottom-2 text-slate-400 text-[10px] font-bold">Empty</span>
-                  )}
-                </div>
-
-                <div className="text-center">
-                  <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{waterIntake}<span className="text-sm font-bold">L</span></p>
-                  <p className="text-[10px] text-outline">Goal: {activePlan.waterGoal} Liters</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 w-full">
                   <button 
-                    onClick={() => handleLogWater(0.25)} 
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 py-2 rounded-xl font-bold text-xs transition-all shadow-sm"
+                    onClick={handleAddToDiet}
+                    className="w-full bg-secondary text-slate-900 font-bold py-1.5 rounded-lg text-center text-xs"
                   >
-                    +250ml
-                  </button>
-                  <button 
-                    onClick={() => handleLogWater(0.5)} 
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50 py-2 rounded-xl font-bold text-xs transition-all shadow-sm"
-                  >
-                    +500ml
+                    ➕ Log to My Diet
                   </button>
                 </div>
-              </div>
+              )}
+
+              {/* Display custom logs */}
+              {extraFoods.length > 0 && (
+                <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
+                  {extraFoods.map((food, idx) => (
+                    <div key={idx} className="bg-white/5 p-2 rounded-lg text-[10px] flex justify-between items-center">
+                      <div>
+                        <span className="font-semibold text-white">{food.foodName}</span> ({food.quantity})
+                      </div>
+                      <span className="text-secondary font-bold">{food.calories} kcal</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
-          </div>
 
-          {/* Bottom Row: Shopping List & Custom Food Log Search */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-            
-            {/* Weekly Shopping List */}
-            <section className="lg:col-span-6 glass-card rounded-3xl p-6 bg-white/80 dark:bg-slate-800/80 shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg text-on-surface dark:text-slate-100">Weekly Shopping List</h3>
-                <span className="text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded-md">
-                  {activePlan.groceryList.length} Items
-                </span>
-              </div>
-              
-              <div className="space-y-2.5">
+            {/* Shopping List */}
+            <section className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <h3 className="font-extrabold text-sm">Grocery Shopping Checklist</h3>
+              <div className="space-y-2">
                 {activePlan.groceryList.map((grocery, idx) => {
                   const isChecked = checkedGroceries.includes(idx);
                   return (
                     <div 
                       key={idx}
                       onClick={() => toggleGroceryCheck(idx)}
-                      className={`p-3 rounded-xl border border-outline-variant/35 cursor-pointer flex items-center gap-3 transition-all ${isChecked ? 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-60' : 'bg-white dark:bg-slate-800'}`}
+                      className={`p-2.5 rounded-xl border cursor-pointer flex items-center gap-2 text-xs transition-all ${isChecked ? 'bg-slate-50 dark:bg-slate-900 border-slate-100 opacity-60' : 'bg-white dark:bg-slate-800 border-slate-150'}`}
                     >
-                      <span className={`w-5 h-5 rounded border flex items-center justify-center font-bold text-xs ${isChecked ? 'bg-primary text-white border-primary' : 'border-outline-variant'}`}>
+                      <span className={`w-4 h-4 rounded border flex items-center justify-center font-bold text-[10px] ${isChecked ? 'bg-primary text-white border-primary' : 'border-slate-300'}`}>
                         {isChecked ? '✓' : ''}
                       </span>
                       <div className="flex-grow">
-                        <p className={`font-bold text-label-md ${isChecked ? 'line-through' : ''}`}>{grocery.item}</p>
-                        <p className="text-[10px] text-outline">{grocery.quantity} • {grocery.category}</p>
+                        <p className={`font-semibold ${isChecked ? 'line-through' : ''}`}>{grocery.item}</p>
+                        <p className="text-[9px] text-slate-400">{grocery.quantity} • {grocery.category}</p>
                       </div>
-                      <span className="font-bold text-secondary dark:text-emerald-400 text-xs">₹{grocery.price || Math.round(50 + (idx * 30))}</span>
                     </div>
                   );
                 })}
               </div>
             </section>
 
-            {/* Custom Extra Food / Recipe Log Card */}
-            <section className="lg:col-span-6 bg-primary text-on-primary dark:bg-slate-900 border border-primary/20 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-md relative overflow-hidden text-white">
-              
-              <div className="z-10 w-full">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="bg-secondary text-on-secondary px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wider inline-block">Recipe Search</span>
-                  {extraFoods.length > 0 && (
-                    <button 
-                      onClick={handleClearExtraFoods}
-                      className="text-white/80 hover:text-white text-xs underline font-bold"
-                    >
-                      Clear Logs
-                    </button>
-                  )}
-                </div>
-                <h3 className="font-bold text-xl mb-1 text-white dark:text-secondary">Log Extra Food & Recipes</h3>
-                <p className="text-xs text-white/90 dark:text-slate-300 mb-4">
-                  Search recipe nutrition details (e.g. "Chicken 500g", "2 rotis", "1 cup oatmeal") to add them to your target.
-                </p>
-
-                <form onSubmit={handleSearchFoodSubmit} className="flex gap-2 mb-4">
-                  <input 
-                    type="text" 
-                    value={foodQuery}
-                    onChange={(e) => setFoodQuery(e.target.value)}
-                    placeholder="Type food item (e.g. Chicken 500g)..."
-                    className="flex-grow p-2.5 rounded-xl border-none outline-none text-slate-800 bg-white text-xs shadow-inner"
-                    required
-                  />
-                  <button 
-                    type="submit" 
-                    disabled={foodLoading}
-                    className="bg-secondary text-white font-bold px-4 py-2.5 rounded-xl text-xs hover:bg-opacity-95 transition-all shadow"
-                  >
-                    {foodLoading ? 'Analyzing...' : 'Search'}
-                  </button>
-                </form>
-
-                {/* Search result preview card with Add option */}
-                {searchResult && (
-                  <div className="bg-white/15 dark:bg-slate-800/60 border border-white/20 p-4 rounded-2xl text-xs mb-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="font-extrabold text-white text-sm dark:text-secondary">{searchResult.foodName}</span>
-                        <span className="text-[10px] text-white/80 ml-1.5 font-bold">({searchResult.quantity})</span>
-                        <p className="text-[10px] text-white/70 mt-0.5">{searchResult.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-extrabold text-secondary">{searchResult.calories} kcal</span>
-                        <p className="text-[9px] text-white/80 font-bold">{searchResult.protein}g P • {searchResult.carbs}g C • {searchResult.fats}g F</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 mt-3 pt-3.5 border-t border-white/10">
-                      <button 
-                        onClick={handleAddToDiet}
-                        className="flex-1 bg-secondary text-white font-bold py-2 rounded-xl text-center hover:bg-opacity-95 transition-all shadow flex items-center justify-center gap-1"
-                      >
-                        ➕ Add to Diet
-                      </button>
-                      <button 
-                        onClick={() => setSearchResult(null)}
-                        className="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold py-2 px-4 rounded-xl text-center transition-all"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Logged extra foods container */}
-                <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
-                  {extraFoods.map((food, idx) => (
-                    <div key={idx} className="bg-white/10 dark:bg-slate-800/40 p-2.5 rounded-xl text-xs flex justify-between items-center border border-white/5">
-                      <div>
-                        <span className="font-bold text-white dark:text-secondary">{food.foodName}</span> ({food.quantity})
-                        <p className="text-[10px] opacity-80 mt-0.5">{food.description}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0 ml-4 font-bold text-secondary-container dark:text-emerald-400">
-                        <span>{food.calories} kcal</span>
-                        <p className="text-[9px] opacity-90">{food.protein}g P • {food.carbs}g C • {food.fats}g F</p>
-                      </div>
-                    </div>
-                  ))}
-                  {extraFoods.length === 0 && (
-                    <div className="text-center py-6 text-xs text-white/60 dark:text-slate-400 italic">
-                      No extra foods added to diet today. Try searching above!
-                    </div>
-                  )}
-                </div>
-
-              </div>
-
-            </section>
-            
           </div>
 
         </div>

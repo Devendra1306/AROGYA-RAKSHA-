@@ -2,15 +2,19 @@
   {
     "_id": "i4jc546nx",
     "createdAt": "2026-06-04T06:20:35.146Z",
-    "updatedAt": "2026-06-04T06:22:28.019Z",
+    "updatedAt": "2026-06-08T11:22:37.803Z",
     "firstName": "Devendra",
     "lastName": "Sagar",
     "email": "devendrasagar0988@gmail.com",
     "mobile": "+919505215187",
-    "passwordHash": "$2b$10$RQdEigrm0ehhAz96.llzUOQpqR1I.Cumfxrj6o7gOeAR9wWklk9E.",
+    "passwordHash": "$2b$10$qVBRX.ZEZgrhyCPiIZlxFeKXDgX4QfgZBtAFptRJTFzGHzgHyeFSe",
     "role": "User",
     "emailVerified": true,
-    "profileCompleted": true
+    "profileCompleted": true,
+    "googleId": "109501534403166921632",
+    "profilePicture": "https://lh3.googleusercontent.com/a/ACg8ocLW5WJnoPFpczxKvbdDFS9XSs4hazR4K0NZq3KDo6Z3Zmoq1Q=s96-c",
+    "resetPasswordToken": null,
+    "resetPasswordExpires": null
   },
   {
     "_id": "f65lku47e",
@@ -37,5 +41,37 @@
     "role": "User",
     "emailVerified": true,
     "profileCompleted": true
+  },
+  {
+    "_id": "haseibhlg",
+    "createdAt": "2026-06-08T11:07:59.733Z",
+    "updatedAt": "2026-06-08T11:07:59.733Z",
+    "firstName": "Google",
+    "lastName": "User",
+    "email": "devendra.google@gmail.com",
+    "mobile": "N/A",
+    "passwordHash": "oauth_managed",
+    "googleId": "simulated_google_id_devendra.google@gmail.com",
+    "authProvider": "google",
+    "profilePicture": "",
+    "role": "User",
+    "emailVerified": true,
+    "profileCompleted": false
+  },
+  {
+    "_id": "j81nfkt9j",
+    "createdAt": "2026-06-08T14:18:22.148Z",
+    "updatedAt": "2026-06-08T14:18:22.148Z",
+    "firstName": "Devendra",
+    "lastName": "Official",
+    "email": "devendraofficial097@gmail.com",
+    "mobile": "N/A",
+    "passwordHash": "oauth_managed",
+    "googleId": "110180617460225739754",
+    "authProvider": "google",
+    "profilePicture": "https://lh3.googleusercontent.com/a/ACg8ocI1dvHn5xTrrEt0_ambmx6se2XbdbF-98oAconPcmQC5E8t_g=s96-c",
+    "role": "User",
+    "emailVerified": true,
+    "profileCompleted": false
   }
 ]

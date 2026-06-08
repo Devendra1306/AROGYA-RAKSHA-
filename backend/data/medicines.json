@@ -541,5 +541,80 @@
       "Known hypersensitivity to active ingredients."
     ],
     "storageInfo": "Store in a cool, dry place away from direct sunlight. Manufactured by Dollar General Corporation."
+  },
+  {
+    "_id": "fda_cache_1e6ba7b2-299c-67cc-e063-6294a90a589d",
+    "createdAt": "2026-06-08T12:34:22.630Z",
+    "updatedAt": "2026-06-08T12:34:22.630Z",
+    "medicineName": "Diclofenac Sodium",
+    "genericName": "DICLOFENAC SODIUM",
+    "brandNames": [
+      "Diclofenac Sodium Topical Gel"
+    ],
+    "category": "Analgesic",
+    "uses": [
+      "Relieves arthritis pain in hands, wrists, elbows, feet, ankles, and knees",
+      "Temporary pain relief for arthritis",
+      "May take up to 7 days to work"
+    ],
+    "dosage": "Use 4 times a day, up to 21 days, with 2.25 inches (2 grams) for upper body areas and 4.5 inches (4 grams) for lower body areas",
+    "sideEffects": [
+      "Allergic reactions, such as hives and facial swelling",
+      "Stomach bleeding and ulcers",
+      "Liver damage"
+    ],
+    "precautions": [
+      "External use only, avoid eyes, nose, and mouth",
+      "Do not use on more than 2 body areas at the same time",
+      "Do not use with external heat or bandages"
+    ],
+    "interactions": [
+      "Avoid using with other pain relievers or NSAIDs",
+      "Consult pharmacist or doctor for active interactions",
+      "Avoid using with diuretics and blood thinners"
+    ],
+    "contraindications": [
+      "History of stomach problems, high blood pressure, or heart disease",
+      "Liver cirrhosis, kidney disease, or asthma",
+      "Under age 18 years, or pregnant/breastfeeding"
+    ],
+    "storageInfo": "Store at 20-25°C (68-77°F), keep from freezing Manufactured by NuCare Pharmaceuticals,Inc.."
+  },
+  {
+    "_id": "mock_1780922164411",
+    "createdAt": "2026-06-08T12:36:04.412Z",
+    "updatedAt": "2026-06-08T12:36:04.412Z",
+    "medicineName": "Paracetamol",
+    "genericName": "Acetaminophen",
+    "brandNames": [
+      "Tylenol",
+      "Panadol"
+    ],
+    "category": "Analgesic and Antipyretic",
+    "uses": [
+      "Relieves pain and reduces fever in adults and children over 3 months of age.",
+      "Relieves headache, toothache, backache, and other minor aches and pains."
+    ],
+    "dosage": "Adults and children over 12 years: 500-1000 mg every 4-6 hours as needed. Maximum 4000 mg in 24 hours. Children 6-11 years: 240-320 mg every 4-6 hours as needed. Maximum 1200 mg in 24 hours. Children 3-5 years: 160-240 mg every 4-6 hours as needed. Maximum 640 mg in 24 hours.",
+    "sideEffects": [
+      "Nausea and vomiting",
+      "Abdominal pain",
+      "Diarrhea",
+      "Headache",
+      "Dizziness"
+    ],
+    "precautions": [
+      "Use with caution in patients with liver disease or kidney disease.",
+      "Avoid use in patients with a history of alcoholism or liver damage."
+    ],
+    "interactions": [
+      "May interact with warfarin, phenobarbital, and other anticonvulsants.",
+      "May increase the risk of bleeding when used with anticoagulants."
+    ],
+    "contraindications": [
+      "Hypersensitivity to acetaminophen or any component of the product.",
+      "Severe liver disease or liver failure."
+    ],
+    "storageInfo": "Store at room temperature (15-30°C or 59-86°F). Keep out of reach of children."
   }
 ]

@@ -2,7 +2,7 @@
   {
     "_id": "qvzzywcsy",
     "createdAt": "2026-06-04T10:54:19.344Z",
-    "updatedAt": "2026-06-04T10:54:19.344Z",
+    "updatedAt": "2026-06-08T12:41:15.879Z",
     "userId": "i4jc546nx",
     "goal": "Healthy Lifestyle",
     "currentWeight": 90,
@@ -89,6 +89,17 @@
         "item": "Paneer / Tofu",
         "quantity": "500g",
         "category": "Protein"
+      }
+    ],
+    "extraFoods": [
+      {
+        "foodName": "Chicken 300g",
+        "quantity": "300g",
+        "calories": 495,
+        "protein": 90,
+        "carbs": 0,
+        "fats": 24,
+        "description": "Chicken is an excellent source of lean protein, essential for muscle growth and repair."
       }
     ]
   },

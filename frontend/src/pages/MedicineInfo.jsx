@@ -19,7 +19,7 @@ const renderCompareMarkdown = (text) => {
     return line + '<br />';
   }).join('\n');
   
-  return <div dangerouslySetInnerHTML={{ __html: escaped }} className="space-y-1 text-label-md" />;
+  return <div dangerouslySetInnerHTML={{ __html: escaped }} className="space-y-1 text-xs leading-relaxed" />;
 };
 
 export default function MedicineInfo() {
@@ -27,6 +27,17 @@ export default function MedicineInfo() {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedMed, setSelectedMed] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
+  const [savedMeds, setSavedMeds] = useState([]);
+
+  // Accordion open states for medicine details
+  const [expandedSections, setExpandedSections] = useState({
+    uses: true,
+    dosage: false,
+    sideEffects: false,
+    precautions: false,
+    interactions: false
+  });
 
   // Compare Tool state
   const [med1, setMed1] = useState('');
@@ -38,7 +49,14 @@ export default function MedicineInfo() {
   const [chatAnswer, setChatAnswer] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
 
+  useEffect(() => {
+    // Load recent searches & saved medicines
+    const searches = JSON.parse(localStorage.getItem('recent_med_searches') || '[]');
+    setRecentSearches(searches);
 
+    const saved = JSON.parse(localStorage.getItem('saved_medicines') || '[]');
+    setSavedMeds(saved);
+  }, []);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -47,7 +65,7 @@ export default function MedicineInfo() {
       } else {
         setSuggestions([]);
       }
-    }, 400); // 400ms debounce delay
+    }, 400);
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
@@ -61,14 +79,30 @@ export default function MedicineInfo() {
     }
   };
 
-  const handleSelectMed = async (id) => {
+  const saveToRecent = (medName) => {
+    let updated = [medName, ...recentSearches.filter(s => s !== medName)];
+    updated = updated.slice(0, 5); // limit to 5
+    setRecentSearches(updated);
+    localStorage.setItem('recent_med_searches', JSON.stringify(updated));
+  };
+
+  const handleSelectMed = async (id, name) => {
     setLoading(true);
     setSearchQuery('');
     setSuggestions([]);
     setComparison(null);
+    saveToRecent(name);
     try {
       const res = await api.get(`/medicine/${id}`);
       setSelectedMed(res.data);
+      // Reset expanded sections
+      setExpandedSections({
+        uses: true,
+        dosage: false,
+        sideEffects: false,
+        precautions: false,
+        interactions: false
+      });
     } catch (err) {
       console.error(err);
     } finally {
@@ -81,9 +115,17 @@ export default function MedicineInfo() {
     setSearchQuery('');
     setSuggestions([]);
     setComparison(null);
+    saveToRecent(name);
     try {
       const res = await api.get(`/medicine/rag-lookup?q=${encodeURIComponent(name)}`);
       setSelectedMed(res.data);
+      setExpandedSections({
+        uses: true,
+        dosage: false,
+        sideEffects: false,
+        precautions: false,
+        interactions: false
+      });
     } catch (err) {
       console.error(err);
       alert('RAG Medicine search failed. Please verify that the name matches a valid drug.');
@@ -125,152 +167,275 @@ export default function MedicineInfo() {
     }
   };
 
+  const toggleSaveMedicine = () => {
+    if (!selectedMed) return;
+    const isBookmarked = savedMeds.some(m => m.medicineName === selectedMed.medicineName);
+    let updated;
+    if (isBookmarked) {
+      updated = savedMeds.filter(m => m.medicineName !== selectedMed.medicineName);
+    } else {
+      updated = [...savedMeds, {
+        medicineName: selectedMed.medicineName,
+        genericName: selectedMed.genericName,
+        category: selectedMed.category
+      }];
+    }
+    setSavedMeds(updated);
+    localStorage.setItem('saved_medicines', JSON.stringify(updated));
+  };
 
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem('recent_med_searches');
+  };
+
+  const isBookmarked = selectedMed && savedMeds.some(m => m.medicineName === selectedMed.medicineName);
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   return (
-    <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
+    <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors animate-fade-in">
       
-      {/* Header */}
-      <header className="mb-stack-md">
-        <h1 className="text-3xl font-bold text-primary dark:text-secondary">💊 Medicine Info</h1>
-        <p className="text-on-surface-variant dark:text-slate-300">Trusted search portal for medication details, dosage guidance, and warnings.</p>
+      {/* Page Header */}
+      <header className="mb-6">
+        <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
+          💊 Medicines
+        </h1>
+        <p className="text-xs text-slate-400 mt-0.5">Explore dosage guidelines, side effects, and drug safety reviews.</p>
       </header>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+      {/* Primary Layout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Column - Search & details */}
-        <div className="lg:col-span-8 space-y-gutter">
+        {/* Left Side: Search Bar and Detailed Lookups */}
+        <div className="lg:col-span-8 space-y-5">
           
-          {/* Autocomplete Search Bar */}
+          {/* Autocomplete Search Bar Container */}
           <div className="relative">
             <input 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-4 rounded-2xl border border-outline-variant bg-white dark:bg-slate-800 shadow-md outline-none text-label-md focus:border-primary"
-              placeholder="Search medicines by name or generic category (e.g. Paracetamol)..."
+              className="w-full p-4 pl-11 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-md outline-none text-xs focus:border-primary transition-all"
+              placeholder="Search medicines (e.g. Paracetamol, Cetirizine)..."
             />
+            <span className="absolute left-4 top-4 text-base text-slate-400 select-none">🔍</span>
+            
+            {/* Search autocomplete suggestion list */}
             {(suggestions.length > 0 || searchQuery.length > 1) && (
-              <div className="absolute top-16 left-0 w-full bg-white dark:bg-slate-800 border border-outline-variant/35 rounded-2xl shadow-xl z-20 overflow-hidden">
+              <div className="absolute top-14 left-0 w-full bg-white dark:bg-slate-800 border border-slate-150 dark:border-slate-700 rounded-2xl shadow-2xl z-30 overflow-hidden">
                 {suggestions.map((s) => (
-                  <div 
+                  <button 
                     key={s._id}
-                    onClick={() => handleSelectMed(s._id)}
-                    className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-outline-variant/10 text-label-md"
+                    onClick={() => handleSelectMed(s._id, s.medicineName)}
+                    className="w-full text-left p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer border-b border-slate-100 dark:border-slate-800 text-xs flex justify-between items-center"
                   >
-                    <span className="font-bold">{s.medicineName}</span> ({s.genericName}) — <span className="text-outline text-xs">{s.category}</span>
-                  </div>
+                    <div>
+                      <span className="font-bold text-primary dark:text-secondary">{s.medicineName}</span>
+                      <span className="text-[10px] text-slate-400 ml-1.5 font-medium">({s.genericName})</span>
+                    </div>
+                    <span className="text-[9px] bg-slate-100 dark:bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full font-bold">{s.category}</span>
+                  </button>
                 ))}
-                <div 
+                <button 
                   onClick={() => handleRagLookup(searchQuery)}
-                  className="p-4 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer text-primary dark:text-secondary font-bold text-label-md flex items-center justify-between border-t border-outline-variant/10"
+                  className="w-full text-left p-4 hover:bg-blue-50 dark:hover:bg-slate-700/60 cursor-pointer text-primary dark:text-secondary font-bold text-xs flex items-center justify-between border-t border-slate-100 dark:border-slate-800 bg-blue-50/10"
                 >
-                  <span>🔍 Run AI / RAG query for "{searchQuery}"</span>
-                  <span className="text-[10px] bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary px-2.5 py-1 rounded-full font-bold">Powered by Gemini</span>
-                </div>
+                  <span className="flex items-center gap-1.5">🔬 Run AI/RAG clinical lookup for "{searchQuery}"</span>
+                  <span className="text-[8px] bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded font-extrabold">Gemini RAG</span>
+                </button>
               </div>
             )}
           </div>
 
-          {loading && (
-            <div className="flex justify-center py-24">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          {/* Recent Searches Chips */}
+          {recentSearches.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/50 dark:bg-slate-900/30 rounded-xl">
+              <span className="text-[9px] text-slate-450 uppercase font-extrabold pl-1.5 select-none">Recent:</span>
+              <div className="flex flex-wrap gap-1">
+                {recentSearches.map((term, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleRagLookup(term)}
+                    className="text-[10px] bg-white dark:bg-slate-800 border border-slate-150 dark:border-slate-700 hover:border-primary px-2.5 py-1 rounded-lg font-medium cursor-pointer transition-all active:scale-95"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+              <button 
+                onClick={clearRecentSearches}
+                className="text-[9px] text-red-500 hover:underline pl-2 font-bold"
+              >
+                Clear
+              </button>
             </div>
           )}
 
-          {/* Details Card */}
+          {loading && (
+            <div className="flex flex-col justify-center items-center py-20 gap-2">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Analyzing Drug Guidelines...</p>
+            </div>
+          )}
+
+          {/* High Fidelity Collapsible Medicine Details Panel */}
           {selectedMed && (
-            <div className="glass-card rounded-2xl p-6 bg-white/80 dark:bg-slate-800/80 border border-outline-variant/30 shadow-md space-y-6">
+            <div className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-md space-y-4">
               
-              <div className="flex justify-between items-start border-b border-outline-variant/30 pb-4">
+              {/* Header card details */}
+              <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-700 pb-3">
                 <div>
-                  <h2 className="text-2xl font-bold text-primary dark:text-secondary">{selectedMed.medicineName}</h2>
-                  <p className="text-label-md text-on-surface-variant dark:text-slate-300 mt-1">Generic Name: {selectedMed.genericName}</p>
+                  <h2 className="text-xl font-extrabold text-primary dark:text-secondary">{selectedMed.medicineName}</h2>
+                  <p className="text-xs text-slate-400 font-semibold mt-0.5">Active Generic ingredient: {selectedMed.genericName}</p>
                 </div>
-                <div className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-4 py-1.5 rounded-full font-bold text-label-sm">
-                  {selectedMed.category}
+                <div className="flex flex-col items-end gap-1.5">
+                  <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-3 py-1 rounded-full font-bold text-[10px]">
+                    {selectedMed.category}
+                  </span>
+                  
+                  {/* Bookmark star */}
+                  <button 
+                    onClick={toggleSaveMedicine}
+                    className={`text-xs px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 border transition-all ${isBookmarked ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-250 dark:border-slate-700 text-slate-450 hover:bg-slate-50'}`}
+                  >
+                    <span>{isBookmarked ? '★ Saved' : '☆ Save'}</span>
+                  </button>
                 </div>
               </div>
 
-              {/* Uses */}
-              <div>
-                <h4 className="font-bold text-lg mb-2">Uses & Indications</h4>
-                <ul className="list-disc list-inside space-y-1 text-label-md">
-                  {selectedMed.uses?.map((use, idx) => (
-                    <li key={idx}>{use}</li>
-                  ))}
-                </ul>
+              {/* Collapsible Section 1: Uses */}
+              <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                <button 
+                  onClick={() => toggleSection('uses')}
+                  className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
+                >
+                  <span>📋 Uses & Indications</span>
+                  <span>{expandedSections.uses ? '▼' : '▶'}</span>
+                </button>
+                {expandedSections.uses && (
+                  <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                    <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-650 dark:text-slate-200">
+                      {selectedMed.uses?.map((use, idx) => (
+                        <li key={idx} className="leading-relaxed">{use}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              {/* Dosage */}
+              {/* Collapsible Section 2: Dosage */}
               {selectedMed.dosage && (
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Dosage Considerations</h4>
-                  <p className="text-label-md leading-relaxed">{selectedMed.dosage}</p>
+                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <button 
+                    onClick={() => toggleSection('dosage')}
+                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
+                  >
+                    <span>🥄 Dosage Considerations</span>
+                    <span>{expandedSections.dosage ? '▼' : '▶'}</span>
+                  </button>
+                  {expandedSections.dosage && (
+                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                      <p className="text-xs leading-relaxed text-slate-650 dark:text-slate-200">{selectedMed.dosage}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Side effects */}
+              {/* Collapsible Section 3: Side Effects */}
               {selectedMed.sideEffects && (
-                <div>
-                  <h4 className="font-bold text-lg mb-2 text-red-600">Possible Side Effects</h4>
-                  <ul className="list-disc list-inside space-y-1 text-label-md">
-                    {selectedMed.sideEffects.map((side, idx) => (
-                      <li key={idx}>{side}</li>
-                    ))}
-                  </ul>
+                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <button 
+                    onClick={() => toggleSection('sideEffects')}
+                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left text-red-600 dark:text-red-400"
+                  >
+                    <span>⚠️ Possible Side Effects</span>
+                    <span>{expandedSections.sideEffects ? '▼' : '▶'}</span>
+                  </button>
+                  {expandedSections.sideEffects && (
+                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                      <ul className="list-disc list-inside space-y-1.5 text-xs text-red-700 dark:text-red-300">
+                        {selectedMed.sideEffects.map((side, idx) => (
+                          <li key={idx} className="leading-relaxed">{side}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Warning Banner */}
-              <div className="bg-red-50 dark:bg-red-950/20 border border-red-100/50 p-4 rounded-xl text-red-800 dark:text-red-300 text-label-md">
-                <h4 className="font-bold mb-1">⚠️ Clinical Precautions & Warnings:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {selectedMed.precautions?.map((prec, idx) => (
-                    <li key={idx}>{prec}</li>
-                  ))}
-                </ul>
-              </div>
+              {/* Collapsible Section 4: Precautions & Warnings */}
+              {selectedMed.precautions && (
+                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <button 
+                    onClick={() => toggleSection('precautions')}
+                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left text-amber-600"
+                  >
+                    <span>🛑 Precautions & Warnings</span>
+                    <span>{expandedSections.precautions ? '▼' : '▶'}</span>
+                  </button>
+                  {expandedSections.precautions && (
+                    <div className="p-4 bg-amber-50/40 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700">
+                      <ul className="list-disc list-inside space-y-1.5 text-xs text-amber-900 dark:text-amber-300">
+                        {selectedMed.precautions?.map((prec, idx) => (
+                          <li key={idx} className="leading-relaxed">{prec}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {/* Interactions */}
+              {/* Collapsible Section 5: Drug Interactions */}
               {selectedMed.interactions && (
-                <div>
-                  <h4 className="font-bold text-lg mb-2">Drug Interactions</h4>
-                  <ul className="list-disc list-inside space-y-1 text-label-md">
-                    {selectedMed.interactions.map((inter, idx) => (
-                      <li key={idx}>{inter}</li>
-                    ))}
-                  </ul>
+                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                  <button 
+                    onClick={() => toggleSection('interactions')}
+                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
+                  >
+                    <span>🔗 Drug Interactions</span>
+                    <span>{expandedSections.interactions ? '▼' : '▶'}</span>
+                  </button>
+                  {expandedSections.interactions && (
+                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
+                      <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-650 dark:text-slate-200">
+                        {selectedMed.interactions.map((inter, idx) => (
+                          <li key={idx} className="leading-relaxed">{inter}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Storage & Manufacturer Info */}
+              {/* Storage details panel */}
               {selectedMed.storageInfo && (
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-outline-variant/20 text-label-md">
-                  <h4 className="font-bold mb-1">📦 Storage & Manufacturer Details:</h4>
-                  <p className="italic text-on-surface-variant dark:text-slate-300">{selectedMed.storageInfo}</p>
+                <div className="bg-slate-50 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700 text-xs">
+                  <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block mb-1">📦 Storage & Manufacturer Details</span>
+                  <p className="italic text-slate-600 dark:text-slate-350">{selectedMed.storageInfo}</p>
                 </div>
               )}
 
-              {/* AI query box specific for this medicine */}
-              <div className="border-t border-outline-variant/30 pt-6">
-                <h3 className="font-bold text-lg mb-3">Ask Medicine Assistant</h3>
+              {/* Ask AI Medicine Helper */}
+              <div className="border-t border-slate-100 dark:border-slate-700 pt-5 mt-2">
+                <h3 className="font-extrabold text-sm mb-2">Ask Medicine Helper</h3>
                 <form onSubmit={handleAskSubmit} className="flex gap-2">
                   <input 
                     type="text" 
                     value={chatQuestion}
                     onChange={(e) => setChatQuestion(e.target.value)}
-                    className="flex-grow p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900 outline-none text-label-md" 
-                    placeholder={`Ask a question (e.g. Can I take ${selectedMed.medicineName} on an empty stomach?)...`}
+                    className="flex-grow p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 outline-none text-xs" 
+                    placeholder={`e.g. Can I take ${selectedMed.medicineName} with milk?`}
                   />
-                  <button type="submit" className="bg-slate-700 hover:bg-slate-800 text-white font-bold px-6 rounded-xl text-label-sm">
-                    Ask AI
+                  <button type="submit" className="bg-primary hover:opacity-95 text-white font-bold px-4 rounded-xl text-xs">
+                    Ask
                   </button>
                 </form>
-                {chatLoading && <p className="text-outline italic text-label-sm mt-2">Checking guidelines...</p>}
+                {chatLoading && <p className="text-slate-400 italic text-[10px] mt-1.5 animate-pulse">Consulting clinical manuals...</p>}
                 {chatAnswer && (
-                  <div className="mt-3 p-4 bg-slate-100 dark:bg-slate-900 rounded-xl text-label-md border leading-relaxed">
+                  <div className="mt-3 p-3.5 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs border border-slate-100 dark:border-slate-800 leading-relaxed font-medium">
                     {chatAnswer}
                   </div>
                 )}
@@ -279,46 +444,46 @@ export default function MedicineInfo() {
             </div>
           )}
 
-          {/* Comparison Page display */}
+          {/* Comparison Page Results Display */}
           {comparison && (
-            <div className="glass-card rounded-2xl p-6 bg-white/80 dark:bg-slate-800/80 border border-outline-variant/30 shadow-md space-y-6 animate-fadeIn">
-              <h3 className="font-bold text-xl mb-6 text-center text-primary dark:text-secondary">Medicine Comparison</h3>
-              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-outline-variant/20">
+            <div className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-850 border border-slate-150 dark:border-slate-800 shadow-md space-y-5">
+              <h3 className="font-extrabold text-base mb-2 text-center text-primary dark:text-secondary">Medicine Comparison</h3>
+              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
                 {/* Medicine 1 */}
-                <div className="border-r border-outline-variant/30 pr-4 space-y-4">
-                  <h4 className="text-2xl font-extrabold text-primary dark:text-secondary">{comparison.medicine1.medicineName}</h4>
-                  <p className="text-label-md text-outline">Generic: {comparison.medicine1.genericName}</p>
+                <div className="border-r border-slate-150 dark:border-slate-800 pr-3 space-y-3">
+                  <h4 className="text-base font-extrabold text-primary dark:text-secondary">{comparison.medicine1.medicineName}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Generic: {comparison.medicine1.genericName}</p>
                   <div>
-                    <span className="font-bold text-label-sm uppercase text-outline">Uses:</span>
-                    <p className="text-label-md mt-1">{comparison.medicine1.uses?.join(', ')}</p>
+                    <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wide">Uses:</span>
+                    <p className="text-xs mt-0.5 leading-snug">{comparison.medicine1.uses?.join(', ')}</p>
                   </div>
                   <div>
-                    <span className="font-bold text-label-sm uppercase text-outline">Side Effects:</span>
-                    <p className="text-label-md mt-1">{comparison.medicine1.sideEffects?.join(', ')}</p>
+                    <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wide text-red-500">Side Effects:</span>
+                    <p className="text-xs mt-0.5 leading-snug text-red-650 dark:text-red-400">{comparison.medicine1.sideEffects?.join(', ')}</p>
                   </div>
                 </div>
                 {/* Medicine 2 */}
-                <div className="pl-4 space-y-4">
-                  <h4 className="text-2xl font-extrabold text-primary dark:text-secondary">{comparison.medicine2.medicineName}</h4>
-                  <p className="text-label-md text-outline">Generic: {comparison.medicine2.genericName}</p>
+                <div className="pl-3 space-y-3">
+                  <h4 className="text-base font-extrabold text-primary dark:text-secondary">{comparison.medicine2.medicineName}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Generic: {comparison.medicine2.genericName}</p>
                   <div>
-                    <span className="font-bold text-label-sm uppercase text-outline">Uses:</span>
-                    <p className="text-label-md mt-1">{comparison.medicine2.uses?.join(', ')}</p>
+                    <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wide">Uses:</span>
+                    <p className="text-xs mt-0.5 leading-snug">{comparison.medicine2.uses?.join(', ')}</p>
                   </div>
                   <div>
-                    <span className="font-bold text-label-sm uppercase text-outline">Side Effects:</span>
-                    <p className="text-label-md mt-1">{comparison.medicine2.sideEffects?.join(', ')}</p>
+                    <span className="font-bold text-[10px] text-slate-400 uppercase tracking-wide text-red-500">Side Effects:</span>
+                    <p className="text-xs mt-0.5 leading-snug text-red-650 dark:text-red-400">{comparison.medicine2.sideEffects?.join(', ')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Potency & Clinical Analysis */}
               {comparison.comparisonText && (
-                <div className="space-y-3">
-                  <h4 className="font-bold text-lg text-primary dark:text-secondary flex items-center gap-2">
+                <div className="space-y-2">
+                  <h4 className="font-bold text-xs text-primary dark:text-secondary">
                     ⚖️ Potency & Clinical Suitability Analysis
                   </h4>
-                  <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-outline-variant/30 rounded-xl leading-relaxed">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-xl leading-relaxed">
                     {renderCompareMarkdown(comparison.comparisonText)}
                   </div>
                 </div>
@@ -328,38 +493,36 @@ export default function MedicineInfo() {
 
         </div>
 
-        {/* Right Column - Scanner & Compare tools */}
-        <div className="lg:col-span-4 space-y-gutter">
+        {/* Right Side: Scanner & Compare Tools */}
+        <div className="lg:col-span-4 space-y-5">
           
-
-
-          {/* Comparison Tool Form */}
-          <div className="glass-card rounded-2xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-md">
-            <h3 className="text-lg font-bold mb-4">Compare Medications</h3>
-            <form onSubmit={handleCompareSubmit} className="space-y-4">
+          {/* Comparison Tool Form Card */}
+          <div className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-md">
+            <h3 className="text-sm font-extrabold mb-3">Compare Medications</h3>
+            <form onSubmit={handleCompareSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-label-sm text-outline mb-1">First Medicine Name</label>
+                <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">First Medicine Name</label>
                 <input 
                   type="text" 
                   value={med1}
                   onChange={(e) => setMed1(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900"
+                  className="w-full p-3 rounded-xl border border-slate-250 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
                   placeholder="Paracetamol"
                   required
                 />
               </div>
               <div>
-                <label className="block text-label-sm text-outline mb-1">Second Medicine Name</label>
+                <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Second Medicine Name</label>
                 <input 
                   type="text" 
                   value={med2}
                   onChange={(e) => setMed2(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900"
+                  className="w-full p-3 rounded-xl border border-slate-250 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
                   placeholder="Cetirizine"
                   required
                 />
               </div>
-              <button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-all">
+              <button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-sm">
                 Run Comparison
               </button>
             </form>

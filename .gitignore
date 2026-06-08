@@ -34,3 +34,4 @@ hospitalmd.txt
 backend/data/*.json
 
 .vercel
+CLIENT.json

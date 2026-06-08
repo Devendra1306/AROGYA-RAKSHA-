@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -20,6 +20,8 @@ import MedicineInfo from './pages/MedicineInfo';
 import HomeRemedies from './pages/HomeRemedies';
 import AdminDashboard from './pages/AdminDashboard';
 import HealthcareDirectory from './pages/HealthcareDirectory';
+import ProfilePage from './pages/ProfilePage';
+import { startNotificationScheduler } from './utils/notificationManager';
 
 
 
@@ -41,7 +43,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   return children;
 };
 
-// Global Layout containing navbar, sidebar, and floating SOS button
+// Global Layout containing navbar, bottom navigation, drawer, and floating SOS speed dial
 const GlobalLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
@@ -49,22 +51,42 @@ const GlobalLayout = ({ children }) => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [sosOpen, setSosOpen] = React.useState(false);
+
+  // Reminders status
+  const [waterActive, setWaterActive] = React.useState(() => localStorage.getItem('remind_water') === 'true');
+  const [dietActive, setDietActive] = React.useState(() => localStorage.getItem('remind_diet') === 'true');
+  const [healthActive, setHealthActive] = React.useState(() => localStorage.getItem('remind_health') === 'true');
 
   const activeClass = (path) => 
     location.pathname === path 
-      ? "text-primary dark:text-secondary font-semibold border-b-2 border-primary dark:border-secondary pb-1" 
+      ? "text-primary dark:text-secondary font-bold border-b-2 border-primary dark:border-secondary pb-1" 
       : "text-on-surface-variant hover:text-primary dark:text-slate-300 dark:hover:text-secondary transition-colors";
+
+  const activeMobileClass = (path) => 
+    location.pathname === path 
+      ? "text-primary dark:text-secondary font-extrabold flex flex-col items-center justify-center text-xs" 
+      : "text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-secondary flex flex-col items-center justify-center text-xs transition-colors";
+
+  const toggleReminder = (type, currentVal, setter) => {
+    const newVal = !currentVal;
+    setter(newVal);
+    localStorage.setItem(type, newVal.toString());
+    if (newVal && 'Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-surface dark:bg-slate-900 text-on-surface dark:text-slate-100 flex flex-col">
-      {/* Sticky Navbar */}
-      <nav className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-800 shadow-sm transition-colors">
-        <div className="flex items-center gap-2.5 cursor-pointer animate-fade-in" onClick={() => navigate('/')}>
-          <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-10 w-10 rounded-full object-cover ring-2 ring-primary dark:ring-secondary ring-offset-1 ring-offset-white dark:ring-offset-slate-900 shadow-md transition-all duration-300 hover:scale-105" />
-          <span className="text-xl font-bold text-primary dark:text-secondary tracking-wide">Arogya Raksha</span>
+      {/* Sticky Top Navbar */}
+      <nav className="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-margin-mobile lg:px-margin-desktop h-16 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-800 shadow-sm transition-colors">
+        <div className="flex items-center gap-2 cursor-pointer animate-fade-in" onClick={() => navigate('/')}>
+          <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-9 w-9 rounded-full object-cover ring-2 ring-primary dark:ring-secondary" />
+          <span className="text-lg font-extrabold text-primary dark:text-secondary tracking-wide">Arogya Raksha</span>
         </div>
 
-        {/* Center Nav Link */}
+        {/* Center Nav Links - hidden on mobile/tablet */}
         <div className="hidden lg:flex items-center gap-gutter">
           <Link className={activeClass('/')} to="/">Home</Link>
           <Link className={activeClass('/emergency')} to="/emergency">Emergency</Link>
@@ -77,228 +99,237 @@ const GlobalLayout = ({ children }) => {
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-stack-sm">
+        <div className="flex items-center gap-2">
           <button 
             onClick={toggleDarkMode}
-            className="p-2 text-on-surface-variant dark:text-slate-300 hover:bg-surface-container dark:hover:bg-slate-800 rounded-full transition-all"
+            className="p-2 text-on-surface-variant dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
             title="Toggle Dark Mode"
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
 
           {user ? (
-            <div className="relative flex items-center">
-              {/* User Selector Row */}
+            <div className="relative hidden lg:flex items-center">
               <div 
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-850 transition-all select-none"
               >
                 {user.profilePicture ? (
-                  <img 
-                    src={user.profilePicture} 
-                    alt={user.firstName} 
-                    className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 dark:ring-secondary/20"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = ''; // Clear image to fallback to initials
-                    }}
-                  />
+                  <img src={user.profilePicture} alt={user.firstName} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/25" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs ring-2 ring-primary/10 dark:ring-secondary/10">
+                  <div className="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs">
                     {(user.firstName ? user.firstName[0].toUpperCase() : '') + (user.lastName ? user.lastName[0].toUpperCase() : '')}
                   </div>
                 )}
-                <span className="hidden md:inline text-label-md font-semibold text-on-surface dark:text-slate-200 ml-1">
-                  {user.firstName}
-                </span>
-                <span className="text-[10px] text-on-surface-variant dark:text-slate-400 ml-0.5">▼</span>
+                <span className="text-label-md font-semibold ml-1">{user.firstName}</span>
+                <span className="text-[9px] text-slate-400 ml-0.5">▼</span>
               </div>
 
-              {/* Dropdown Menu */}
               {dropdownOpen && (
                 <>
-                  {/* Overlay to close on click outside */}
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setDropdownOpen(false)}
-                  ></div>
-                  
-                  {/* Dropdown Card */}
-                  <div className="absolute right-0 top-11 z-50 w-64 glass-card rounded-2xl p-4 bg-white dark:bg-slate-800 border border-outline-variant/30 dark:border-slate-700 shadow-2xl animate-scale-up text-slate-800 dark:text-slate-200">
-                    <div className="pb-3 border-b border-outline-variant/30 dark:border-slate-700/65 mb-2">
-                      <h4 className="font-bold text-sm text-on-surface dark:text-slate-100">
-                        {user.firstName} {user.lastName}
-                      </h4>
-                      <p className="text-xs text-on-surface-variant dark:text-slate-400 truncate mt-0.5">
-                        {user.email}
-                      </p>
+                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)}></div>
+                  <div className="absolute right-0 top-11 z-50 w-60 glass-card rounded-2xl p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl animate-scale-up">
+                    <div className="pb-2.5 border-b border-slate-100 dark:border-slate-700 mb-2">
+                      <h4 className="font-bold text-sm">{user.firstName} {user.lastName}</h4>
+                      <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
                     </div>
-                    
                     <div className="space-y-1">
-                      <button 
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          navigate('/dashboard');
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium hover:bg-primary/5 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2"
-                      >
-                        📊 Dashboard
-                      </button>
-                      
-                      <button 
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          navigate('/profile-setup');
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium hover:bg-primary/5 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2"
-                      >
-                        👤 Profile Setup
-                      </button>
-                      
-                      {user.role === 'Admin' && (
-                        <button 
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            navigate('/admin');
-                          }}
-                          className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold text-secondary hover:bg-secondary/5 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2"
-                        >
-                          🛡️ Admin Dashboard
-                        </button>
-                      )}
-                      
-                      <button 
-                        onClick={() => {
-                          setDropdownOpen(false);
-                          logout();
-                          navigate('/');
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 dark:hover:text-red-400 transition-all flex items-center gap-2 mt-2 pt-2 border-t border-outline-variant/20 dark:border-slate-700/40"
-                      >
-                        🚪 Logout
-                      </button>
+                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">📊 Dashboard</button>
+                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">👤 View Profile</button>
+                      <button onClick={() => { setDropdownOpen(false); navigate('/profile-setup'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">⚙️ Profile Setup</button>
+                      <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 mt-2 pt-2">🚪 Logout</button>
                     </div>
                   </div>
                 </>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-stack-sm">
-              <Link to="/login" className="text-on-surface-variant dark:text-slate-300 hover:text-primary transition-colors text-label-md px-2">Login</Link>
-              <Link to="/signup" className="bg-primary text-white hover:opacity-90 dark:bg-secondary dark:text-slate-900 px-4 py-2 rounded-xl text-label-md font-bold transition-all shadow-sm">Sign Up</Link>
+            <div className="hidden lg:flex items-center gap-2">
+              <Link to="/login" className="text-on-surface-variant hover:text-primary transition-colors text-label-md px-2">Login</Link>
+              <Link to="/signup" className="bg-primary text-white hover:opacity-90 px-4 py-2 rounded-xl text-label-md font-bold transition-all shadow-sm">Sign Up</Link>
             </div>
           )}
 
-          {/* Hamburger Icon */}
+          {/* Mobile hamburger menu button */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-2xl p-1 text-on-surface-variant dark:text-slate-300"
+            className="p-2 text-2xl text-on-surface-variant dark:text-slate-300"
           >
             ☰
           </button>
         </div>
       </nav>
 
-      {/* Mobile Hamburger Drawer */}
+      {/* Slide-out Mobile Hamburger Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed top-16 left-0 w-full z-40 bg-surface dark:bg-slate-900 border-b border-outline-variant/30 shadow-lg flex flex-col p-6 gap-4 lg:hidden animate-fade-in">
-          <Link className="font-medium text-lg" to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-          <Link className="font-medium text-lg text-red-500" to="/emergency" onClick={() => setMobileMenuOpen(false)}>🚨 Emergency Help</Link>
-          <Link className="font-medium text-lg" to="/medical-assistant" onClick={() => setMobileMenuOpen(false)}>🩺 Medical Assistant</Link>
-          <Link className="font-medium text-lg" to="/health-assessment" onClick={() => setMobileMenuOpen(false)}>📊 Health Assessment</Link>
-          <Link className="font-medium text-lg" to="/diet-planner" onClick={() => setMobileMenuOpen(false)}>🥗 Diet Planner</Link>
-          <Link className="font-medium text-lg" to="/medicine-info" onClick={() => setMobileMenuOpen(false)}>💊 Medicine Info</Link>
-          <Link className="font-medium text-lg" to="/home-remedies" onClick={() => setMobileMenuOpen(false)}>🏠 Home Remedies</Link>
-          {user && (
-            <>
-              <hr className="border-outline-variant/30" />
-              <Link className="font-medium text-lg text-primary" to="/dashboard" onClick={() => setMobileMenuOpen(false)}>My Dashboard</Link>
-              {user.role === 'Admin' && (
-                <Link className="font-medium text-lg text-secondary" to="/admin" onClick={() => setMobileMenuOpen(false)}>Admin Panel</Link>
-              )}
-            </>
-          )}
-        </div>
+        <>
+          {/* Backdrop Blur Overlay */}
+          <div 
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm transition-all" 
+            onClick={() => setMobileMenuOpen(false)}
+          ></div>
+
+          {/* Drawer Panel */}
+          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 shadow-2xl p-6 flex flex-col justify-between animate-slide-in text-slate-800 dark:text-slate-100">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
+                <span className="font-extrabold text-base text-primary dark:text-secondary">App Options</span>
+                <button onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold">✕</button>
+              </div>
+
+              {/* Reminder Settings Toggles */}
+              <div className="space-y-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Reminders</span>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold">💧 Water Tracker</span>
+                  <input 
+                    type="checkbox" 
+                    checked={waterActive} 
+                    onChange={() => toggleReminder('remind_water', waterActive, setWaterActive)}
+                    className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
+                  />
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold">🥗 Diet Log Checks</span>
+                  <input 
+                    type="checkbox" 
+                    checked={dietActive} 
+                    onChange={() => toggleReminder('remind_diet', dietActive, setDietActive)}
+                    className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
+                  />
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold">📊 Weekly Vitals</span>
+                  <input 
+                    type="checkbox" 
+                    checked={healthActive} 
+                    onChange={() => toggleReminder('remind_health', healthActive, setHealthActive)}
+                    className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* App links */}
+              <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Information</span>
+                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>ℹ️ About Arogya</Link>
+                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>🔒 Privacy Policy</Link>
+                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>📄 Terms of Service</Link>
+              </div>
+            </div>
+
+            {/* Logout/Account */}
+            {user ? (
+              <button 
+                onClick={() => { setMobileMenuOpen(false); logout(); navigate('/'); }}
+                className="w-full bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold py-3 rounded-2xl hover:bg-red-100 transition-all text-xs"
+              >
+                🚪 Log Out
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="border border-slate-250 py-3 rounded-2xl font-bold text-center text-xs">Login</Link>
+                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="bg-primary text-white py-3 rounded-2xl font-bold text-center text-xs">Sign Up</Link>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
-      {/* Main Content Body */}
-      <main className="flex-grow pt-16">
+      {/* Main Content Body - padding bottom added to clear mobile nav */}
+      <main className="flex-grow pt-16 pb-20 lg:pb-0">
         {children}
       </main>
 
-      {/* Global Footer */}
-      <footer className="bg-slate-900 text-slate-300 py-12 px-margin-desktop border-t border-slate-800 transition-colors">
-        <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row justify-between items-center gap-gutter text-center md:text-left">
-          
-          {/* Logo & Tagline */}
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <img 
-              src="/logo.jpg" 
-              alt="Arogya Raksha Logo" 
-              className="h-16 w-16 rounded-full object-cover ring-2 ring-primary dark:ring-secondary ring-offset-2 ring-offset-slate-900 shadow-xl transition-all duration-300 hover:scale-105 hover:rotate-3" 
-            />
+      {/* Global Footer - hidden on mobile screens to feel like an App */}
+      <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-margin-desktop border-t border-slate-800 transition-colors">
+        <div className="max-w-[1280px] mx-auto flex justify-between items-center gap-gutter">
+          <div className="flex items-center gap-4">
+            <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-14 w-14 rounded-full object-cover" />
             <div>
-              <h3 className="text-white font-bold text-xl tracking-wide">Arogya Raksha</h3>
-              <p className="text-xs opacity-75 mt-1">PROTECTING YOUR HEALTH. SECURING YOUR FUTURE.</p>
+              <h3 className="text-white font-bold text-lg">Arogya Raksha</h3>
+              <p className="text-[10px] opacity-75 mt-0.5">PROTECTING YOUR HEALTH. SECURING YOUR FUTURE.</p>
             </div>
           </div>
-
-          {/* Social Links / neat cool hover adaptive icons */}
-          <div className="flex flex-col items-center md:items-end gap-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Contact Developer</span>
-            <div className="flex gap-4">
-              
-              {/* Email */}
-              <a 
-                href="mailto:devendrasagar0988@gmail.com" 
-                className="w-9 h-9 rounded-full bg-slate-800 text-slate-400 hover:bg-red-600 hover:text-white flex items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5"
-                title="Email Developer"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </a>
-
-              {/* LinkedIn */}
-              <a 
-                href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="w-9 h-9 rounded-full bg-slate-800 text-slate-400 hover:bg-[#0077b5] hover:text-white flex items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5"
-                title="LinkedIn Profile"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                </svg>
-              </a>
-
-              {/* GitHub */}
-              <a 
-                href="https://github.com/Devendra1306" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="w-9 h-9 rounded-full bg-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-all duration-300 shadow-md hover:-translate-y-0.5"
-                title="GitHub Repository"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-              </a>
-
-            </div>
+          <div className="flex gap-4">
+            <a href="mailto:devendrasagar0988@gmail.com" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-red-600"><span className="text-white text-sm">✉️</span></a>
+            <a href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-[#0077b5]"><span className="text-white text-sm">in</span></a>
+            <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-900"><span className="text-white text-sm">git</span></a>
           </div>
-
         </div>
       </footer>
 
-      {/* Floating SOS Emergency Help Button on every page */}
-      <button 
-        onClick={() => navigate('/emergency')}
-        className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl hover:scale-105 active:scale-95 transition-all animate-bounce"
-        title="SOS EMERGENCY HELP"
-      >
-        🚨
-      </button>
+      {/* Sticky Bottom Navigation Bar for Mobile and Tablet viewports */}
+      <div className="fixed bottom-0 left-0 w-full z-45 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-xl h-16 grid grid-cols-5 items-center px-2 lg:hidden transition-colors">
+        <Link className={activeMobileClass(user ? '/dashboard' : '/')} to={user ? '/dashboard' : '/'}>
+          <span className="text-xl mb-0.5">🏠</span>
+          <span>Home</span>
+        </Link>
+        
+        <Link className={activeMobileClass('/emergency')} to="/emergency">
+          <span className="text-xl mb-0.5">🚨</span>
+          <span>SOS</span>
+        </Link>
+        
+        <Link className={activeMobileClass('/medical-assistant')} to="/medical-assistant">
+          <span className="text-xl mb-0.5">🤖</span>
+          <span>Assistant</span>
+        </Link>
+        
+        <Link className={activeMobileClass('/medicine-info')} to="/medicine-info">
+          <span className="text-xl mb-0.5">💊</span>
+          <span>Medicines</span>
+        </Link>
+        
+        <Link className={activeMobileClass(user ? '/profile' : '/login')} to={user ? '/profile' : '/login'}>
+          <span className="text-xl mb-0.5">👤</span>
+          <span>Profile</span>
+        </Link>
+      </div>
+
+      {/* Floating SOS Emergency Speed Dial Widget */}
+      <div className="fixed bottom-20 right-6 z-40 lg:bottom-8 lg:right-8 flex flex-col items-center">
+        {sosOpen && (
+          <div className="flex flex-col gap-2.5 mb-3 animate-scale-up">
+            {/* Call 112 */}
+            <a 
+              href="tel:112"
+              className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all"
+              title="Call Emergency 112"
+            >
+              📞
+            </a>
+
+            {/* Find Nearby Help */}
+            <button 
+              onClick={() => { setSosOpen(false); navigate('/nearby'); }}
+              className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all"
+              title="Find Nearby Healthcare"
+            >
+              🏥
+            </button>
+
+            {/* First-Aid Instructions */}
+            <button 
+              onClick={() => { setSosOpen(false); navigate('/emergency'); }}
+              className="w-12 h-12 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center text-lg hover:scale-105 active:scale-95 transition-all"
+              title="Emergency First-Aid Guides"
+            >
+              🚨
+            </button>
+          </div>
+        )}
+        <button 
+          onClick={() => setSosOpen(!sosOpen)}
+          className={`w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-105 active:scale-95 transition-all select-none ${!sosOpen ? 'animate-pulse' : 'bg-slate-700 hover:bg-slate-800'}`}
+          title="SOS DIAL"
+        >
+          {sosOpen ? '✕' : '🚨'}
+        </button>
+      </div>
     </div>
   );
 };
@@ -306,6 +337,11 @@ const GlobalLayout = ({ children }) => {
 export default function App() {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '173236579751-t2aa0hq2d83eo0939a37qbed74351np5.apps.googleusercontent.com';
   
+  // Initialize PWA scheduler alert reminders
+  useEffect(() => {
+    startNotificationScheduler();
+  }, []);
+
   // Detailed Google OAuth Initialization Logs
   console.log("=== Google OAuth Audit Logs ===");
   console.log("Active Client ID:", clientId);
@@ -329,6 +365,7 @@ export default function App() {
                 {/* Protected Routes */}
                 <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                 <Route path="/emergency" element={<EmergencyHelp />} />
                 <Route path="/medical-assistant" element={<MedicalAssistant />} />
                 <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
