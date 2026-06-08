@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const googleLogin = async (googleData) => {
-    const res = await api.post('/auth/google-login', googleData);
+    const res = await api.post('/auth/google', googleData);
     setToken(res.data.token);
     return res.data;
   };

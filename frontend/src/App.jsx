@@ -299,7 +299,7 @@ const GlobalLayout = ({ children }) => {
 };
 
 export default function App() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com';
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '129111784182-17n7932kgfubstil8c8bf86g6s88otga.apps.googleusercontent.com';
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <ThemeProvider>
