@@ -32,3 +32,5 @@ hospitalmd.txt
 
 # Local Database
 backend/data/*.json
+
+.vercel
