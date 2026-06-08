@@ -50,6 +50,12 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  const googleLogin = async (googleData) => {
+    const res = await api.post('/auth/google-login', googleData);
+    setToken(res.data.token);
+    return res.data;
+  };
+
   const register = async (firstName, lastName, email, mobile, password) => {
     const res = await api.post('/auth/register', { firstName, lastName, email, mobile, password });
     setToken(res.data.token);
@@ -79,6 +85,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     profile,
     login,
+    googleLogin,
     register,
     logout,
     updateProfile,

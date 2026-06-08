@@ -5,6 +5,7 @@ const { protect } = require('../middleware/auth');
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
+router.post('/google-login', authController.googleLogin);
 
 router.get('/profile', protect, authController.getProfile);
 router.post('/profile/setup', protect, authController.setupProfile);

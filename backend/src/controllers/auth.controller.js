@@ -163,6 +163,63 @@ const authController = {
     }
   },
 
+  googleLogin: async (req, res) => {
+    const { token: googleToken, email, firstName, lastName } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Google email is required.' });
+    }
+
+    try {
+      const isMock = global.isMockDB;
+      let user;
+
+      if (isMock) {
+        user = localDb.findOne('users', { email });
+      } else {
+        user = await User.findOne({ email });
+      }
+
+      // If user does not exist, register them automatically
+      if (!user) {
+        const userData = {
+          firstName: firstName || 'GoogleUser',
+          lastName: lastName || 'Account',
+          email,
+          mobile: 'N/A',
+          passwordHash: 'oauth_managed', // flag that it's Google Auth
+          role: 'User',
+          emailVerified: true,
+          profileCompleted: false
+        };
+
+        if (isMock) {
+          user = localDb.create('users', userData);
+        } else {
+          user = await User.create(userData);
+        }
+      }
+
+      // Generate app session token
+      const sessionToken = generateToken(user);
+      res.json({
+        message: 'Google Login successful.',
+        token: sessionToken,
+        user: {
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          mobile: user.mobile,
+          role: user.role,
+          profileCompleted: user.profileCompleted
+        }
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   getProfile: async (req, res) => {
     try {
       const isMock = global.isMockDB;
