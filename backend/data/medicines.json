@@ -1,0 +1,545 @@
+[
+  {
+    "_id": "cj2z3ug01",
+    "createdAt": "2026-06-04T06:13:49.223Z",
+    "updatedAt": "2026-06-04T06:13:49.223Z",
+    "medicineName": "Paracetamol",
+    "genericName": "Acetaminophen",
+    "brandNames": [
+      "Crocin",
+      "Dolo 650",
+      "Calpol",
+      "Tylenol"
+    ],
+    "category": "Pain Relief / Antipyretic",
+    "uses": [
+      "Mild to moderate pain relief",
+      "Fever reduction",
+      "Headache",
+      "Muscle ache"
+    ],
+    "dosage": "Adults: 500mg to 650mg every 4-6 hours as needed. Maximum daily limit: 4000mg (4g) to prevent liver damage.",
+    "sideEffects": [
+      "Nausea",
+      "Allergic skin rash",
+      "Liver toxicity (in case of overdose)"
+    ],
+    "precautions": [
+      "Avoid taking with alcohol.",
+      "Check other medications to prevent duplicate dosing.",
+      "Consult doctor if pain persists for >5 days."
+    ],
+    "interactions": [
+      "Alcohol (increases liver damage risk)",
+      "Warfarin (blood thinner interaction)"
+    ],
+    "contraindications": [
+      "Severe liver impairment",
+      "Known allergy to acetaminophen"
+    ],
+    "storageInfo": "Store below 30°C in a dry place away from direct sunlight."
+  },
+  {
+    "_id": "qjg7u36wc",
+    "createdAt": "2026-06-04T06:13:49.224Z",
+    "updatedAt": "2026-06-04T06:13:49.224Z",
+    "medicineName": "Metformin",
+    "genericName": "Metformin Hydrochloride",
+    "brandNames": [
+      "Glycomet",
+      "Obimet",
+      "Glucophage"
+    ],
+    "category": "Anti-diabetic",
+    "uses": [
+      "Type 2 Diabetes mellitus management",
+      "Improves insulin sensitivity"
+    ],
+    "dosage": "Usually starts with 500mg once or twice daily with meals. Maximum daily limit: 2000mg.",
+    "sideEffects": [
+      "Diarrhea",
+      "Nausea or bloating",
+      "Metallic taste",
+      "Lactic acidosis (very rare but serious)"
+    ],
+    "precautions": [
+      "Take with meals to reduce stomach upset.",
+      "Monitor kidney function regularly.",
+      "Stay hydrated to prevent lactic acidosis."
+    ],
+    "interactions": [
+      "Contrast dyes used in medical scans",
+      "Alcohol",
+      "Diuretics"
+    ],
+    "contraindications": [
+      "Severe kidney failure",
+      "Diabetic ketoacidosis",
+      "Severe liver disease"
+    ],
+    "storageInfo": "Store at room temperature (15°C to 30°C) away from moisture."
+  },
+  {
+    "_id": "wxrh2qcn7",
+    "createdAt": "2026-06-04T06:13:49.225Z",
+    "updatedAt": "2026-06-04T06:13:49.225Z",
+    "medicineName": "Cetirizine",
+    "genericName": "Cetirizine Hydrochloride",
+    "brandNames": [
+      "Okacet",
+      "Alerid",
+      "Zyrtec"
+    ],
+    "category": "Antihistamine / Allergy",
+    "uses": [
+      "Allergic rhinitis",
+      "Sneezing and runny nose",
+      "Hives or skin allergies",
+      "Watery eyes"
+    ],
+    "dosage": "Adults: 10mg once daily, preferably in the evening.",
+    "sideEffects": [
+      "Drowsiness or sleepiness",
+      "Dry mouth",
+      "Fatigue",
+      "Dizziness"
+    ],
+    "precautions": [
+      "Avoid driving or operating heavy machinery if drowsy.",
+      "Avoid combining with alcohol or sedatives."
+    ],
+    "interactions": [
+      "Alcohol",
+      "Central nervous system depressants"
+    ],
+    "contraindications": [
+      "Severe kidney disease",
+      "Known allergy to cetirizine"
+    ],
+    "storageInfo": "Store in a cool, dry place away from heat and moisture."
+  },
+  {
+    "_id": "mock_1780566510855",
+    "createdAt": "2026-06-04T09:48:30.856Z",
+    "updatedAt": "2026-06-04T09:48:30.856Z",
+    "medicineName": "MAHANACGEL",
+    "genericName": "Diclofenac",
+    "brandNames": [
+      "Voltaren Gel",
+      "Flector Patch",
+      "Pen NSAID Gel",
+      "Zorvolex Gel"
+    ],
+    "category": "Non-Steroidal Anti-Inflammatory Drug (NSAID)",
+    "uses": [
+      "Relief of pain associated with osteoarthritis, particularly in joints amenable to topical treatment (e.g., knees, hands)",
+      "Treatment of localized musculoskeletal pain (e.g., sprains, strains, contusions)",
+      "Reduction of inflammation in superficial soft tissue conditions"
+    ],
+    "dosage": "For adults: Apply 2 to 4 grams of gel to the affected joint or area 2 to 4 times daily, depending on the specific product concentration and condition. The amount applied should be measured using the dosing card provided with the product, if applicable. Do not exceed the maximum daily dose specified in the product labeling.",
+    "sideEffects": [
+      "Application site reactions (e.g., rash, pruritus, redness, dermatitis, dry skin, peeling)",
+      "Gastrointestinal upset (e.g., nausea, dyspepsia, abdominal pain) - less common with topical use but can occur due to systemic absorption",
+      "Headache",
+      "Edema",
+      "Photosensitivity (increased sensitivity to sunlight)",
+      "Systemic NSAID effects (e.g., gastrointestinal ulceration, renal dysfunction, cardiovascular events) are rare but possible, especially with prolonged use over large surface areas or in susceptible individuals."
+    ],
+    "precautions": [
+      "Avoid contact with eyes, mucous membranes, and open wounds or damaged skin.",
+      "Do not apply external heat or occlusive dressings to the treated area.",
+      "Protect treated areas from sunlight and artificial UV light.",
+      "Use with caution in patients with a history of gastrointestinal bleeding or ulceration, as systemic absorption can occur.",
+      "Monitor renal and hepatic function in patients with pre-existing impairment, although systemic exposure is generally low.",
+      "Patients with cardiovascular disease or risk factors should use with caution, as NSAIDs can increase the risk of serious cardiovascular thrombotic events.",
+      "Discontinue use if skin rash or systemic reactions develop.",
+      "Not recommended for use in the third trimester of pregnancy due to potential fetal harm (e.g., premature closure of the ductus arteriosus)."
+    ],
+    "interactions": [
+      "Oral NSAIDs: Concomitant use with oral diclofenac or other NSAIDs may increase the risk of systemic side effects.",
+      "Anticoagulants (e.g., warfarin): Increased risk of bleeding, although systemic absorption from topical diclofenac is low.",
+      "Diuretics and ACE inhibitors: NSAIDs may reduce the natriuretic effect of diuretics and the antihypertensive effect of ACE inhibitors.",
+      "Methotrexate: NSAIDs may increase methotrexate plasma concentrations.",
+      "Lithium: NSAIDs may increase lithium plasma concentrations."
+    ],
+    "contraindications": [
+      "Known hypersensitivity to diclofenac, aspirin, or other NSAIDs.",
+      "History of asthma, urticaria, or other allergic-type reactions after taking aspirin or other NSAIDs.",
+      "Application to open wounds, infections, or damaged skin.",
+      "Use during the third trimester of pregnancy."
+    ],
+    "storageInfo": "Store at controlled room temperature (20°C to 25°C, 68°F to 77°F). Protect from freezing. Keep tube tightly closed when not in use. Keep out of reach of children."
+  },
+  {
+    "_id": "fda_cache_008ee85b-5cac-45a6-a857-a828f8125175",
+    "createdAt": "2026-06-04T09:50:00.436Z",
+    "updatedAt": "2026-06-04T09:50:00.436Z",
+    "medicineName": "Low Dose Aspirin",
+    "genericName": "ASPIRIN",
+    "brandNames": [],
+    "category": "NSAID, Analgesic, Antiplatelet Agent",
+    "uses": [
+      "Temporary relief of minor aches and pains.",
+      "Other uses as recommended by your doctor (e.g., for cardiovascular prophylaxis, particularly for 81 mg safety-coated aspirin)."
+    ],
+    "dosage": "Adults and children 12 years and over: Take 4 to 8 tablets (81 mg each) every 4 hours with a full glass of water. Do not exceed 48 tablets in 24 hours unless directed by a doctor. Children under 12 years: Consult a doctor.",
+    "sideEffects": [
+      "Severe allergic reactions (hives, facial swelling, asthma/wheezing, shock)",
+      "Severe stomach bleeding (symptoms include feeling faint, vomiting blood, bloody or black stools, persistent stomach pain)",
+      "Reye's syndrome (changes in behavior with nausea and vomiting in children/teenagers with viral infections)",
+      "Ringing in the ears or loss of hearing"
+    ],
+    "precautions": [
+      "Risk of Reye's Syndrome: Do not use in children or teenagers who have or are recovering from chickenpox or flu-like symptoms.",
+      "Allergy Alert: May cause severe allergic reactions; do not use if allergic to aspirin or other NSAIDs.",
+      "Stomach Bleeding Warning: Increased risk if you are age 60 or older, have a history of stomach ulcers/bleeding, take blood thinners/steroids, take other NSAIDs, or consume 3+ alcoholic drinks daily.",
+      "Consult a doctor before use if you have: stomach problems (e.g., heartburn), high blood pressure, heart disease, liver cirrhosis, kidney disease, asthma, or are taking a diuretic.",
+      "Consult a doctor or pharmacist before use if you are taking prescription drugs for gout, diabetes, or arthritis.",
+      "Stop use and seek medical help if: an allergic reaction occurs, signs of stomach bleeding appear, pain worsens or lasts more than 10 days, redness or swelling is present, ringing in the ears or loss of hearing occurs, or new symptoms develop.",
+      "Pregnancy/Breastfeeding: Ask a health professional before use. Avoid during the last 3 months of pregnancy unless specifically directed by a doctor, as it may cause problems in the unborn child or complications during delivery.",
+      "Keep out of reach of children. In case of overdose, seek medical help immediately."
+    ],
+    "interactions": [
+      "Blood thinning (anticoagulant) drugs (increased risk of stomach bleeding)",
+      "Steroid drugs (increased risk of stomach bleeding)",
+      "Other NSAIDs (e.g., ibuprofen, naproxen) (increased risk of stomach bleeding)",
+      "Diuretics",
+      "Prescription drugs for gout, diabetes, or arthritis"
+    ],
+    "contraindications": [
+      "Allergy to aspirin or any other pain reliever/fever reducer.",
+      "History of allergic reaction to this product or its ingredients.",
+      "Children and teenagers recovering from chickenpox or flu-like symptoms (due to Reye's syndrome risk).",
+      "Last 3 months of pregnancy (unless definitely directed by a doctor)."
+    ],
+    "storageInfo": "Store between 15-30ºC (59-86ºF). Manufactured by P & L Development, LLC."
+  },
+  {
+    "_id": "mock_1780566675833",
+    "createdAt": "2026-06-04T09:51:15.833Z",
+    "updatedAt": "2026-06-04T09:51:15.833Z",
+    "medicineName": "DOLO65",
+    "genericName": "Paracetamol (Acetaminophen)",
+    "brandNames": [
+      "Tylenol",
+      "Panadol",
+      "Calpol"
+    ],
+    "category": "Analgesic, Antipyretic",
+    "uses": [
+      "Relief of mild to moderate pain (e.g., headache, muscle aches, menstrual pain, toothache, backache, osteoarthritis pain)",
+      "Reduction of fever"
+    ],
+    "dosage": "Standard adult dosage for 650mg formulation: 650 mg orally every 4-6 hours as needed. Maximum daily dose should not exceed 4000 mg (4g) in 24 hours. Dosage should be reduced in patients with severe renal impairment.",
+    "sideEffects": [
+      "Nausea",
+      "Stomach upset",
+      "Insomnia (less common)",
+      "Hepatotoxicity (liver damage), especially with overdose or in patients with impaired liver function or chronic alcohol use",
+      "Allergic reactions (e.g., rash, itching, swelling, severe dizziness, trouble breathing)",
+      "Blood dyscrasias (e.g., thrombocytopenia, agranulocytosis) - rare but serious"
+    ],
+    "precautions": [
+      "Use with caution in patients with pre-existing liver disease or impairment, chronic alcohol consumption, or malnutrition, as these increase the risk of hepatotoxicity.",
+      "Do not exceed the recommended dose or duration of treatment, as overdose can lead to severe and potentially fatal liver damage.",
+      "Avoid concurrent use with other paracetamol-containing products to prevent accidental overdose.",
+      "Patients with severe renal impairment may require dose adjustment.",
+      "Caution in patients with G6PD deficiency (rare risk of hemolytic anemia)."
+    ],
+    "interactions": [
+      "Alcohol: Increases the risk of hepatotoxicity.",
+      "Warfarin and other oral anticoagulants: Prolonged high-dose paracetamol may enhance the anticoagulant effect, increasing the risk of bleeding.",
+      "Drugs that induce hepatic enzymes (e.g., phenytoin, carbamazepine, rifampin, isoniazid): May increase the risk of paracetamol-induced hepatotoxicity.",
+      "Cholestyramine: Reduces the absorption of paracetamol if given within 1 hour.",
+      "Metoclopramide, domperidone: May increase the absorption rate of paracetamol.",
+      "Lamotrigine: Paracetamol may reduce serum concentrations of lamotrigine, potentially reducing its therapeutic effect."
+    ],
+    "contraindications": [
+      "Hypersensitivity to paracetamol or any component of the formulation.",
+      "Severe active liver disease."
+    ],
+    "storageInfo": "Store at room temperature (typically 20-25°C or 68-77°F). Keep in a dry place, protected from moisture and direct light. Keep out of reach of children."
+  },
+  {
+    "_id": "fda_cache_ca86ce8b-9c04-47d8-94e3-ae041f251fab",
+    "createdAt": "2026-06-04T09:52:14.814Z",
+    "updatedAt": "2026-06-04T09:52:14.814Z",
+    "medicineName": "Trijardy XR",
+    "genericName": "EMPAGLIFLOZIN, LINAGLIPTIN, METFORMIN HYDROCHLORIDE",
+    "brandNames": [
+      "Trijardy XR"
+    ],
+    "category": "Antidiabetic (SGLT2 inhibitor, DPP-4 inhibitor, Biguanide Combination)",
+    "uses": [
+      "As an adjunct to diet and exercise to improve glycemic control in adults with type 2 diabetes mellitus.",
+      "To reduce the risk of cardiovascular (CV) death in adults with type 2 diabetes mellitus and established CV disease."
+    ],
+    "dosage": "Standard adult dosage is individualized based on the patient's current regimen and renal function. Take orally once daily with a meal in the morning. Swallow tablets whole; do not split, crush, dissolve, or chew. The maximum recommended dosage is 25 mg empagliflozin, 5 mg linagliptin, and 2,000 mg metformin HCl daily. Renal function (eGFR) should be assessed before initiating and periodically during treatment. Initiation is not recommended in patients with an eGFR less than 45 mL/min/1.73 m². Temporarily discontinue before iodinated contrast imaging procedures (if eGFR < 60 mL/min/1.73 m², or with history of liver disease, alcoholism, heart failure, or intra-arterial contrast) or major surgery/prolonged fasting (for at least 3 days prior). If a dose is missed, take it as soon as possible, but do not double the next dose.",
+    "sideEffects": [
+      "Lactic acidosis (serious)",
+      "Diabetic ketoacidosis (serious, including fatal cases)",
+      "Pancreatitis (serious, including fatal cases)",
+      "Volume depletion/Dehydration (serious)",
+      "Genitourinary infections (serious, including urosepsis, pyelonephritis, necrotizing fasciitis of the perineum [Fournier's gangrene], genital mycotic infections)",
+      "Hypoglycemia (especially with insulin or insulin secretagogues)",
+      "Lower limb amputation (serious)",
+      "Hypersensitivity reactions (serious, e.g., anaphylaxis, angioedema, exfoliative skin conditions)",
+      "Vitamin B12 deficiency",
+      "Severe and disabling arthralgia",
+      "Bullous pemphigoid (serious)",
+      "Heart failure",
+      "Upper respiratory tract infection",
+      "Urinary tract infection",
+      "Nasopharyngitis",
+      "Diarrhea",
+      "Constipation",
+      "Headache",
+      "Gastroenteritis",
+      "Increased urination",
+      "Dyslipidemia",
+      "Nausea",
+      "Thirst",
+      "Increased serum creatinine/decreased eGFR",
+      "Increased LDL-C",
+      "Increased hematocrit",
+      "Increased uric acid",
+      "Increased lipase/amylase"
+    ],
+    "precautions": [
+      "Assess renal function (eGFR) before starting and regularly (at least annually, more frequently in elderly or at-risk patients). Contraindicated if eGFR < 30 mL/min/1.73 m². Monitor for signs/symptoms of lactic acidosis, especially in patients with impaired renal/hepatic function, age ≥ 65, excessive alcohol intake, hypoxic states, or during concurrent use of certain drugs.",
+      "Not recommended for type 1 diabetes mellitus due to increased risk of diabetic ketoacidosis (DKA). Monitor for DKA symptoms regardless of blood glucose levels; discontinue if suspected.",
+      "Discontinue immediately if pancreatitis is suspected.",
+      "Assess and correct volume depletion before initiating, especially in elderly, renally impaired, or those on loop diuretics. Monitor for signs/symptoms of volume depletion and hypotension.",
+      "Monitor for signs/symptoms of genitourinary infections. Promptly evaluate and treat suspected necrotizing fasciitis of the perineum (Fournier's gangrene).",
+      "Adjust dosage of insulin or insulin secretagogues when co-administering to reduce the risk of hypoglycemia.",
+      "Counsel patients on preventative foot care and monitor for diabetic foot infections, sores, or ulcers due to increased risk of lower limb amputation.",
+      "Discontinue immediately if serious hypersensitivity reactions (e.g., angioedema) occur. Use with caution in patients with a history of angioedema to other DPP-4 inhibitors.",
+      "Monitor hematologic parameters annually and vitamin B12 levels every 2-3 years due to risk of vitamin B12 deficiency.",
+      "Consider DPP-4 inhibitors as a possible cause for severe joint pain and discontinue if appropriate.",
+      "Advise patients to report development of blisters or erosions, and discontinue if bullous pemphigoid is suspected.",
+      "Consider risks/benefits in patients with risk factors for heart failure and monitor for symptoms.",
+      "Avoid excessive alcohol intake.",
+      "Temporarily withhold before surgery or procedures with prolonged fasting, and during iodinated contrast imaging procedures (based on eGFR and other risk factors).",
+      "Monitoring glycemic control with urine glucose tests or 1,5-anhydroglucitol (1,5-AG) assay is not recommended."
+    ],
+    "interactions": [
+      "Carbonic Anhydrase Inhibitors (e.g., topiramate, zonisamide, acetazolamide): Increased risk of lactic acidosis.",
+      "Drugs that Reduce Metformin Clearance (e.g., ranolazine, vandetanib, dolutegravir, cimetidine): Increased metformin exposure and lactic acidosis risk.",
+      "Alcohol: Potentiates metformin's effect on lactate metabolism, increasing lactic acidosis risk.",
+      "Diuretics: May increase risk of volume depletion/hypotension.",
+      "Insulin or Insulin Secretagogues (e.g., sulfonylureas): Increased risk of hypoglycemia; dosage adjustment may be needed.",
+      "Drugs Affecting Glycemic Control (e.g., corticosteroids, thiazides, estrogens, phenytoin, sympathomimetics, nicotinic acid, isoniazid): May lead to loss of glycemic control; monitor closely.",
+      "Lithium: May decrease serum lithium concentrations; monitor lithium levels.",
+      "Inducers of P-glycoprotein or CYP3A4 Enzymes (e.g., rifampin): Reduced linagliptin efficacy; use of alternative treatments recommended.",
+      "Urine Glucose Tests: SGLT2 inhibitors cause positive urine glucose tests, making them unreliable for glycemic monitoring.",
+      "1,5-Anhydroglucitol (1,5-AG) Assay: Unreliable for glycemic control monitoring."
+    ],
+    "contraindications": [
+      "Known hypersensitivity to empagliflozin, linagliptin, metformin hydrochloride, or any excipients in Trijardy XR.",
+      "Patients with an estimated glomerular filtration rate (eGFR) less than 30 mL/min/1.73 m².",
+      "Type 1 diabetes mellitus (due to increased risk of diabetic ketoacidosis).",
+      "Patients with clinical or laboratory evidence of hepatic disease (due to metformin component and increased risk of lactic acidosis)."
+    ],
+    "storageInfo": "Store at 20°C to 25°C (68°F to 77°F); excursions permitted to 15°C to 30°C (59°F to 86°F). Protect from exposure to high humidity. Manufactured by Boehringer Ingelheim Pharmaceuticals, Inc.."
+  },
+  {
+    "_id": "fda_cache_a2a30785-599c-4436-a3cc-b4db011b7a87",
+    "createdAt": "2026-06-04T09:54:32.244Z",
+    "updatedAt": "2026-06-04T09:54:32.244Z",
+    "medicineName": "AMOXICILLIN AND CLAVULANATE POTASSIUM",
+    "genericName": "AMOXICILLIN AND CLAVULANATE POTASSIUM",
+    "brandNames": [],
+    "category": "Antibiotic",
+    "uses": [
+      "Treat lower respiratory tract and sinus infections.",
+      "Treat acute bacterial otitis media.",
+      "Treat skin and urinary tract infections."
+    ],
+    "dosage": "Adults typically take 500-875mg every 12 hours or 250-500mg every 8 hours, at the start of a meal.",
+    "sideEffects": [
+      "Diarrhea/loose stools, nausea, vomiting.",
+      "Skin rashes, urticaria, vaginitis.",
+      "Abdominal discomfort, flatulence, headache."
+    ],
+    "precautions": [
+      "Serious hypersensitivity reactions, discontinue if occurs.",
+      "Monitor for severe cutaneous adverse reactions (SCAR).",
+      "Monitor hepatic function; evaluate for C. difficile diarrhea."
+    ],
+    "interactions": [
+      "Not recommended with probenecid.",
+      "May increase effect of oral anticoagulants.",
+      "May reduce efficacy of oral contraceptives."
+    ],
+    "contraindications": [
+      "History of penicillin hypersensitivity.",
+      "History of Amoxicillin-Clavulanate hepatic dysfunction.",
+      "Patients with infectious mononucleosis."
+    ],
+    "storageInfo": "Refrigerate reconstituted oral suspension and discard after 10 days. Manufactured by A-S Medication Solutions."
+  },
+  {
+    "_id": "fda_cache_a2a30785-599c-4436-a3cc-b4db011b7a87",
+    "createdAt": "2026-06-04T09:56:40.183Z",
+    "updatedAt": "2026-06-04T09:56:40.183Z",
+    "medicineName": "AMOXICILLIN AND CLAVULANATE POTASSIUM",
+    "genericName": "AMOXICILLIN AND CLAVULANATE POTASSIUM",
+    "brandNames": [],
+    "category": "Antibiotic (Penicillin-class and Beta-lactamase inhibitor)",
+    "uses": [
+      "Treats lower respiratory tract infections",
+      "Effective for acute bacterial otitis media and sinusitis",
+      "Manages skin, skin structure, and urinary tract infections"
+    ],
+    "dosage": "Adults (>40kg) take 500-875mg every 12 hours or 250-500mg every 8 hours, with meals.",
+    "sideEffects": [
+      "Diarrhea, nausea, vomiting, and skin rashes",
+      "Serious hypersensitivity reactions (anaphylaxis)",
+      "Hepatic dysfunction and Clostridioides difficile diarrhea"
+    ],
+    "precautions": [
+      "Discontinue for severe hypersensitivity or skin reactions (SCAR)",
+      "Avoid in patients with mononucleosis due to rash risk",
+      "Monitor liver function in hepatic impairment; risk of superinfections"
+    ],
+    "interactions": [
+      "Probenecid increases amoxicillin blood levels",
+      "May increase effects of oral anticoagulants (INR)",
+      "Can reduce the efficacy of oral contraceptives"
+    ],
+    "contraindications": [
+      "History of severe allergic reactions to penicillins",
+      "Previous hepatic dysfunction from amoxicillin/clavulanate",
+      "Patients with mononucleosis"
+    ],
+    "storageInfo": "Reconstituted oral suspension must be refrigerated and discarded after 10 days. Manufactured by A-S Medication Solutions."
+  },
+  {
+    "_id": "fda_cache_a2a30785-599c-4436-a3cc-b4db011b7a87",
+    "createdAt": "2026-06-04T10:00:22.242Z",
+    "updatedAt": "2026-06-04T10:00:22.242Z",
+    "medicineName": "AMOXICILLIN AND CLAVULANATE POTASSIUM",
+    "genericName": "Unknown Active Ingredient",
+    "brandNames": [
+      "Amoxicillin"
+    ],
+    "category": "General Therapeutics",
+    "uses": [
+      "General health management"
+    ],
+    "dosage": "Consult physician for exact dosage details.",
+    "sideEffects": [
+      "Possible stomach discomfort",
+      "Nausea"
+    ],
+    "precautions": [
+      "Always consult a physician before starting new medication."
+    ],
+    "interactions": [
+      "Seek medical advice if taking multiple treatments."
+    ],
+    "contraindications": [
+      "Known hypersensitivity to active ingredients."
+    ],
+    "storageInfo": "Store in a cool, dry place away from direct sunlight. Manufactured by A-S Medication Solutions."
+  },
+  {
+    "_id": "mock_1780567413335",
+    "createdAt": "2026-06-04T10:03:33.336Z",
+    "updatedAt": "2026-06-04T10:03:33.336Z",
+    "medicineName": "PARACETMOL",
+    "genericName": "Unknown Active Ingredient",
+    "brandNames": [],
+    "category": "General Therapeutics",
+    "uses": [
+      "General health management"
+    ],
+    "dosage": "Consult physician for exact dosage details.",
+    "sideEffects": [
+      "Possible stomach discomfort",
+      "Nausea"
+    ],
+    "precautions": [
+      "Always consult a physician before starting new medication."
+    ],
+    "interactions": [
+      "Seek medical advice if taking multiple treatments."
+    ],
+    "contraindications": [
+      "Known hypersensitivity to active ingredients."
+    ],
+    "storageInfo": "Store in a cool, dry place away from direct sunlight."
+  },
+  {
+    "_id": "mock_1780567426680",
+    "createdAt": "2026-06-04T10:03:46.681Z",
+    "updatedAt": "2026-06-04T10:03:46.681Z",
+    "medicineName": "DOLO650",
+    "genericName": "Paracetamol (Acetaminophen)",
+    "brandNames": [
+      "DOLO650",
+      "DOLO65"
+    ],
+    "category": "Analgesic, Antipyretic",
+    "uses": [
+      "Relief of mild to moderate pain (e.g., headache, muscle aches, menstrual pain, toothache, backache, osteoarthritis pain)",
+      "Reduction of fever"
+    ],
+    "dosage": "Standard adult dosage for 650mg formulation: 650 mg orally every 4-6 hours as needed. Maximum daily dose should not exceed 4000 mg (4g) in 24 hours. Dosage should be reduced in patients with severe renal impairment.",
+    "sideEffects": [
+      "Nausea",
+      "Stomach upset",
+      "Insomnia (less common)",
+      "Hepatotoxicity (liver damage), especially with overdose or in patients with impaired liver function or chronic alcohol use",
+      "Allergic reactions (e.g., rash, itching, swelling, severe dizziness, trouble breathing)",
+      "Blood dyscrasias (e.g., thrombocytopenia, agranulocytosis) - rare but serious"
+    ],
+    "precautions": [
+      "Use with caution in patients with pre-existing liver disease or impairment, chronic alcohol consumption, or malnutrition, as these increase the risk of hepatotoxicity.",
+      "Do not exceed the recommended dose or duration of treatment, as overdose can lead to severe and potentially fatal liver damage.",
+      "Avoid concurrent use with other paracetamol-containing products to prevent accidental overdose.",
+      "Patients with severe renal impairment may require dose adjustment.",
+      "Caution in patients with G6PD deficiency (rare risk of hemolytic anemia)."
+    ],
+    "interactions": [
+      "Alcohol: Increases the risk of hepatotoxicity.",
+      "Warfarin and other oral anticoagulants: Prolonged high-dose paracetamol may enhance the anticoagulant effect, increasing the risk of bleeding.",
+      "Drugs that induce hepatic enzymes (e.g., phenytoin, carbamazepine, rifampin, isoniazid): May increase the risk of paracetamol-induced hepatotoxicity.",
+      "Cholestyramine: Reduces the absorption of paracetamol if given within 1 hour.",
+      "Metoclopramide, domperidone: May increase the absorption rate of paracetamol.",
+      "Lamotrigine: Paracetamol may reduce serum concentrations of lamotrigine, potentially reducing its therapeutic effect."
+    ],
+    "contraindications": [
+      "Hypersensitivity to paracetamol or any component of the formulation",
+      "Severe hepatic impairment or active liver disease"
+    ],
+    "storageInfo": "Not specified in the provided context."
+  },
+  {
+    "_id": "fda_cache_2ad54994-2810-f17d-e063-6394a90aa977",
+    "createdAt": "2026-06-04T10:04:19.002Z",
+    "updatedAt": "2026-06-04T10:04:19.002Z",
+    "medicineName": "Dollar General",
+    "genericName": "Unknown Active Ingredient",
+    "brandNames": [],
+    "category": "General Therapeutics",
+    "uses": [
+      "General health management"
+    ],
+    "dosage": "Consult physician for exact dosage details.",
+    "sideEffects": [
+      "Possible stomach discomfort",
+      "Nausea"
+    ],
+    "precautions": [
+      "Always consult a physician before starting new medication."
+    ],
+    "interactions": [
+      "Seek medical advice if taking multiple treatments."
+    ],
+    "contraindications": [
+      "Known hypersensitivity to active ingredients."
+    ],
+    "storageInfo": "Store in a cool, dry place away from direct sunlight. Manufactured by Dollar General Corporation."
+  }
+]

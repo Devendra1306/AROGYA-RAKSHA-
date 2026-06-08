@@ -1,0 +1,206 @@
+[
+  {
+    "_id": "qvzzywcsy",
+    "createdAt": "2026-06-04T10:54:19.344Z",
+    "updatedAt": "2026-06-04T10:54:19.344Z",
+    "userId": "i4jc546nx",
+    "goal": "Healthy Lifestyle",
+    "currentWeight": 90,
+    "targetWeight": 90,
+    "dailyCalories": 2661,
+    "protein": 133,
+    "carbs": 366,
+    "fats": 74,
+    "waterGoal": 2,
+    "mealPlan": [
+      {
+        "mealType": "Breakfast",
+        "foodItems": "Oatmeal with sliced banana and skimmed milk",
+        "calories": 350,
+        "protein": 12,
+        "carbs": 55,
+        "fats": 6
+      },
+      {
+        "mealType": "Morning Snack",
+        "foodItems": "A handful of peanuts or a green apple",
+        "calories": 150,
+        "protein": 4,
+        "carbs": 22,
+        "fats": 5
+      },
+      {
+        "mealType": "Lunch",
+        "foodItems": "2 Rotis with dal tadka and cucumber salad",
+        "calories": 500,
+        "protein": 18,
+        "carbs": 75,
+        "fats": 12
+      },
+      {
+        "mealType": "Evening Snack",
+        "foodItems": "Boiled chana salad (chickpeas)",
+        "calories": 180,
+        "protein": 8,
+        "carbs": 28,
+        "fats": 3
+      },
+      {
+        "mealType": "Dinner",
+        "foodItems": "Grilled paneer/tofu with sautéed vegetables",
+        "calories": 420,
+        "protein": 22,
+        "carbs": 18,
+        "fats": 25
+      }
+    ],
+    "groceryList": [
+      {
+        "item": "Oats",
+        "quantity": "500g",
+        "category": "Grains"
+      },
+      {
+        "item": "Bananas",
+        "quantity": "1 Dozen",
+        "category": "Fruits"
+      },
+      {
+        "item": "Skimmed Milk",
+        "quantity": "2 Liters",
+        "category": "Dairy"
+      },
+      {
+        "item": "Peanuts",
+        "quantity": "250g",
+        "category": "Nuts"
+      },
+      {
+        "item": "Wheat Flour",
+        "quantity": "2kg",
+        "category": "Grains"
+      },
+      {
+        "item": "Dal (Lentils)",
+        "quantity": "1kg",
+        "category": "Grains"
+      },
+      {
+        "item": "Paneer / Tofu",
+        "quantity": "500g",
+        "category": "Protein"
+      }
+    ]
+  },
+  {
+    "_id": "0fnmqck6k",
+    "createdAt": "2026-06-04T11:43:27.707Z",
+    "updatedAt": "2026-06-04T11:43:27.707Z",
+    "userId": "slqm0bu19",
+    "goal": "Muscle Gain",
+    "currentWeight": 75,
+    "targetWeight": 75,
+    "dailyCalories": 2949,
+    "protein": 221,
+    "carbs": 332,
+    "fats": 82,
+    "waterGoal": 3.5,
+    "mealPlan": [
+      {
+        "mealType": "Breakfast",
+        "foodItems": "Oatmeal with sliced banana and skimmed milk",
+        "calories": 350,
+        "protein": 12,
+        "carbs": 55,
+        "fats": 6
+      },
+      {
+        "mealType": "Morning Snack",
+        "foodItems": "A handful of peanuts or a green apple",
+        "calories": 150,
+        "protein": 4,
+        "carbs": 22,
+        "fats": 5
+      },
+      {
+        "mealType": "Lunch",
+        "foodItems": "2 Rotis with dal tadka and cucumber salad",
+        "calories": 500,
+        "protein": 18,
+        "carbs": 75,
+        "fats": 12
+      },
+      {
+        "mealType": "Evening Snack",
+        "foodItems": "Boiled chana salad (chickpeas)",
+        "calories": 180,
+        "protein": 8,
+        "carbs": 28,
+        "fats": 3
+      },
+      {
+        "mealType": "Dinner",
+        "foodItems": "Grilled paneer/tofu with sautéed vegetables",
+        "calories": 420,
+        "protein": 22,
+        "carbs": 18,
+        "fats": 25
+      }
+    ],
+    "groceryList": [
+      {
+        "item": "Oats",
+        "quantity": "1.5kg",
+        "category": "Grains",
+        "price": 180
+      },
+      {
+        "item": "Bananas",
+        "quantity": "2 Dozen",
+        "category": "Fruits",
+        "price": 120
+      },
+      {
+        "item": "Skimmed Milk",
+        "quantity": "7 Liters",
+        "category": "Dairy",
+        "price": 420
+      },
+      {
+        "item": "Peanuts",
+        "quantity": "1kg",
+        "category": "Nuts",
+        "price": 200
+      },
+      {
+        "item": "Wheat Flour",
+        "quantity": "5kg",
+        "category": "Grains",
+        "price": 250
+      },
+      {
+        "item": "Dal (Lentils)",
+        "quantity": "2kg",
+        "category": "Grains",
+        "price": 300
+      },
+      {
+        "item": "Paneer / Tofu",
+        "quantity": "1.5kg",
+        "category": "Protein",
+        "price": 450
+      }
+    ],
+    "extraFoods": [
+      {
+        "foodName": "Grilled Chicken",
+        "quantity": "500g",
+        "calories": 650,
+        "protein": 110,
+        "carbs": 0,
+        "fats": 18,
+        "description": "500g of boneless, skinless chicken breast, grilled."
+      }
+    ]
+  }
+]

@@ -1,0 +1,41 @@
+[
+  {
+    "_id": "i4jc546nx",
+    "createdAt": "2026-06-04T06:20:35.146Z",
+    "updatedAt": "2026-06-04T06:22:28.019Z",
+    "firstName": "Devendra",
+    "lastName": "Sagar",
+    "email": "devendrasagar0988@gmail.com",
+    "mobile": "+919505215187",
+    "passwordHash": "$2b$10$RQdEigrm0ehhAz96.llzUOQpqR1I.Cumfxrj6o7gOeAR9wWklk9E.",
+    "role": "User",
+    "emailVerified": true,
+    "profileCompleted": true
+  },
+  {
+    "_id": "f65lku47e",
+    "createdAt": "2026-06-04T11:40:50.189Z",
+    "updatedAt": "2026-06-04T11:40:50.204Z",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test_1780573250056@example.com",
+    "mobile": "+919999999999",
+    "passwordHash": "$2b$10$Vvbi2NKwIQIHuUEHcoMu3u0XwDV/KG9ewzmolpgp2qHf8FzPdWhei",
+    "role": "User",
+    "emailVerified": true,
+    "profileCompleted": true
+  },
+  {
+    "_id": "slqm0bu19",
+    "createdAt": "2026-06-04T11:43:24.040Z",
+    "updatedAt": "2026-06-04T11:43:24.059Z",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test_1780573403893@example.com",
+    "mobile": "+919999999999",
+    "passwordHash": "$2b$10$KfC4G3.vDzQT3Yk1LHqHbuf5Ld0b6XcJDo7E/JPlAtnJKO.WJb7bq",
+    "role": "User",
+    "emailVerified": true,
+    "profileCompleted": true
+  }
+]

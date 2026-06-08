@@ -1,0 +1,42 @@
+[
+  {
+    "_id": "mibw90lab",
+    "createdAt": "2026-06-04T06:27:28.804Z",
+    "updatedAt": "2026-06-04T06:27:28.804Z",
+    "userId": "i4jc546nx",
+    "latitude": 16.858793,
+    "longitude": 81.494511,
+    "emergencyType": "Poisoning",
+    "timestamp": "2026-06-04T06:27:28.803Z"
+  },
+  {
+    "_id": "64pb7d4d9",
+    "createdAt": "2026-06-04T06:27:32.683Z",
+    "updatedAt": "2026-06-04T06:27:32.683Z",
+    "userId": "i4jc546nx",
+    "latitude": 16.858793,
+    "longitude": 81.494511,
+    "emergencyType": "Poisoning",
+    "timestamp": "2026-06-04T06:27:32.683Z"
+  },
+  {
+    "_id": "jnn132r3x",
+    "createdAt": "2026-06-05T05:31:23.323Z",
+    "updatedAt": "2026-06-05T05:31:23.323Z",
+    "userId": "i4jc546nx",
+    "latitude": 16.819011,
+    "longitude": 81.539183,
+    "emergencyType": "SOS General Alert",
+    "timestamp": "2026-06-05T05:31:23.323Z"
+  },
+  {
+    "_id": "6r2oyo04f",
+    "createdAt": "2026-06-05T05:31:34.265Z",
+    "updatedAt": "2026-06-05T05:31:34.265Z",
+    "userId": "i4jc546nx",
+    "latitude": 16.819011,
+    "longitude": 81.539183,
+    "emergencyType": "SOS General Alert",
+    "timestamp": "2026-06-05T05:31:34.265Z"
+  }
+]

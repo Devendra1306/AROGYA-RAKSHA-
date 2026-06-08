@@ -1,0 +1,13 @@
+{
+  "name": "arogya-raksha",
+  "version": "1.0.0",
+  "description": "AI-Powered MERN Stack Healthcare Platform",
+  "scripts": {
+    "backend": "cd backend && node server.js",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
