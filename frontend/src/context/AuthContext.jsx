@@ -10,6 +10,20 @@ export const api = axios.create({
   baseURL: API_URL
 });
 
+// Configure Axios request interceptor to dynamically attach token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [user, setUser] = useState(() => {
@@ -24,12 +38,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
 
-  // Configure auth token interceptor and sync profile
+  // Configure sync profile
   useEffect(() => {
     const initializeAuth = async () => {
       if (token) {
         localStorage.setItem('token', token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setIsAuthenticated(true);
         try {
           const res = await api.get('/auth/profile');
@@ -43,7 +56,6 @@ export const AuthProvider = ({ children }) => {
       } else {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        delete api.defaults.headers.common['Authorization'];
         setUser(null);
         setProfile(null);
         setIsAuthenticated(false);
@@ -61,7 +73,6 @@ export const AuthProvider = ({ children }) => {
     // Save to localStorage immediately
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
-    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     
     // Update state immediately
     setToken(newToken);
@@ -85,12 +96,17 @@ export const AuthProvider = ({ children }) => {
     // Save to localStorage immediately
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
-    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     
     // Update state immediately
     setToken(newToken);
     setUser(newUser);
     setIsAuthenticated(true);
+
+    // Debugging logs as requested
+    console.log("Google Login Response:", res.data);
+    console.log("Token Saved:", localStorage.getItem("token"));
+    console.log("Current User:", localStorage.getItem("user"));
+    console.log("Is Authenticated:", true);
     
     try {
       const profileRes = await api.get('/auth/profile');
