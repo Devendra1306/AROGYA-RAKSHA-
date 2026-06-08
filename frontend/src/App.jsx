@@ -18,9 +18,8 @@ import MedicineInfo from './pages/MedicineInfo';
 import HomeRemedies from './pages/HomeRemedies';
 import AdminDashboard from './pages/AdminDashboard';
 
-// Protected Route wrapper
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-surface dark:bg-slate-900">
@@ -28,7 +27,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
       </div>
     );
   }
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
   if (requireAdmin && user.role !== 'Admin' && user.role !== 'SuperAdmin') {

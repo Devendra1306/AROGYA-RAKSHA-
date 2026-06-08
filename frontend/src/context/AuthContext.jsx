@@ -11,66 +11,134 @@ export const api = axios.create({
 });
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    try {
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
 
-  // Configure auth token interceptor
+  // Configure auth token interceptor and sync profile
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUserProfile();
-    } else {
-      localStorage.removeItem('token');
-      delete api.defaults.headers.common['Authorization'];
-      setUser(null);
-      setProfile(null);
+    const initializeAuth = async () => {
+      if (token) {
+        localStorage.setItem('token', token);
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setIsAuthenticated(true);
+        try {
+          const res = await api.get('/auth/profile');
+          setUser(res.data.user);
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+          setProfile(res.data.profile);
+        } catch (err) {
+          console.error('Failed to fetch user profile:', err.message);
+          logout();
+        }
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete api.defaults.headers.common['Authorization'];
+        setUser(null);
+        setProfile(null);
+        setIsAuthenticated(false);
+      }
       setLoading(false);
-    }
-  }, [token]);
+    };
 
-  const fetchUserProfile = async () => {
-    try {
-      const res = await api.get('/auth/profile');
-      setUser(res.data.user);
-      setProfile(res.data.profile);
-    } catch (err) {
-      console.error('Failed to fetch user profile:', err.message);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
+    initializeAuth();
+  }, [token]);
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
-    setToken(res.data.token);
+    const { token: newToken, user: newUser } = res.data;
+    
+    // Save to localStorage immediately
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    
+    // Update state immediately
+    setToken(newToken);
+    setUser(newUser);
+    setIsAuthenticated(true);
+    
+    try {
+      const profileRes = await api.get('/auth/profile');
+      setProfile(profileRes.data.profile);
+    } catch (e) {
+      console.error('Failed to fetch profile during login:', e.message);
+    }
+    
     return res.data;
   };
 
   const googleLogin = async (googleData) => {
     const res = await api.post('/auth/google', googleData);
-    setToken(res.data.token);
+    const { token: newToken, user: newUser } = res.data;
+    
+    // Save to localStorage immediately
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    
+    // Update state immediately
+    setToken(newToken);
+    setUser(newUser);
+    setIsAuthenticated(true);
+    
+    try {
+      const profileRes = await api.get('/auth/profile');
+      setProfile(profileRes.data.profile);
+    } catch (e) {
+      console.error('Failed to fetch profile during Google login:', e.message);
+    }
+    
     return res.data;
   };
 
   const register = async (firstName, lastName, email, mobile, password) => {
     const res = await api.post('/auth/register', { firstName, lastName, email, mobile, password });
-    setToken(res.data.token);
+    const { token: newToken, user: newUser } = res.data;
+    
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    
+    setToken(newToken);
+    setUser(newUser);
+    setIsAuthenticated(true);
+    
     return res.data;
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
     setToken(null);
+    setUser(null);
+    setProfile(null);
+    setIsAuthenticated(false);
   };
 
   const updateProfile = async (profileData) => {
     const res = await api.post('/auth/profile/setup', profileData);
     setProfile(res.data.profile);
-    // Refresh user state to update profileCompleted tag
-    await fetchUserProfile();
+    if (token) {
+      try {
+        const profileRes = await api.get('/auth/profile');
+        setUser(profileRes.data.user);
+        localStorage.setItem('user', JSON.stringify(profileRes.data.user));
+      } catch (e) {
+        console.error('Failed to refresh profile details:', e.message);
+      }
+    }
     return res.data;
   };
 
@@ -82,6 +150,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
+    isAuthenticated,
     loading,
     profile,
     login,
@@ -90,7 +159,18 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     deleteAccount,
-    refreshProfile: fetchUserProfile
+    refreshProfile: async () => {
+      if (token) {
+        try {
+          const profileRes = await api.get('/auth/profile');
+          setUser(profileRes.data.user);
+          localStorage.setItem('user', JSON.stringify(profileRes.data.user));
+          setProfile(profileRes.data.profile);
+        } catch (e) {
+          console.error('Failed to refresh profile details:', e.message);
+        }
+      }
+    }
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

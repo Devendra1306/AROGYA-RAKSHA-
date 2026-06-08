@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
@@ -13,8 +13,18 @@ export default function SignupPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register, googleLogin } = useAuth();
+  const { register, googleLogin, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (user?.profileCompleted) {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile-setup');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   // Google authentication fallback states
   const [showGoogleChooser, setShowGoogleChooser] = useState(false);
