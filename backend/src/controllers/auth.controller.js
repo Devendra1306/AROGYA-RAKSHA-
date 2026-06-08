@@ -158,7 +158,8 @@ const authController = {
           email: user.email,
           mobile: user.mobile,
           role: user.role,
-          profileCompleted: user.profileCompleted
+          profileCompleted: user.profileCompleted,
+          profilePicture: user.profilePicture
         }
       });
     } catch (err) {
@@ -309,7 +310,8 @@ const authController = {
           email: req.user.email,
           mobile: req.user.mobile,
           role: req.user.role,
-          profileCompleted: req.user.profileCompleted
+          profileCompleted: req.user.profileCompleted,
+          profilePicture: req.user.profilePicture
         },
         profile
       });

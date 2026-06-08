@@ -15,12 +15,13 @@ export default function LandingPage() {
   ];
 
   const services = [
-    { title: 'Emergency Help', desc: 'Immediate first-aid directions & GPS alerts.', icon: '🚨', path: '/emergency' },
+    { title: 'Emergency Help', desc: 'Immediate first-aid instructions and clinical guidelines.', icon: '🚨', path: '/emergency' },
     { title: 'Medical Assistant', desc: 'Clinical symptom checks & disease lookups.', icon: '🩺', path: '/medical-assistant' },
     { title: 'Health Assessment', desc: 'Calibrate your daily score & track vitals.', icon: '📊', path: '/health-assessment' },
     { title: 'Diet Planner', desc: 'Calorie-needs macros rings & grocery list.', icon: '🥗', path: '/diet-planner' },
     { title: 'Medicine Info', desc: 'Verify interactions, dosages, warnings.', icon: '💊', path: '/medicine-info' },
-    { title: 'Home Remedies', desc: 'Kitchen remedies matching for minor concerns.', icon: '🏠', path: '/home-remedies' }
+    { title: 'Home Remedies', desc: 'Kitchen remedies matching for minor concerns.', icon: '🏠', path: '/home-remedies' },
+    { title: 'Nearby Healthcare', desc: 'Search hospitals, clinics, and doctor specializations.', icon: '🏥', path: '/nearby' }
   ];
 
   const faqs = [

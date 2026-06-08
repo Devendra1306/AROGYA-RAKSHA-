@@ -17,6 +17,9 @@ import DietPlanner from './pages/DietPlanner';
 import MedicineInfo from './pages/MedicineInfo';
 import HomeRemedies from './pages/HomeRemedies';
 import AdminDashboard from './pages/AdminDashboard';
+import HealthcareDirectory from './pages/HealthcareDirectory';
+
+
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -68,6 +71,7 @@ const GlobalLayout = ({ children }) => {
           <Link className={activeClass('/diet-planner')} to="/diet-planner">Diet Planner</Link>
           <Link className={activeClass('/medicine-info')} to="/medicine-info">Medicines</Link>
           <Link className={activeClass('/home-remedies')} to="/home-remedies">Remedies</Link>
+          <Link className={activeClass('/nearby')} to="/nearby">Nearby</Link>
         </div>
 
         {/* Right Controls */}
@@ -99,7 +103,7 @@ const GlobalLayout = ({ children }) => {
                   />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs ring-2 ring-primary/10 dark:ring-secondary/10">
-                    {user.firstName[0].toUpperCase()}{user.lastName[0].toUpperCase()}
+                    {(user.firstName ? user.firstName[0].toUpperCase() : '') + (user.lastName ? user.lastName[0].toUpperCase() : '')}
                   </div>
                 )}
                 <span className="hidden md:inline text-label-md font-semibold text-on-surface dark:text-slate-200 ml-1">
@@ -298,7 +302,15 @@ const GlobalLayout = ({ children }) => {
 };
 
 export default function App() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '129111784182-17n7932kgfubstil8c8bf86g6s88otga.apps.googleusercontent.com';
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '173236579751-t2aa0hq2d83eo0939a37qbed74351np5.apps.googleusercontent.com';
+  
+  // Detailed Google OAuth Initialization Logs
+  console.log("=== Google OAuth Audit Logs ===");
+  console.log("Active Client ID:", clientId);
+  console.log("Active Origin:", window.location.origin);
+  console.log("OAuth Provider Initialization: SUCCESS (Wrapped in GoogleOAuthProvider)");
+  console.log("===============================");
+
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <ThemeProvider>
@@ -319,6 +331,7 @@ export default function App() {
                 <Route path="/diet-planner" element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
                 <Route path="/medicine-info" element={<MedicineInfo />} />
                 <Route path="/home-remedies" element={<HomeRemedies />} />
+                <Route path="/nearby" element={<HealthcareDirectory />} />
                 <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
               </Routes>
             </GlobalLayout>

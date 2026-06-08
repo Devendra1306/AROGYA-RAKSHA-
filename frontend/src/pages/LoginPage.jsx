@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function LoginPage() {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '173236579751-t2aa0hq2d83eo0939a37qbed74351np5.apps.googleusercontent.com';
+  const hasRealClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'mock';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, googleLogin, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
@@ -100,14 +104,24 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-label-md font-medium mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-3 pr-10 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none flex items-center justify-center"
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between text-label-sm">
@@ -133,7 +147,7 @@ export default function LoginPage() {
           <div className="flex-grow border-t border-outline-variant/30"></div>
         </div>
 
-        {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+        {hasRealClientId ? (
           <div className="w-full flex justify-center min-h-[44px]">
             <GoogleLogin
               onSuccess={async (credentialResponse) => {
@@ -143,24 +157,29 @@ export default function LoginPage() {
                   const jwtToken = credentialResponse.credential;
                   // Decode token payload
                   const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+                  console.log("Google OAuth flow success! Sending token to backend for verification...", payload);
                   const data = await googleLogin({
                     token: jwtToken,
                     email: payload.email,
                     firstName: payload.given_name,
                     lastName: payload.family_name
                   });
+                  console.log("Google Authentication SUCCESS! Profile details:", data.user);
                   if (data.user.profileCompleted) {
                     navigate('/dashboard');
                   } else {
                     navigate('/profile-setup');
                   }
                 } catch (err) {
-                  setError(err.response?.data?.error || 'Google login failed.');
+                  const errMsg = err.response?.data?.error || err.message || 'Google login failed.';
+                  console.error("Google Authentication FAILED on backend verify:", errMsg);
+                  setError(errMsg);
                 } finally {
                   setLoading(false);
                 }
               }}
               onError={() => {
+                console.error("Google Authentication FAILED: OAuth popup flow cancelled or origin not registered.");
                 setError('Google authentication cancelled or failed.');
               }}
               theme="outline"

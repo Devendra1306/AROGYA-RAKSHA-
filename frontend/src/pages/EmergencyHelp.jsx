@@ -91,8 +91,6 @@ export default function EmergencyHelp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState(null);
-  const [sharing, setSharing] = useState(false);
   const [listening, setListening] = useState(false);
 
   // Contacts circles
@@ -102,14 +100,9 @@ export default function EmergencyHelp() {
   const [newContactRelation, setNewContactRelation] = useState('');
   const [showAddContact, setShowAddContact] = useState(false);
 
-  // Hospitals list
-  const [hospitals, setHospitals] = useState([]);
-
   useEffect(() => {
     fetchCategories();
     fetchContacts();
-    fetchNearbyHospitals();
-    detectLocation();
   }, []);
 
   const fetchCategories = async () => {
@@ -130,34 +123,6 @@ export default function EmergencyHelp() {
       }
     } catch (err) {
       console.error('Failed to fetch emergency contacts:', err.message);
-    }
-  };
-
-  const fetchNearbyHospitals = async () => {
-    try {
-      // Default coordinates (Secunderabad) if location is not detected yet
-      const lat = location?.lat || 17.4399;
-      const lng = location?.lng || 78.4983;
-      const res = await api.get(`/hospitals/nearby?lat=${lat}&lng=${lng}&category=hospitals`);
-      setHospitals(res.data.slice(0, 3));
-    } catch (err) {
-      console.error('Failed to fetch nearby hospitals:', err.message);
-    }
-  };
-
-  const detectLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setLocation(coords);
-          // Re-fetch hospitals using updated coordinates
-          api.get(`/hospitals/nearby?lat=${coords.lat}&lng=${coords.lng}&category=hospitals`)
-            .then(res => setHospitals(res.data.slice(0, 3)))
-            .catch(err => console.warn(err));
-        },
-        (err) => console.warn('Geolocation access denied.')
-      );
     }
   };
 
@@ -188,26 +153,6 @@ export default function EmergencyHelp() {
       console.error('Failed to fetch guide details:', err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleShareLocation = async () => {
-    if (!location) {
-      alert('Unable to detect GPS coordinates. Please enable device location settings.');
-      return;
-    }
-    setSharing(true);
-    try {
-      await api.post('/emergency/share-location', {
-        latitude: location.lat,
-        longitude: location.lng,
-        emergencyType: selectedGuide?.title || searchQuery || 'SOS General Alert'
-      });
-      alert('🚨 SOS Alert with GPS coordinates broadcasted to your emergency circle successfully!');
-    } catch (err) {
-      alert('SOS broadcast failed. Please try dialing emergency contacts directly.');
-    } finally {
-      setSharing(false);
     }
   };
 
@@ -297,9 +242,9 @@ export default function EmergencyHelp() {
         <div className="lg:col-span-8 space-y-gutter">
           
           {/* Quick Action SOS Cards (Mockup Style) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-base">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-base">
             
-            {/* Call 112 */}
+            {/* Call Emergency Services */}
             <a 
               href="tel:112" 
               className="bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex flex-col justify-between p-5 rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer h-36"
@@ -311,42 +256,22 @@ export default function EmergencyHelp() {
                   </svg>
                 </div>
               </div>
-              <span className="text-xl font-bold tracking-wide">Call 112</span>
+              <span className="text-lg font-bold tracking-wide">📞 Call Emergency Services</span>
             </a>
 
-            {/* Find Nearest ER (scrolls to ER list) */}
+            {/* Nearby Healthcare */}
             <button 
-              onClick={() => {
-                document.getElementById('closest-er-facilities')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="bg-gradient-to-br from-primary to-primary-dark text-white flex flex-col justify-between p-5 rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer h-36 text-left"
+              onClick={() => navigate('/nearby')}
+              className="bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white flex flex-col justify-between p-5 rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer h-36 text-left"
             >
               <div className="flex justify-between items-start">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 10.5V20a2 2 0 01-2 2H7a2 2 0 01-2-2v-9.5M12 4v16m-8-8h16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
               </div>
-              <span className="text-xl font-bold tracking-wide">Find Nearest ER</span>
-            </button>
-
-            {/* Share Location */}
-            <button 
-              onClick={handleShareLocation} 
-              disabled={sharing}
-              className="bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white flex flex-col justify-between p-5 rounded-2xl shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer h-36 text-left"
-            >
-              <div className="flex justify-between items-start">
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                {sharing && <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>}
-              </div>
-              <span className="text-xl font-bold tracking-wide">{sharing ? 'Sharing...' : 'Share Location'}</span>
+              <span className="text-lg font-bold tracking-wide">🏥 Nearby Healthcare</span>
             </button>
 
             {/* SOS Circle Toggle */}
@@ -361,7 +286,7 @@ export default function EmergencyHelp() {
                   </svg>
                 </div>
               </div>
-              <span className="text-xl font-bold tracking-wide">SOS Circle</span>
+              <span className="text-lg font-bold tracking-wide">👥 SOS Circle</span>
             </button>
 
           </div>
@@ -581,51 +506,7 @@ export default function EmergencyHelp() {
             </div>
           </div>
 
-          {/* Closest ER Facilities Card */}
-          <div 
-            id="closest-er-facilities"
-            className="glass-card rounded-2xl p-6 bg-white/80 dark:bg-slate-800/80 border border-outline-variant/30 shadow-md scroll-mt-24"
-          >
-            <h3 className="text-lg font-bold mb-4 pb-2 border-b border-outline-variant/20 flex items-center gap-2">
-              <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              </svg>
-              Closest ER Facilities
-            </h3>
-            
-            <div className="space-y-4">
-              {hospitals.length > 0 ? (
-                hospitals.map((h) => (
-                  <div key={h._id} className="pb-3 border-b border-outline-variant/20 last:border-b-0 last:pb-0 space-y-2">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-xs text-slate-800 dark:text-slate-100 flex-1 pr-2">{h.name}</h4>
-                      <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[9px] font-bold">
-                        OPEN
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-outline">{h.address}</p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-[10px] text-secondary font-bold flex items-center gap-1">
-                        ★ {h.rating} • {h.distance} km
-                      </span>
-                      <a 
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(h.name + ' ' + h.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-slate-50 dark:bg-slate-700/60 border border-outline-variant/40 hover:bg-slate-100 dark:hover:bg-slate-600 px-3 py-1 rounded-full text-[9px] font-bold text-slate-600 dark:text-slate-300 transition-colors shadow-sm"
-                      >
-                        Directions
-                      </a>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 text-center border border-dashed border-outline-variant/40 rounded-xl">
-                  <p className="text-on-surface-variant dark:text-slate-400 text-xs italic">Loading ER facilities...</p>
-                </div>
-              )}
-            </div>
-          </div>
+
 
         </div>
 
