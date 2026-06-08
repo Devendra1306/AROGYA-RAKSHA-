@@ -105,7 +105,6 @@ const StructuredResponseCard = ({ text }) => {
 
   return (
     <div className="space-y-3 w-full text-slate-800 dark:text-slate-100 max-w-full">
-      {/* 1. Condition Card */}
       {sections.condition && (
         <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm">
           <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Possible Condition</div>
@@ -113,9 +112,7 @@ const StructuredResponseCard = ({ text }) => {
         </div>
       )}
 
-      {/* Severity and Medicines */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* 2. Severity Card */}
         {sections.severity && (
           <div className={`border rounded-2xl p-3.5 shadow-sm flex flex-col justify-between ${severityColor} ${severityPulse}`}>
             <div>
@@ -130,7 +127,6 @@ const StructuredResponseCard = ({ text }) => {
           </div>
         )}
 
-        {/* 3. Suggested Medicines Card */}
         {medicinesList.length > 0 ? (
           <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm">
             <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Suggested Medicines</div>
@@ -157,7 +153,6 @@ const StructuredResponseCard = ({ text }) => {
         )}
       </div>
 
-      {/* 4. Quick Care Tips Card */}
       {tipsList.length > 0 && (
         <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-2xl p-3.5 shadow-sm">
           <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Quick Care Tips</div>
@@ -172,7 +167,6 @@ const StructuredResponseCard = ({ text }) => {
         </div>
       )}
 
-      {/* 5. Doctor Visit Indicator Alert */}
       {sections.doctor && (
         <div className="bg-blue-50 dark:bg-blue-950/20 border-l-4 border-blue-500 rounded-r-2xl p-3 text-blue-900 dark:text-blue-300 text-xs shadow-sm">
           <div className="font-bold mb-0.5 flex items-center gap-1.5 text-blue-800 dark:text-blue-400">
@@ -182,7 +176,6 @@ const StructuredResponseCard = ({ text }) => {
         </div>
       )}
 
-      {/* 6. Emergency Alert */}
       {sections.emergency && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-2xl p-3.5 text-red-950 dark:text-red-300 text-xs shadow-md">
           <div className="font-extrabold mb-1 flex items-center gap-1.5 text-red-700 dark:text-red-400">
@@ -207,13 +200,22 @@ export default function MedicalAssistant() {
   
   const chatEndRef = useRef(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     fetchConversations();
-    // Default initial greeting message
     setMessages([
       {
         role: 'assistant',
-        content: "Hello! I am your Arogya Raksha AI Medical Assistant. I can analyze your symptoms, explain medications, and suggest care plans.\n\nDescribe how you are feeling or ask a question to get started.",
+        content: "Hello! I am your Arogya Raksha AI Medical Assistant. I can analyze your symptoms, suggest disease checks, explain medications, and provide care guidelines.\n\nDescribe how you are feeling or ask a health-related question to get started.",
         timestamp: new Date()
       }
     ]);
@@ -264,7 +266,6 @@ export default function MedicalAssistant() {
         conversationId: currentConvoId
       });
 
-      // Check for emergency safety override redirect
       if (res.data.isEmergency) {
         alert('🚨 EMERGENCY DETECTED: Redirecting you to the Emergency Help module immediately!');
         navigate('/emergency');
@@ -326,13 +327,12 @@ export default function MedicalAssistant() {
     setMessages([
       {
         role: 'assistant',
-        content: "New consultation started. Describe your symptoms or ask a health question.",
+        content: "New chat started. Ask me any medical or health questions.",
         timestamp: new Date()
       }
     ]);
   };
 
-  // Starter suggestion questions
   const suggestionChips = [
     { text: "🤢 Remedy for stomach acidity", query: "Can you provide some natural home remedies for treating stomach acidity and indigestion?" },
     { text: "🤕 Persistent tension headache", query: "I have a persistent tension headache since morning. What are the common causes and self-care steps?" },
@@ -340,195 +340,283 @@ export default function MedicalAssistant() {
     { text: "🥦 Diet plan for high blood sugar", query: "What kind of daily diet plan and food restrictions are recommended for a pre-diabetic patient?" }
   ];
 
-  return (
-    <div className="w-full flex h-[calc(100vh-144px)] lg:h-[calc(100vh-80px)] bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-hidden relative transition-all">
-      
-      {/* Sidebar: Conversation History (Desktop only, responsive sliding panel on mobile) */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-850 border-r border-slate-200 dark:border-slate-800 shadow-2xl p-4 flex flex-col justify-between transform transition-transform duration-300 ${historyOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0 lg:flex lg:w-64 lg:shadow-none`}>
-        <div className="flex flex-col h-full overflow-hidden">
-          <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-            <span className="font-extrabold text-sm uppercase text-slate-400 tracking-wider">Consultations</span>
-            <button onClick={() => setHistoryOpen(false)} className="lg:hidden text-lg font-bold">✕</button>
-          </div>
-          
-          <button 
-            onClick={startNewChat}
-            className="w-full bg-primary hover:opacity-90 text-white font-bold py-2.5 px-4 rounded-xl mb-4 transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm"
-          >
-            ➕ New Consultation
-          </button>
-          
-          <div className="flex-grow overflow-y-auto space-y-1.5 pr-1">
-            {conversations.length > 0 ? (
-              conversations.map((convo) => (
-                <button 
-                  key={convo._id}
-                  onClick={() => loadConversation(convo._id)}
-                  className={`w-full p-3 rounded-xl cursor-pointer text-left text-xs transition-all truncate block ${currentConvoId === convo._id ? 'bg-primary/10 text-primary font-bold dark:text-secondary dark:bg-secondary/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300'}`}
-                >
-                  💬 {convo.conversationTitle}
-                </button>
-              ))
-            ) : (
-              <p className="text-[11px] text-slate-400 italic text-center mt-6">No previous conversations.</p>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      {/* Backdrop for mobile history panel */}
-      {historyOpen && (
-        <div 
-          onClick={() => setHistoryOpen(false)} 
-          className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm lg:hidden transition-all"
-        />
-      )}
-
-      {/* Main Chat Interface */}
-      <div className="flex-grow flex flex-col h-full overflow-hidden bg-white dark:bg-slate-900 border-l border-slate-100 dark:border-slate-800">
+  if (isMobile) {
+    // Mobile ChatGPT Assistant Layout (following medical_assistant/code.html from mobile.zip)
+    return (
+      <div className="w-full flex h-[calc(100vh-144px)] bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-hidden relative transition-all">
         
-        {/* Chat Header */}
-        <div className="px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-150 dark:border-slate-800 flex justify-between items-center">
-          <div className="flex items-center gap-2.5">
-            <button 
-              onClick={() => setHistoryOpen(true)}
-              className="lg:hidden p-1.5 text-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
-              title="Show history"
-            >
-              💬
-            </button>
-            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary flex items-center justify-center text-base font-bold">
-              🤖
+        {/* Sidebar History Drawer Overlay */}
+        <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-850 border-r border-slate-200 dark:border-slate-800 shadow-2xl p-4 flex flex-col justify-between transform transition-transform duration-300 ${historyOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <span className="font-extrabold text-sm uppercase text-slate-400 tracking-wider">Consultations</span>
+              <button onClick={() => setHistoryOpen(false)} className="text-lg font-bold">✕</button>
             </div>
-            <div>
-              <h3 className="font-extrabold text-sm">Arogya AI Assistant</h3>
-              <p className="text-[9px] text-slate-400 uppercase font-semibold tracking-wider">Clinical Knowledge Engine</p>
+            <button 
+              onClick={startNewChat}
+              className="w-full bg-primary hover:opacity-90 text-white font-bold py-2.5 px-4 rounded-xl mb-4 transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm"
+            >
+              ➕ New Consultation
+            </button>
+            <div className="flex-grow overflow-y-auto space-y-1.5 pr-1">
+              {conversations.length > 0 ? (
+                conversations.map((convo) => (
+                  <button 
+                    key={convo._id}
+                    onClick={() => loadConversation(convo._id)}
+                    className={`w-full p-3 rounded-xl cursor-pointer text-left text-xs transition-all truncate block ${currentConvoId === convo._id ? 'bg-primary/10 text-primary font-bold dark:text-secondary dark:bg-secondary/10' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-650'}`}
+                  >
+                    💬 {convo.conversationTitle}
+                  </button>
+                ))
+              ) : (
+                <p className="text-[10px] text-slate-400 italic text-center mt-6">No previous conversations.</p>
+              )}
             </div>
           </div>
-          <button 
-            onClick={startNewChat}
-            className="lg:hidden text-xs bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary px-3 py-1.5 rounded-xl font-bold hover:opacity-90"
-          >
-            New
-          </button>
-        </div>
+        </aside>
 
-        {/* Message Viewport */}
-        <div className="flex-grow p-4 md:p-6 overflow-y-auto space-y-4 bg-slate-50/50 dark:bg-slate-950/30">
+        {historyOpen && (
+          <div onClick={() => setHistoryOpen(false)} className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm" />
+        )}
+
+        {/* Messaging Board */}
+        <div className="flex-grow flex flex-col h-full overflow-hidden bg-white dark:bg-slate-900">
           
-          {messages.map((msg, idx) => {
-            const isUser = msg.role === 'user';
-            const isStructured = hasStructuredSections(msg.content);
-            return (
-              <div 
-                key={idx}
-                className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`}
+          {/* Mobile Chat Header */}
+          <div className="px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-150 flex justify-between items-center">
+            <div className="flex items-center gap-2.5">
+              <button 
+                onClick={() => setHistoryOpen(true)}
+                className="p-1.5 text-xl text-slate-500 hover:bg-slate-100 rounded-xl"
               >
-                <div 
-                  className={`max-w-[85%] leading-relaxed ${
-                    isUser
-                      ? 'p-3.5 rounded-2xl rounded-tr-none bg-gradient-to-r from-primary to-blue-600 text-white font-medium shadow-md text-sm whitespace-pre-line'
-                      : isStructured
-                        ? 'w-full bg-transparent p-0 border-none shadow-none'
-                        : 'p-3.5 rounded-2xl rounded-tl-none bg-white border border-slate-150/80 dark:border-slate-800 dark:bg-slate-900 text-slate-850 dark:text-slate-100 shadow-sm text-sm whitespace-pre-line'
-                  }`}
-                >
-                  {isUser
-                    ? msg.content
-                    : isStructured
-                      ? <StructuredResponseCard text={msg.content} />
-                      : renderMarkdown(msg.content)}
-                  
-                  {/* Urgency indicators for standard text answers */}
-                  {!isUser && msg.urgencyLevel && !isStructured && (
-                    <div className="mt-2.5 flex items-center gap-1 border-t border-slate-100 dark:border-slate-800 pt-2 text-[9px] text-slate-400 font-bold uppercase">
-                      <span>Severity Level:</span>
-                      <span className={msg.urgencyLevel.toLowerCase().includes('high') ? 'text-red-500 font-extrabold' : 'text-emerald-500'}>
-                        {msg.urgencyLevel}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <span className="text-[9px] text-slate-400 mt-1 px-1.5 font-medium">
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+                💬
+              </button>
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-base font-bold">
+                🤖
               </div>
-            );
-          })}
+              <div>
+                <h3 className="font-extrabold text-sm">Arogya AI Assistant</h3>
+                <p className="text-[9px] text-slate-400 uppercase font-semibold">Active Now</p>
+              </div>
+            </div>
+            <button 
+              onClick={startNewChat}
+              className="text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-xl font-bold"
+            >
+              New
+            </button>
+          </div>
 
-          {/* Typing / Loading Skeleton */}
-          {loading && (
-            <div className="flex items-start gap-2.5 max-w-[80%] animate-pulse">
-              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center">
-                ●
+          {/* Messages Scroll Area */}
+          <div className="flex-grow p-4 overflow-y-auto space-y-4 bg-slate-50/50 dark:bg-slate-950/20">
+            {messages.map((msg, idx) => {
+              const isUser = msg.role === 'user';
+              const isStructured = hasStructuredSections(msg.content);
+              return (
+                <div key={idx} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-fade-in`}>
+                  <div 
+                    className={`max-w-[85%] leading-relaxed ${
+                      isUser
+                        ? 'p-3.5 rounded-2xl rounded-tr-none bg-primary text-white font-medium shadow-md text-sm whitespace-pre-line'
+                        : isStructured
+                          ? 'w-full bg-transparent p-0 border-none shadow-none'
+                          : 'p-3.5 rounded-2xl rounded-tl-none bg-white border border-slate-150 dark:bg-slate-900 dark:border-slate-800 text-slate-850 shadow-sm text-sm whitespace-pre-line'
+                    }`}
+                  >
+                    {isUser ? msg.content : isStructured ? <StructuredResponseCard text={msg.content} /> : renderMarkdown(msg.content)}
+                  </div>
+                  <span className="text-[9px] text-slate-400 mt-1 px-1.5">
+                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              );
+            })}
+
+            {loading && (
+              <div className="flex items-start gap-2.5 max-w-[80%] animate-pulse">
+                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center">●</div>
+                <div className="p-4 rounded-2xl rounded-tl-none bg-white border dark:bg-slate-900 dark:border-slate-800 flex-grow space-y-2 shadow-sm">
+                  <div className="h-2 bg-slate-250 dark:bg-slate-800 rounded w-1/3"></div>
+                  <div className="h-2 bg-slate-250 dark:bg-slate-800 rounded w-5/6"></div>
+                </div>
               </div>
-              <div className="p-4 rounded-2xl rounded-tl-none bg-white border border-slate-100 dark:bg-slate-900 dark:border-slate-800 flex-grow space-y-2.5 shadow-sm">
-                <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded w-1/3"></div>
-                <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded w-5/6"></div>
-                <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Quick Suggestions Chips */}
+          {messages.length <= 1 && !loading && (
+            <div className="p-3 bg-slate-50/70 dark:bg-slate-950/10 border-t border-slate-150">
+              <div className="grid grid-cols-1 gap-1.5">
+                {suggestionChips.map((chip, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSend(chip.query)}
+                    className="p-2.5 text-left bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary rounded-xl text-[11px] font-semibold flex items-center gap-2"
+                  >
+                    <span>🔍</span>
+                    <span className="truncate">{chip.text}</span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
-          
+
+          {/* Disclaimer and Input */}
+          <div className="bg-alert-bg p-3 border-t border-slate-150 text-[10px] text-red-800 flex gap-2">
+            <span>⚠️</span>
+            <p className="leading-snug">
+              <strong>Disclaimer:</strong> This AI assistant provides info only. Call 112 for critical health emergencies.
+            </p>
+          </div>
+
+          <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-150">
+            <form onSubmit={handleFormSubmit} className="flex gap-2 items-center">
+              <input 
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                className="flex-grow p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-xs"
+                placeholder="Describe your symptoms..."
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={startSpeechRecognition}
+                className={`p-3 rounded-xl border text-sm transition-all ${listening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 border-slate-200'}`}
+              >
+                🎤
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !inputText.trim()}
+                className="bg-primary text-white font-bold p-3 rounded-xl text-xs disabled:opacity-40"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop View (Original rich MedicalAssistant with Sidebar history)
+  return (
+    <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 flex flex-col lg:flex-row gap-gutter h-[calc(100vh-64px)] transition-colors">
+      
+      {/* Sidebar: History */}
+      <div className="w-full lg:w-64 flex-shrink-0 flex flex-col border border-outline-variant/30 dark:border-slate-800 rounded-2xl bg-white/70 dark:bg-slate-800/70 p-4 h-48 lg:h-full overflow-hidden shadow-sm">
+        <button 
+          onClick={startNewChat}
+          className="w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl mb-4 transition-all"
+        >
+          + New Consultation
+        </button>
+        <h4 className="text-label-sm uppercase tracking-wider text-outline mb-2">Previous Chats</h4>
+        <div className="flex-grow overflow-y-auto space-y-2">
+          {conversations.map((convo) => (
+            <div 
+              key={convo._id}
+              onClick={() => loadConversation(convo._id)}
+              className={`p-3 rounded-xl cursor-pointer text-left text-label-md transition-all truncate ${currentConvoId === convo._id ? 'bg-primary/10 text-primary font-bold dark:text-secondary dark:bg-secondary/10' : 'hover:bg-slate-50 dark:hover:bg-slate-900'}`}
+            >
+              {convo.conversationTitle}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-grow flex flex-col border border-outline-variant/30 dark:border-slate-800 rounded-2xl bg-white/70 dark:bg-slate-800/70 overflow-hidden shadow-md h-[calc(100%-192px)] lg:h-full">
+        {/* Chat Header */}
+        <div className="bg-primary text-white p-4 flex justify-between items-center dark:bg-slate-950">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🩺</span>
+            <div>
+              <h3 className="font-bold text-lg">AI Medical Assistant</h3>
+              <p className="text-[10px] opacity-80">RAG Clinical Knowledge Base Active</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Message bubbles */}
+        <div className="flex-grow p-6 overflow-y-auto space-y-4">
+          {messages.map((msg, idx) => (
+            <div 
+              key={idx}
+              className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+            >
+              <div 
+                className={`max-w-[75%] leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'p-4 rounded-2xl bg-primary text-white dark:bg-secondary dark:text-slate-900 font-medium whitespace-pre-line'
+                    : hasStructuredSections(msg.content)
+                      ? 'w-full bg-transparent border-none shadow-none p-0'
+                      : 'p-4 rounded-2xl bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 border border-outline-variant/20 shadow-sm whitespace-pre-line'
+                }`}
+              >
+                {msg.role === 'user'
+                  ? msg.content
+                  : hasStructuredSections(msg.content)
+                    ? <StructuredResponseCard text={msg.content} />
+                    : renderMarkdown(msg.content)}
+                
+                {msg.role === 'assistant' && msg.urgencyLevel && !hasStructuredSections(msg.content) && (
+                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-outline-variant/30 pt-2 text-[10px] text-outline font-bold uppercase">
+                    <span>Severity: {msg.urgencyLevel}</span>
+                  </div>
+                )}
+              </div>
+              <span className="text-[9px] text-outline mt-1 px-1">
+                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex items-center gap-2 text-outline">
+              <div className="animate-bounce">●</div>
+              <div className="animate-bounce [animation-delay:0.2s]">●</div>
+              <div className="animate-bounce [animation-delay:0.4s]">●</div>
+              <span className="text-label-sm italic ml-1">Analyzing medical context...</span>
+            </div>
+          )}
           <div ref={chatEndRef} />
         </div>
 
-        {/* Suggestion Chips - visible only when conversation has only 1 message (initial greeting) */}
-        {messages.length <= 1 && !loading && (
-          <div className="p-4 bg-slate-50/70 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-900">
-            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold mb-2.5">Starter Health Prompts</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {suggestionChips.map((chip, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleSend(chip.query)}
-                  className="p-3 text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-primary dark:hover:border-secondary rounded-2xl text-xs font-semibold hover:shadow-md active:scale-98 transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <span className="text-sm">🔍</span>
-                  <span className="truncate">{chip.text}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Disclaimer Footer Banner */}
-        <div className="bg-amber-50/60 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 px-4 py-2 text-center text-[9px] text-amber-800 dark:text-amber-400 leading-tight">
-          ⚠️ <strong>Disclaimer:</strong> Arogya Raksha AI generates educational guidance. Call 112 or visit a doctor for critical emergencies.
+        {/* Disclaimer footer banner */}
+        <div className="bg-amber-50 border-t border-b border-amber-100 p-2 text-center text-[10px] text-amber-800 dark:bg-slate-900 dark:border-slate-800 dark:text-amber-400">
+          ⚠️ Arogya Raksha provides educational health information only. Call emergency services in critical cases.
         </div>
 
-        {/* Sticky Input Bar */}
-        <div className="p-3.5 bg-white dark:bg-slate-900 border-t border-slate-150 dark:border-slate-800">
-          <form onSubmit={handleFormSubmit} className="flex gap-2 items-center">
-            <input 
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              className="flex-grow p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:border-primary dark:focus:border-secondary outline-none text-xs"
-              placeholder="Describe symptoms (e.g. fever for 2 days)..."
-              disabled={loading}
-            />
-            
-            <button
-              type="button"
-              onClick={startSpeechRecognition}
-              className={`p-3 rounded-2xl border transition-all text-sm select-none ${listening ? 'bg-red-500 border-red-500 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-200'}`}
-              title={listening ? "Listening..." : "Voice input"}
-            >
-              🎤
-            </button>
-            
-            <button
-              type="submit"
-              disabled={loading || !inputText.trim()}
-              className="bg-primary hover:opacity-95 dark:bg-secondary dark:text-slate-900 text-white font-bold p-3 rounded-2xl transition-all shadow-md text-xs flex items-center justify-center flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              🚀 Send
-            </button>
-          </form>
-        </div>
-
+        {/* Input Form */}
+        <form onSubmit={handleFormSubmit} className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-outline-variant/30 flex gap-2">
+          <input 
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            className="flex-grow p-3 rounded-xl border border-outline-variant bg-white dark:bg-slate-800 focus:border-primary outline-none text-label-md"
+            placeholder="Type your symptoms or health queries here..."
+            disabled={loading}
+          />
+          <button
+            type="button"
+            onClick={startSpeechRecognition}
+            className={`p-3 rounded-xl border border-outline-variant hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-xl ${listening ? 'bg-red-100 text-red-600 border-red-300 animate-pulse' : ''}`}
+            title="Speech to text input"
+          >
+            🎤
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-primary hover:opacity-90 dark:bg-secondary dark:text-slate-900 text-white font-bold px-6 rounded-xl transition-all shadow-md"
+          >
+            Send
+          </button>
+        </form>
       </div>
 
     </div>

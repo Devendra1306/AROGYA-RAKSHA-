@@ -11,6 +11,17 @@ export default function HealthAssessment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Media Query Check
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Wizard State (null = dashboard/landing, 1 = Personal Details, 2 = Lifestyle, 3 = Medical History)
   const [wizardStep, setWizardStep] = useState(null);
 
@@ -99,7 +110,6 @@ export default function HealthAssessment() {
     setError('');
 
     try {
-      // 1. Package profile data and sync to backend
       const profileData = {
         age: Number(age),
         gender,
@@ -115,14 +125,9 @@ export default function HealthAssessment() {
         medications: medications.split(',').map(s => s.trim()).filter(Boolean),
       };
 
-      // Call context updater (posts to /auth/profile/setup internally)
       await updateProfile(profileData);
-
-      // 2. Trigger fresh health assessment scorecard generation
       const resAss = await api.post('/assessment/generate');
       setLatestAssessment(resAss.data);
-      
-      // 3. Reload historical trends and reset wizard
       await fetchHistory();
       setWizardStep(null);
     } catch (err) {
@@ -160,456 +165,450 @@ export default function HealthAssessment() {
     }
   };
 
-  // Convert scores to percentage for circular gauge stroke
-  const radius = 68;
+  // Convert scores to percentage for circular gauge stroke (Desktop radius 70)
+  const radius = 70;
   const strokeDasharray = 2 * Math.PI * radius;
   const strokeDashoffset = latestAssessment 
     ? strokeDasharray - (latestAssessment.healthScore / 100) * strokeDasharray 
     : strokeDasharray;
 
-  // Chart data formatting
   const chartData = history.map(h => ({
     date: new Date(h.generatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' }),
     score: h.healthScore
   }));
 
-  return (
-    <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors">
-      
-      {/* Wizard Form Layout (Steps 1, 2, 3) */}
-      {wizardStep !== null ? (
-        <div className="max-w-xl mx-auto bg-white dark:bg-slate-850 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xl space-y-5 animate-fade-in">
-          
-          {/* Header & Step progress bar */}
-          <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h2 className="text-lg font-extrabold text-primary dark:text-secondary">Health Assessment Setup</h2>
-              <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Step {wizardStep} of 3</p>
-            </div>
-            <div className="w-24 h-2 bg-slate-100 dark:bg-slate-750 rounded-full overflow-hidden">
-              <div className="h-full bg-primary" style={{ width: `${wizardStep * 33.3}%` }}></div>
-            </div>
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-355 rounded-xl text-xs border border-red-100">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="flex flex-col justify-center items-center py-20 gap-2">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Calibrating Vitals Scorecard...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleWizardSubmit} className="space-y-4">
-              
-              {/* Step 1: Personal vitals details */}
-              {wizardStep === 1 && (
-                <div className="space-y-4">
-                  <h3 className="font-extrabold text-sm text-slate-500">Personal details & Vitals</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Age</label>
-                      <input 
-                        type="number" 
-                        value={age} 
-                        onChange={(e) => setAge(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                        placeholder="e.g. 28" 
-                        required 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Gender</label>
-                      <select 
-                        value={gender} 
-                        onChange={(e) => setGender(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs cursor-pointer"
-                      >
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Height (cm)</label>
-                      <input 
-                        type="number" 
-                        value={height} 
-                        onChange={(e) => setHeight(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                        placeholder="175" 
-                        required 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Weight (kg)</label>
-                      <input 
-                        type="number" 
-                        value={weight} 
-                        onChange={(e) => setWeight(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                        placeholder="72" 
-                        required 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Blood Group</label>
-                      <select 
-                        value={bloodGroup} 
-                        onChange={(e) => setBloodGroup(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs cursor-pointer"
-                      >
-                        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                        <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: Lifestyle Habits details */}
-              {wizardStep === 2 && (
-                <div className="space-y-4">
-                  <h3 className="font-extrabold text-sm text-slate-500">Lifestyle Habits</h3>
-                  
-                  <div>
-                    <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1.5">Activity Level</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active'].map((lvl) => (
-                        <button
-                          key={lvl}
-                          type="button"
-                          onClick={() => setActivityLevel(lvl)}
-                          className={`p-2.5 rounded-xl border text-center text-xs font-semibold transition-all ${activityLevel === lvl ? 'bg-primary text-white border-primary shadow' : 'border-slate-200 dark:border-slate-800'}`}
-                        >
-                          {lvl}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Water Intake (Liters/day)</label>
-                      <input 
-                        type="number" 
-                        step="0.5" 
-                        value={waterIntake} 
-                        onChange={(e) => setWaterIntake(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Sleep Duration (Hours/night)</label>
-                      <input 
-                        type="number" 
-                        value={sleepDuration} 
-                        onChange={(e) => setSleepDuration(e.target.value)} 
-                        className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1.5">Stress Level</label>
-                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl gap-1">
-                      {['Low', 'Moderate', 'High'].map((lvl) => (
-                        <button
-                          key={lvl}
-                          type="button"
-                          onClick={() => setStressLevel(lvl)}
-                          className={`flex-grow text-center py-2 rounded-lg font-bold text-xs transition-all ${stressLevel === lvl ? 'bg-white text-primary dark:bg-slate-800 dark:text-secondary shadow' : 'text-slate-500'}`}
-                        >
-                          {lvl}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Medical History details */}
-              {wizardStep === 3 && (
-                <div className="space-y-4">
-                  <h3 className="font-extrabold text-sm text-slate-500">Medical History</h3>
-                  
-                  <div>
-                    <label className="block text-[10px] text-slate-450 uppercase font-bold mb-2">Existing Medical Conditions</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['Diabetes', 'Hypertension', 'Asthma', 'Thyroid', 'Heart Disease', 'None'].map((cond) => {
-                        const active = medicalConditions.includes(cond);
-                        return (
-                          <button
-                            key={cond}
-                            type="button"
-                            onClick={() => toggleCondition(cond)}
-                            className={`p-2.5 rounded-xl border text-center text-xs font-semibold transition-all ${active ? 'bg-primary text-white border-primary shadow' : 'border-slate-200 dark:border-slate-800'}`}
-                          >
-                            {cond}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Allergies (comma-separated)</label>
-                    <input 
-                      type="text" 
-                      value={allergies} 
-                      onChange={(e) => setAllergies(e.target.value)} 
-                      className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                      placeholder="e.g. Peanuts, Penicillin" 
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Current Medications (comma-separated)</label>
-                    <input 
-                      type="text" 
-                      value={medications} 
-                      onChange={(e) => setMedications(e.target.value)} 
-                      className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" 
-                      placeholder="e.g. Metformin 500mg" 
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Wizard controls footer */}
-              <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
-                {wizardStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={handlePrevStep}
-                    className="px-5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 text-xs font-bold"
-                  >
-                    Back
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setWizardStep(null)}
-                    className="px-5 py-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold"
-                  >
-                    Cancel
-                  </button>
-                )}
-
-                {wizardStep < 3 ? (
-                  <button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="ml-auto bg-primary hover:opacity-95 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm"
-                  >
-                    Next Step
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="ml-auto bg-primary hover:opacity-95 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm"
-                  >
-                    Submit & Generate
-                  </button>
-                )}
+  if (isMobile) {
+    // Mobile Assessment view (Multi-step wizard and results)
+    return (
+      <div className="max-w-[1280px] mx-auto px-margin-mobile py-6 text-slate-800 dark:text-slate-100 font-body-md animate-fade-in">
+        
+        {wizardStep !== null ? (
+          // Mobile Wizard Form
+          <div className="bg-white dark:bg-slate-850 rounded-2xl p-5 border border-slate-200 dark:border-slate-850 shadow-xl space-y-5">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-150">
+              <div>
+                <h2 className="text-base font-extrabold text-primary dark:text-secondary">Health Wizard</h2>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">Step {wizardStep} of 3</p>
               </div>
-
-            </form>
-          )}
-
-        </div>
-      ) : (
-        /* Results / Landing score dashboard view */
-        <div className="space-y-6">
-          
-          {/* Main Header */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
-            <div>
-              <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
-                📊 Health Assessment
-              </h1>
-              <p className="text-xs text-slate-400 mt-0.5">Understand physical risks, clinical scores, and recommendations.</p>
+              <div className="w-24 h-2 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
+                <div className="h-full bg-primary" style={{ width: `${wizardStep * 33.3}%` }}></div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={handleDownloadReport}
-                className="border border-slate-200 dark:border-slate-750 hover:bg-slate-50 dark:hover:bg-slate-800 px-3 py-2 rounded-xl text-xs font-bold"
-              >
-                📥 Export Report
-              </button>
-              <button 
-                onClick={startAssessmentWizard}
-                className="bg-primary hover:opacity-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm"
-              >
-                {latestAssessment ? 'Retake Wizard' : 'Start Assessment'}
-              </button>
-            </div>
-          </header>
 
-          {latestAssessment ? (
-            <div className="space-y-6">
-              
-              {/* Score ring and trends graph panel */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Health Score circle Gauge */}
-                <div className="lg:col-span-4 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col items-center justify-center text-center">
-                  <h3 className="font-extrabold text-xs text-slate-400 uppercase tracking-wide mb-5">Current Health Score</h3>
-                  
-                  <div className="relative w-36 h-36 flex items-center justify-center mb-5">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="72" cy="72" fill="transparent" r={radius} stroke="#f1f5f9" strokeWidth="10" className="dark:stroke-slate-800"></circle>
-                      <circle 
-                        cx="72" 
-                        cy="72" 
-                        fill="transparent" 
-                        r={radius} 
-                        stroke="#0052cc" 
-                        strokeWidth="10"
-                        strokeDasharray={strokeDasharray}
-                        strokeDashoffset={strokeDashoffset}
-                        className="transition-all duration-700"
-                        strokeLinecap="round"
-                      ></circle>
-                    </svg>
-                    <div className="absolute text-center">
-                      <p className="text-3xl font-black text-primary dark:text-secondary">{latestAssessment.healthScore}</p>
-                      <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Score</p>
-                    </div>
-                  </div>
+            {error && (
+              <div className="p-3 bg-red-50 text-red-700 rounded-xl text-xs">{error}</div>
+            )}
 
-                  <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-4.5 py-1.5 rounded-full font-bold text-xs shadow-sm">
-                    {latestAssessment.healthScore >= 90 ? 'Excellent' : latestAssessment.healthScore >= 75 ? 'Good' : 'Moderate'}
-                  </span>
-                </div>
-
-                {/* Score Trend History Chart */}
-                <div className="lg:col-span-8 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
-                  <h3 className="font-extrabold text-xs text-slate-400 uppercase tracking-wide mb-3">Score History Trends</h3>
-                  <div className="h-48 w-full text-xs">
-                    {chartData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" className="dark:stroke-slate-800" />
-                          <XAxis dataKey="date" stroke="#94a3b8" />
-                          <YAxis domain={[0, 100]} stroke="#94a3b8" />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="score" stroke="#0052cc" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-slate-400 italic">
-                        No history logs recorded yet.
+            {loading ? (
+              <div className="flex flex-col justify-center items-center py-20 gap-2">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase">Calibrating Vitals...</p>
+              </div>
+            ) : (
+              <form onSubmit={handleWizardSubmit} className="space-y-4">
+                {wizardStep === 1 && (
+                  <div className="space-y-4">
+                    <h3 className="font-extrabold text-sm text-slate-500">Step 1: Personal Details</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Age</label>
+                        <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" required />
                       </div>
-                    )}
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Gender</label>
+                        <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs">
+                          <option>Male</option><option>Female</option><option>Other</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Height (cm)</label>
+                        <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" required />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Weight (kg)</label>
+                        <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" required />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Blood Group</label>
+                        <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs">
+                          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                          <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 2 && (
+                  <div className="space-y-4">
+                    <h3 className="font-extrabold text-sm text-slate-500">Step 2: Lifestyle Habits</h3>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1.5">Activity Level</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active'].map((lvl) => (
+                          <button key={lvl} type="button" onClick={() => setActivityLevel(lvl)} className={`p-2.5 rounded-xl border text-center text-xs font-semibold ${activityLevel === lvl ? 'bg-primary text-white border-primary shadow' : 'border-slate-200'}`}>{lvl}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Water (L/day)</label>
+                        <input type="number" step="0.5" value={waterIntake} onChange={(e) => setWaterIntake(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Sleep (Hours)</label>
+                        <input type="number" value={sleepDuration} onChange={(e) => setSleepDuration(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1.5">Stress Level</label>
+                      <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl gap-1">
+                        {['Low', 'Moderate', 'High'].map((lvl) => (
+                          <button key={lvl} type="button" onClick={() => setStressLevel(lvl)} className={`flex-grow text-center py-2 rounded-lg font-bold text-xs ${stressLevel === lvl ? 'bg-white text-primary dark:bg-slate-800 dark:text-secondary shadow' : 'text-slate-500'}`}>{lvl}</button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {wizardStep === 3 && (
+                  <div className="space-y-4">
+                    <h3 className="font-extrabold text-sm text-slate-500">Step 3: Medical History</h3>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase font-bold mb-2">Existing Conditions</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Diabetes', 'Hypertension', 'Asthma', 'Thyroid', 'Heart Disease', 'None'].map((cond) => (
+                          <button key={cond} type="button" onClick={() => toggleCondition(cond)} className={`p-2.5 rounded-xl border text-center text-xs font-semibold ${medicalConditions.includes(cond) ? 'bg-primary text-white border-primary shadow' : 'border-slate-200'}`}>{cond}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Allergies</label>
+                      <input type="text" value={allergies} onChange={(e) => setAllergies(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" placeholder="Aspirin, Peanuts" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Medications</label>
+                      <input type="text" value={medications} onChange={(e) => setMedications(e.target.value)} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 dark:bg-slate-900 text-xs" placeholder="Metformin 500mg" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                  {wizardStep > 1 ? (
+                    <button type="button" onClick={handlePrevStep} className="px-5 py-2.5 border rounded-xl text-xs font-bold">Back</button>
+                  ) : (
+                    <button type="button" onClick={() => setWizardStep(null)} className="px-5 py-2.5 text-slate-400 text-xs font-bold">Cancel</button>
+                  )}
+                  {wizardStep < 3 ? (
+                    <button type="button" onClick={handleNextStep} className="ml-auto bg-primary text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm">Next Step</button>
+                  ) : (
+                    <button type="submit" className="ml-auto bg-primary text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-sm">Generate Score</button>
+                  )}
+                </div>
+              </form>
+            )}
+          </div>
+        ) : (
+          // Mobile Results Scorecard styled as health_assessment/code.html from mobile.zip
+          <div className="space-y-6">
+            <header className="flex justify-between items-center border-b pb-4 border-slate-100">
+              <div>
+                <h2 className="text-xl font-extrabold text-primary dark:text-secondary">Health Profile Details</h2>
+                <p className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Vitals Analysis</p>
+              </div>
+              <div className="flex gap-1.5">
+                <button onClick={handleDownloadReport} className="border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold">Export</button>
+                <button onClick={startAssessmentWizard} className="bg-primary text-white font-bold px-3 py-1.5 rounded-lg text-xs">Retake</button>
+              </div>
+            </header>
+
+            {latestAssessment ? (
+              <div className="space-y-5">
+                
+                {/* Score card ring */}
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-150 shadow-xs flex flex-col items-center">
+                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide self-start">CURRENT WELLNESS SCORE</span>
+                  <div className="relative w-36 h-36 flex items-center justify-center mt-3">
+                    <div 
+                      className="w-full h-full absolute rounded-full"
+                      style={{
+                        background: `conic-gradient(from 0deg, #002045 0% ${latestAssessment.healthScore}%, #e2e8f0 ${latestAssessment.healthScore}% 100%)`
+                      }}
+                    ></div>
+                    <div className="absolute w-[86%] h-[86%] bg-white dark:bg-slate-800 rounded-full flex flex-col items-center justify-center">
+                      <span className="text-3xl font-black text-primary dark:text-secondary">{latestAssessment.healthScore}</span>
+                      <span className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Optimal</span>
+                    </div>
                   </div>
                 </div>
 
-              </div>
+                {/* Score History Recharts Line Chart */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-150 shadow-xs">
+                  <h3 className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wide mb-2.5">Score history</h3>
+                  <div className="h-32 w-full text-[9px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="date" stroke="#94a3b8" />
+                        <YAxis domain={[0, 100]} stroke="#94a3b8" />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="score" stroke="#002045" strokeWidth={2.5} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
 
-              {/* AI clinical narrative analysis */}
-              {latestAssessment.analysisText && (
-                <section className="bg-slate-900 text-white dark:bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow relative overflow-hidden">
-                  <span className="bg-secondary text-slate-900 px-2.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">Gemini Medical Opinion</span>
-                  <p className="mt-3 text-xs leading-relaxed font-semibold italic text-slate-200">
-                    "{latestAssessment.analysisText}"
-                  </p>
-                </section>
-              )}
+                {/* AI Text Advice */}
+                {latestAssessment.analysisText && (
+                  <div className="bg-slate-900 text-white p-4.5 rounded-xl text-xs space-y-1">
+                    <span className="bg-secondary text-slate-900 px-2 py-0.5 rounded text-[8px] font-black uppercase">Gemini opinion</span>
+                    <p className="mt-1 leading-relaxed text-slate-200 italic font-semibold">"{latestAssessment.analysisText}"</p>
+                  </div>
+                )}
 
-              {/* Wellness Factors Breakdown */}
-              <section className="space-y-3">
-                <h3 className="font-extrabold text-sm">Wellness Factors Breakdown</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {/* Breakdown grid */}
+                <div className="grid grid-cols-5 gap-1.5">
                   {[
-                    { name: '🏃 Physical', val: latestAssessment.activityScore || 0, color: 'text-primary' },
-                    { name: '🥗 Nutrition', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
+                    { name: '🏃 Phys', val: latestAssessment.activityScore || 0, color: 'text-primary' },
+                    { name: '🥗 Nutr', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
                     { name: '😴 Sleep', val: latestAssessment.sleepScore || 0, color: 'text-indigo-500' },
-                    { name: '💧 Hydration', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
-                    { name: '🧠 Stress', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
+                    { name: '💧 Hydr', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
+                    { name: '🧠 Stres', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
                   ].map(f => (
-                    <div key={f.name} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-850 rounded-xl p-3 text-center shadow-xs">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase">{f.name}</span>
-                      <p className={`text-xl font-black mt-1 ${f.color}`}>{f.val}%</p>
+                    <div key={f.name} className="bg-white dark:bg-slate-800 border p-2 rounded-xl text-center shadow-xs">
+                      <span className="text-[8px] text-slate-400 font-bold block">{f.name}</span>
+                      <p className={`text-sm font-black mt-0.5 ${f.color}`}>{f.val}%</p>
                     </div>
                   ))}
                 </div>
-              </section>
 
-              {/* Risk Factors and Roadmap */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                {/* Active risk flags */}
-                <div className="bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                  <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300">Active Risk Flags</h3>
-                  <div className="space-y-3">
+                {/* Risk factors list */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-150 shadow-xs space-y-3">
+                  <h3 className="font-extrabold text-xs text-slate-650">Active Vitals Risks</h3>
+                  <div className="space-y-2">
                     {latestAssessment.riskFactors?.length > 0 ? (
                       latestAssessment.riskFactors.map((risk, idx) => (
-                        <div key={idx} className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 rounded-xl text-xs space-y-1.5">
-                          <div className="flex justify-between items-center">
-                            <h4 className="font-bold text-red-750 dark:text-red-300">{risk.name}</h4>
-                            <span className="bg-red-200 text-red-900 px-2 py-0.5 rounded text-[8px] font-black uppercase">{risk.level}</span>
+                        <div key={idx} className="p-3 bg-red-50 text-xs rounded-lg space-y-1">
+                          <div className="flex justify-between items-center font-bold">
+                            <span className="text-red-700">{risk.name}</span>
+                            <span className="bg-red-200 text-red-900 px-1.5 py-0.5 rounded text-[7px]">{risk.level}</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 leading-snug">{risk.description}</p>
-                          <p className="text-[10px] text-red-650 font-bold">✓ Advice: {risk.advice}</p>
+                          <p className="text-[10px] text-slate-500 leading-snug">{risk.description}</p>
+                          <p className="text-[9px] text-red-650 font-bold">Advice: {risk.advice}</p>
                         </div>
                       ))
                     ) : (
-                      <p className="text-xs text-slate-400 italic">No primary risks flags activated. Good work!</p>
+                      <p className="text-xs text-slate-400 italic">No warnings active. Keep up the good habits!</p>
                     )}
                   </div>
                 </div>
 
-                {/* Improvement Roadmap */}
-                <div className="bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-                  <h3 className="font-extrabold text-sm text-slate-700 dark:text-slate-300">Improvement Roadmap</h3>
-                  <div className="space-y-3">
-                    <div className="flex gap-3 items-start text-xs">
-                      <span className="bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold mt-0.5">1</span>
-                      <div>
-                        <h4 className="font-bold">Next 7 Days (Hydration focus)</h4>
-                        <p className="text-[11px] text-slate-400">Increase water intake logs to hit 3L target. Toggle alerts in menu.</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 items-start text-xs">
-                      <span className="bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold mt-0.5">2</span>
-                      <div>
-                        <h4 className="font-bold">Next 30 Days (Habits frequency)</h4>
-                        <p className="text-[11px] text-slate-400">Work out at least 3 days a week. Keep weekly check-in scores steady.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
               </div>
+            ) : (
+              <div className="text-center py-10 bg-white dark:bg-slate-800 border rounded-xl p-5 shadow-xs">
+                <span className="text-3xl">📊</span>
+                <h3 className="font-bold text-sm mt-3">Start Vitals Assessment</h3>
+                <p className="text-xs text-slate-400 mt-1 mb-4">Update habits and generate scores in real-time.</p>
+                <button onClick={startAssessmentWizard} className="bg-primary text-white font-bold px-5 py-2 rounded-lg text-xs">Start Wizard</button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
 
-            </div>
-          ) : (
-            /* Empty state placeholder */
-            <div className="max-w-md mx-auto text-center py-12 bg-white dark:bg-slate-850 border border-slate-200 rounded-2xl p-6 shadow-sm">
-              <span className="text-4xl">📊</span>
-              <h3 className="font-extrabold text-lg mt-3">Generate Your Scorecard</h3>
-              <p className="text-xs text-slate-400 mt-1.5 mb-5 leading-relaxed">
-                Arogya Raksha can analyze BMI, conditions, sleep logs, and activities to calibrate an interactive wellness rating.
-              </p>
-              <button 
-                onClick={startAssessmentWizard}
-                className="bg-primary hover:opacity-95 text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
-              >
-                Start Assessment Wizard
-              </button>
-            </div>
-          )}
+  // Desktop View (Original health assessment details)
+  return (
+    <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
+      
+      {/* Header */}
+      <header className="mb-stack-md flex flex-col md:flex-row justify-between items-start md:items-end gap-base">
+        <div>
+          <h1 className="text-3xl font-bold text-primary dark:text-secondary">📊 Health Assessment</h1>
+          <p className="text-on-surface-variant dark:text-slate-300">Understand your overall wellness metrics and risks.</p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={handleDownloadReport}
+            className="border border-outline-variant hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 rounded-xl text-label-md font-bold transition-all"
+          >
+            📥 Export report
+          </button>
+          <button 
+            onClick={startAssessmentWizard}
+            disabled={loading}
+            className="bg-primary hover:opacity-90 dark:bg-secondary dark:text-slate-900 text-white font-bold px-6 py-2 rounded-xl transition-all shadow-md"
+          >
+            {loading ? 'Analyzing...' : 'Retake Assessment'}
+          </button>
+        </div>
+      </header>
 
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-2xl">
+          {error}
         </div>
       )}
 
+      {loading && !latestAssessment ? (
+        <div className="flex justify-center py-24">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      ) : latestAssessment ? (
+        <div className="space-y-gutter">
+          
+          {/* Top Row: Score circle & Line Chart */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+            
+            {/* Score Ring Card */}
+            <div className="lg:col-span-4 glass-card rounded-2xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-md flex flex-col items-center justify-center text-center">
+              <h3 className="font-bold text-lg mb-6">Current Health Score</h3>
+              
+              <div className="relative w-40 h-40 flex items-center justify-center mb-6">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="80" cy="80" fill="transparent" r={radius} stroke="#eff4ff" strokeWidth="12"></circle>
+                  <circle 
+                    cx="80" 
+                    cy="80" 
+                    fill="transparent" 
+                    r={radius} 
+                    stroke="#0052cc" 
+                    strokeWidth="12"
+                    strokeDasharray={strokeDasharray}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-700"
+                  ></circle>
+                </svg>
+                <div className="absolute text-center">
+                  <p className="text-4xl font-extrabold text-primary dark:text-secondary">{latestAssessment.healthScore}</p>
+                  <p className="text-[10px] text-outline uppercase tracking-wider">Score</p>
+                </div>
+              </div>
+
+              <div className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-4 py-1.5 rounded-full font-bold text-label-md">
+                {latestAssessment.healthScore >= 90 ? 'Excellent' : latestAssessment.healthScore >= 75 ? 'Good' : 'Moderate'}
+              </div>
+            </div>
+
+            {/* Recharts Trends */}
+            <div className="lg:col-span-8 glass-card rounded-2xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-md">
+              <h3 className="font-bold text-lg mb-4">Health Score Trend History</h3>
+              <div className="h-64 w-full">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="date" stroke="#94a3b8" />
+                      <YAxis domain={[0, 100]} stroke="#94a3b8" />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="score" stroke="#0052cc" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-outline">
+                    Perform assessments periodically to view historical score trends.
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          {/* AI Health Analysis Narrative */}
+          {latestAssessment.analysisText && (
+            <div className="glass-card rounded-2xl p-6 bg-white/80 dark:bg-slate-800/80 border-l-4 border-l-secondary shadow-sm">
+              <span className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-bold">AI Clinical Analysis</span>
+              <p className="mt-3 text-label-md leading-relaxed whitespace-pre-line font-medium text-slate-700 dark:text-slate-300">
+                "{latestAssessment.analysisText}"
+              </p>
+            </div>
+          )}
+
+          {/* Breakdown cards */}
+          <div>
+            <h3 className="text-xl font-bold mb-4">Wellness Factors Breakdown</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-base">
+              {[
+                { name: '🏃 Physical', val: latestAssessment.activityScore || 0, color: 'text-primary' },
+                { name: '🥗 Nutrition', val: latestAssessment.nutritionScore || 0, color: 'text-emerald-500' },
+                { name: '😴 Sleep', val: latestAssessment.sleepScore || 0, color: 'text-indigo-500' },
+                { name: '💧 Hydration', val: latestAssessment.hydrationScore || 0, color: 'text-blue-500' },
+                { name: '🧠 Stress', val: latestAssessment.stressScore || 0, color: 'text-orange-500' }
+              ].map(f => (
+                <div key={f.name} className="glass-card rounded-xl p-4 bg-white dark:bg-slate-800 text-center shadow-sm">
+                  <span className="text-label-sm text-outline">{f.name}</span>
+                  <p className={`text-2xl font-extrabold mt-2 ${f.color}`}>{f.val}%</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Risk Factors & Recommendations */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+            
+            {/* Risk Factors */}
+            <div className="glass-card rounded-2xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-md">
+              <h3 className="text-lg font-bold mb-4">Active Risk Flags</h3>
+              <div className="space-y-4">
+                {latestAssessment.riskFactors?.length > 0 ? (
+                  latestAssessment.riskFactors.map((risk, idx) => (
+                    <div key={idx} className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl space-y-2">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-bold text-red-700 dark:text-red-300">{risk.name}</h4>
+                        <span className="bg-red-200 text-red-800 px-2 py-0.5 rounded text-[8px] font-bold uppercase">{risk.level}</span>
+                      </div>
+                      <p className="text-label-sm text-on-surface-variant dark:text-slate-300">{risk.description}</p>
+                      <p className="text-[10px] text-red-650 dark:text-red-400 font-medium">✓ Advice: {risk.advice}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-on-surface-variant dark:text-slate-400 italic text-label-md">No risk factors identified. Maintain your habits!</p>
+                )}
+              </div>
+            </div>
+
+            {/* Improvement Roadmap */}
+            <div className="glass-card rounded-2xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-md">
+              <h3 className="text-lg font-bold mb-4">Health Improvement Roadmap</h3>
+              <div className="space-y-4">
+                <div className="flex gap-4 items-start">
+                  <span className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-label-sm font-bold flex-shrink-0 mt-0.5">1</span>
+                  <div>
+                    <h4 className="font-bold text-label-md">Next 7 Days (Hydration focus)</h4>
+                    <p className="text-label-sm text-on-surface-variant dark:text-slate-400">Increase pure water intake to 3L daily. Log items in Tracker.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <span className="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-label-sm font-bold flex-shrink-0 mt-0.5">2</span>
+                  <div>
+                    <h4 className="font-bold text-label-md">Next 30 Days (Activity focus)</h4>
+                    <p className="text-label-sm text-on-surface-variant dark:text-slate-400">Maintain exercise frequency of at least 3 days a week. Complete assessments weekly.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      ) : (
+        <div className="glass-card rounded-2xl p-8 bg-white/70 dark:bg-slate-800/70 shadow-md text-center max-w-md mx-auto mt-12">
+          <p className="text-3xl">📊</p>
+          <h3 className="font-bold text-xl mt-4">Generate Your Health Report</h3>
+          <p className="text-on-surface-variant dark:text-slate-300 text-label-md mt-2 mb-6">
+            Arogya Raksha can evaluate your habits, conditions, and vitals to calibrate a detailed health scorecard.
+          </p>
+          <button 
+            onClick={startAssessmentWizard}
+            className="bg-primary hover:opacity-90 dark:bg-secondary dark:text-slate-900 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-md"
+          >
+            Start Assessment
+          </button>
+        </div>
+      )}
     </div>
   );
 }

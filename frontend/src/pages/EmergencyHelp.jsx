@@ -100,9 +100,21 @@ export default function EmergencyHelp() {
   const [newContactRelation, setNewContactRelation] = useState('');
   const [showAddContact, setShowAddContact] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
     fetchCategories();
     fetchContacts();
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   const fetchCategories = async () => {
@@ -218,6 +230,341 @@ export default function EmergencyHelp() {
       .substring(0, 2)
       .toUpperCase();
   };
+
+  if (isMobile) {
+    const filteredCategories = categories.filter(cat => 
+      cat.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      cat.symptoms?.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const getMobileCategoryIcon = (title) => {
+      const lower = title.toLowerCase();
+      if (lower.includes('heart') || lower.includes('cardiac')) return 'cardiology';
+      if (lower.includes('stroke') || lower.includes('brain') || lower.includes('head')) return 'psychology';
+      if (lower.includes('choking') || lower.includes('breath') || lower.includes('airway')) return 'airwave';
+      if (lower.includes('burn')) return 'local_fire_department';
+      if (lower.includes('poison')) return 'skull';
+      if (lower.includes('bleed')) return 'bloodtype';
+      return 'emergency';
+    };
+
+    const getMobileCategoryBg = (title) => {
+      const lower = title.toLowerCase();
+      if (lower.includes('heart') || lower.includes('cardiac')) return 'bg-red-50 dark:bg-red-950/20 text-red-500';
+      if (lower.includes('stroke') || lower.includes('brain') || lower.includes('head')) return 'bg-blue-50 dark:bg-blue-950/20 text-blue-500';
+      if (lower.includes('choking') || lower.includes('breath') || lower.includes('airway')) return 'bg-amber-50 dark:bg-amber-950/20 text-amber-600';
+      if (lower.includes('burn')) return 'bg-orange-50 dark:bg-orange-950/20 text-orange-600';
+      if (lower.includes('poison')) return 'bg-purple-50 dark:bg-purple-950/20 text-purple-600';
+      if (lower.includes('bleed')) return 'bg-red-50 dark:bg-red-950/20 text-red-650';
+      return 'bg-slate-50 dark:bg-slate-900/60 text-primary dark:text-secondary';
+    };
+
+    return (
+      <div className="bg-background text-on-surface px-margin-mobile pb-40 font-body-md">
+        {/* Search Header */}
+        <div className="py-6">
+          <h2 className="text-xl font-bold text-primary dark:text-secondary mb-1">Emergency Assistance</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Immediate first aid guidance for critical situations.</p>
+          
+          <form onSubmit={handleSearch} className="relative w-full">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            <input 
+              className="w-full pl-12 pr-12 py-3.5 bg-white dark:bg-slate-800 border border-border-grey dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:outline-none shadow-sm transition-all text-xs" 
+              placeholder="Search emergency topics (e.g., CPR, seizures)..." 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={startSpeechRecognition}
+              className={`absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                listening ? 'bg-red-500 text-white animate-pulse' : 'text-slate-400 hover:text-slate-650'
+              }`}
+              title="Speech-to-Text Search"
+            >
+              <span className="material-symbols-outlined text-lg">mic</span>
+            </button>
+          </form>
+        </div>
+
+        {/* AI Results */}
+        {loading && (
+          <div className="flex justify-center py-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-650"></div>
+          </div>
+        )}
+
+        {aiResult && !loading && (
+          <div className="bg-red-50/50 dark:bg-red-950/20 border border-red-200/40 p-5 rounded-2xl mb-6 space-y-4 animate-fade-in">
+            <div className="flex justify-between items-center border-b border-red-100 dark:border-red-900/30 pb-2.5">
+              <h3 className="font-bold text-sm text-red-600 dark:text-red-400">{aiResult.possibleEmergency || 'AI Symptoms Assessment'}</h3>
+              <span className="bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-400 px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                {aiResult.urgencyLevel || 'Critical'}
+              </span>
+            </div>
+            
+            <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line bg-white dark:bg-slate-900/40 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
+              {aiResult.response}
+            </p>
+            
+            {aiResult.immediateActions && (
+              <div className="space-y-2.5">
+                <h4 className="font-bold text-red-600 text-xs flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base">checklist</span>
+                  Immediate Steps to Take:
+                </h4>
+                <ol className="space-y-2">
+                  {aiResult.immediateActions.map((step, idx) => (
+                    <li key={idx} className="flex gap-2.5 items-start p-3 bg-white dark:bg-slate-800 border-l-4 border-red-500 rounded-r-xl text-xs shadow-xs">
+                      <span className="font-bold text-red-600 dark:text-red-400 shrink-0">{idx + 1}.</span>
+                      <span className="text-slate-700 dark:text-slate-300 leading-normal">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            
+            <button 
+              onClick={() => setAiResult(null)}
+              className="w-full py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-750 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-[10px] uppercase transition-colors"
+            >
+              Clear Analysis
+            </button>
+          </div>
+        )}
+
+        {/* Emergency Guides Grid */}
+        <div className="space-y-4 mb-8">
+          <h3 className="text-sm font-bold tracking-wide uppercase text-slate-400">Emergency Guides</h3>
+          <div className="grid grid-cols-1 gap-4">
+            {filteredCategories.map((cat) => (
+              <div 
+                key={cat._id} 
+                className="bg-white dark:bg-slate-850 border border-border-grey dark:border-slate-750 p-5 rounded-xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${getMobileCategoryBg(cat.title)}`}>
+                    <span className="material-symbols-outlined text-xl">{getMobileCategoryIcon(cat.title)}</span>
+                  </div>
+                  <h3 className="font-bold text-base text-primary dark:text-secondary mb-1">{cat.title}</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mb-4">
+                    Symptoms: {cat.symptoms?.join(', ') || 'No symptoms specified.'}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => handleSelectGuide(cat._id)}
+                  className="w-full bg-primary text-white py-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-primary-container active:scale-[0.98] transition-all shadow-xs"
+                >
+                  Start Guide
+                  <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Nearest ER Details */}
+        <div className="bg-primary-container text-white rounded-2xl overflow-hidden shadow-md mb-8">
+          <div className="p-6">
+            <h3 className="text-lg font-bold mb-2 text-white">Nearest ER: 1.2 miles away</h3>
+            <p className="text-xs text-slate-350 leading-relaxed mb-5">
+              City General Hospital is currently reporting low wait times for trauma cases. Our system has automatically notified them of your location.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button 
+                onClick={() => navigate('/nearby')}
+                className="w-full px-4 py-3 bg-white text-primary rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all"
+              >
+                <span className="material-symbols-outlined text-base">map</span>
+                View Directions
+              </button>
+              <a 
+                href="tel:+919823456789"
+                className="w-full px-4 py-3 border border-slate-500/50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+              >
+                <span className="material-symbols-outlined text-base">call</span>
+                Hospital Reception
+              </a>
+            </div>
+          </div>
+          <div className="h-44 relative overflow-hidden">
+            <img 
+              className="w-full h-full object-cover opacity-60" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBixCfEPpMThbdFpk8MUJA-sZBnd1KhqXI8F7BFdqiBN7C2KyD6g1EW6tNfFKrfgkMN4rtpVZrCArVHOsNm8xJtWPRPCPIbH2qmXI8XCf8VaUT3nBVXhaSmwV9oOioMeFkuwu2ou7OSKA-DVG8AVG69vTs25bPWPJIyYTocxSK2-20mw7YbsppJzholRvZdknV1ZZqs4WoCQDTNijV2D4AMc9tsnWlZ6ESGnzI51mWb6YPnW7yqM5fAGaMSazcVy3bJ25wqtP69wc5k" 
+              alt="Hospital ER Entrance" 
+            />
+          </div>
+        </div>
+
+        {/* SOS Circle widget on mobile */}
+        <div className="glass-card rounded-xl p-5 shadow-sm border border-border-grey bg-white/80 dark:bg-slate-800/80 mb-6">
+          <div className="flex justify-between items-center mb-4 border-b border-border-grey/30 pb-2">
+            <h3 className="font-bold text-sm text-primary dark:text-secondary flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg">group</span>
+              SOS Contacts
+            </h3>
+            <button 
+              onClick={() => setShowAddContact(!showAddContact)} 
+              className="text-primary dark:text-secondary text-xs font-bold"
+            >
+              {showAddContact ? 'Cancel' : '+ Add'}
+            </button>
+          </div>
+
+          {showAddContact && (
+            <form onSubmit={handleAddContact} className="mb-4 p-4 border border-border-grey/50 rounded-xl bg-slate-50 dark:bg-slate-900/60 space-y-3">
+              <div>
+                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Contact Name</label>
+                <input 
+                  type="text" 
+                  placeholder="E.g. John Doe" 
+                  value={newContactName} 
+                  onChange={(e) => setNewContactName(e.target.value)}
+                  className="w-full p-2.5 text-xs rounded-xl border border-border-grey outline-none dark:bg-slate-800"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phone Number</label>
+                <input 
+                  type="tel" 
+                  placeholder="E.g. +91 98765 43210" 
+                  value={newContactPhone} 
+                  onChange={(e) => setNewContactPhone(e.target.value)}
+                  className="w-full p-2.5 text-xs rounded-xl border border-border-grey outline-none dark:bg-slate-800"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Relationship</label>
+                <input 
+                  type="text" 
+                  placeholder="E.g. Mother / Doctor" 
+                  value={newContactRelation} 
+                  onChange={(e) => setNewContactRelation(e.target.value)}
+                  className="w-full p-2.5 text-xs rounded-xl border border-border-grey outline-none dark:bg-slate-800"
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-primary text-white text-xs font-bold py-2.5 rounded-xl shadow-sm"
+              >
+                Save SOS Contact
+              </button>
+            </form>
+          )}
+
+          <div className="space-y-3.5">
+            {contacts.length > 0 ? (
+              contacts.map((c, idx) => (
+                <div key={idx} className="flex justify-between items-center p-2.5 bg-slate-50/60 dark:bg-slate-900/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                      {getInitials(c.name)}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-slate-850 dark:text-slate-150">{c.name}</h4>
+                      <p className="text-[9px] text-slate-450 uppercase mt-0.5">{c.relationship || 'Emergency Contact'}</p>
+                    </div>
+                  </div>
+                  <a 
+                    href={`tel:${c.phone}`} 
+                    className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 flex items-center justify-center"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">call</span>
+                  </a>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 italic text-center py-2">No emergency contacts saved.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Call Ambulance Bottom Bar */}
+        <div className="fixed bottom-20 left-0 w-full px-4 z-40">
+          <a 
+            href="tel:102"
+            className="emergency-glow w-full bg-emergency-red text-white py-4.5 rounded-2xl font-bold text-sm shadow-2xl flex items-center justify-center gap-3.5 active:scale-95 transition-transform"
+          >
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>emergency_share</span>
+            Call Ambulance (102)
+          </a>
+        </div>
+
+        {/* Modal guidance inside mobile view too */}
+        {selectedGuide && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-xl w-full p-5 shadow-2xl border border-outline-variant/30 space-y-4 animate-scale-up max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-border-grey/30 pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-red-650 dark:text-red-400">{selectedGuide.title} Instructions</h3>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    {getSeverityBadge(selectedGuide.severity)}
+                    <span className="text-[9px] text-slate-400">First-Aid Guide</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedGuide(null)} 
+                  className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors font-bold text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-bold text-[10px] uppercase tracking-wider text-slate-400">Symptom Indicators:</h4>
+                <ul className="grid grid-cols-2 gap-2 text-xs">
+                  {selectedGuide.symptoms?.map((s, idx) => (
+                    <li key={idx} className="flex items-center gap-1.5 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      <span className="text-slate-750 dark:text-slate-250 font-light text-[10px]">{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-2.5">
+                <h4 className="font-bold text-[10px] uppercase tracking-wider text-slate-400">Guidance:</h4>
+                <ol className="space-y-2">
+                  {selectedGuide.steps?.map((step, idx) => (
+                    <li key={idx} className="flex gap-2.5 items-start p-3 bg-emerald-50/20 dark:bg-emerald-950/10 border-l-4 border-emerald-500 rounded-r-2xl text-xs">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{idx + 1}.</span>
+                      <span className="text-slate-750 dark:text-slate-250 leading-relaxed">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              {selectedGuide.warnings && (
+                <div className="bg-red-50/30 dark:bg-red-950/10 border border-red-200/55 p-3 rounded-2xl text-xs space-y-1.5">
+                  <h4 className="font-bold text-red-650 dark:text-red-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
+                    ⚠️ Warnings:
+                  </h4>
+                  <ul className="space-y-1">
+                    {selectedGuide.warnings.map((w, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5 text-red-800 dark:text-red-300 font-light text-[10px]">
+                        <span className="text-red-500 select-none">•</span>
+                        <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <button 
+                onClick={() => setSelectedGuide(null)} 
+                className="w-full bg-slate-800 dark:bg-slate-750 text-white font-bold py-3 rounded-xl text-xs uppercase transition-colors"
+              >
+                Close Instructions
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
