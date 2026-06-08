@@ -11,47 +11,41 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   // Google authentication states
+  const [gisLoaded, setGisLoaded] = useState(false);
   const [showGoogleChooser, setShowGoogleChooser] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
 
   // Dynamically load Google Identity Services library
   useEffect(() => {
+    if (window.google?.accounts?.id) {
+      setGisLoaded(true);
+      return;
+    }
+
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
+    script.onload = () => setGisLoaded(true);
+    script.onerror = () => console.error('Failed to load Google Identity Services script.');
     document.body.appendChild(script);
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const data = await login(email, password);
-      if (data.user.profileCompleted) {
-        navigate('/dashboard');
-      } else {
-        navigate('/profile-setup');
-      }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Invalid credentials or connection error.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleClick = () => {
+  // Initialize GIS and render native button if client ID is present
+  useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (clientId) {
-      if (window.google?.accounts?.id) {
+    if (gisLoaded && clientId && window.google?.accounts?.id) {
+      try {
         window.google.accounts.id.initialize({
           client_id: clientId,
           callback: async (response) => {
             setLoading(true);
+            setError('');
             try {
               const jwtToken = response.credential;
               // Decode token payload
@@ -74,13 +68,47 @@ export default function LoginPage() {
             }
           }
         });
-        window.google.accounts.id.prompt();
-      } else {
-        setShowGoogleChooser(true);
+
+        const buttonDiv = document.getElementById('googleSignInButton');
+        if (buttonDiv) {
+          window.google.accounts.id.renderButton(
+            buttonDiv,
+            {
+              theme: 'outline',
+              size: 'large',
+              width: buttonDiv.offsetWidth || 382,
+              text: 'continue_with',
+              shape: 'pill'
+            }
+          );
+        }
+      } catch (err) {
+        console.error('Error initializing Google Sign-In:', err);
       }
-    } else {
-      setShowGoogleChooser(true);
     }
+  }, [gisLoaded]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const data = await login(email, password);
+      if (data.user.profileCompleted) {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile-setup');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid credentials or connection error.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleClick = () => {
+    // This is the fallback handler for simulated authentication when no client ID is set
+    setShowGoogleChooser(true);
   };
 
   const handleSimulatedGoogleLogin = async (simulatedEmail, firstName, lastName) => {
@@ -168,12 +196,16 @@ export default function LoginPage() {
           <div className="flex-grow border-t border-outline-variant/30"></div>
         </div>
 
-        <button 
-          onClick={handleGoogleClick}
-          className="w-full border border-outline-variant py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm"
-        >
-          🔑 Continue with Google
-        </button>
+        {gisLoaded && import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+          <div id="googleSignInButton" className="w-full flex justify-center min-h-[44px]"></div>
+        ) : (
+          <button 
+            onClick={handleGoogleClick}
+            className="w-full border border-outline-variant py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm text-slate-800 dark:text-slate-200"
+          >
+            🔑 Continue with Google
+          </button>
+        )}
 
         <p className="text-center text-label-md text-on-surface-variant dark:text-slate-400 mt-6">
           Don't have an account? <Link to="/signup" className="text-primary hover:underline font-bold">Sign Up</Link>
