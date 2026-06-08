@@ -16,8 +16,8 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      if (user?.profileCompleted) {
+    if (isAuthenticated && user) {
+      if (user.profileCompleted) {
         navigate('/dashboard');
       } else {
         navigate('/profile-setup');

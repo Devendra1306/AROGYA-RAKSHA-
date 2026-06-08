@@ -60,9 +60,14 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         try {
           const res = await api.get('/auth/profile');
-          setUser(res.data.user);
-          localStorage.setItem('user', JSON.stringify(res.data.user));
-          setProfile(res.data.profile);
+          if (res.data && typeof res.data === 'object' && res.data.user) {
+            setUser(res.data.user);
+            localStorage.setItem('user', JSON.stringify(res.data.user));
+            setProfile(res.data.profile);
+          } else {
+            console.error('Failed to fetch user profile: Invalid response structure.');
+            logout();
+          }
         } catch (err) {
           console.error('Failed to fetch user profile:', err.message);
           logout();
