@@ -1,9 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const HealthProfile = require('../models/HealthProfile');
 const localDb = require('../utils/localDb');
 const { JWT_SECRET } = require('../middleware/auth');
+
+const googleClient = new OAuth2Client();
 
 function generateToken(user) {
   return jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, {
@@ -164,13 +167,51 @@ const authController = {
   },
 
   googleLogin: async (req, res) => {
-    const { token: googleToken, email, firstName, lastName } = req.body;
+    const { token: googleToken } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ error: 'Google email is required.' });
+    if (!googleToken) {
+      return res.status(400).json({ error: 'Google auth token is required.' });
     }
 
     try {
+      let email;
+      let firstName = 'GoogleUser';
+      let lastName = 'Account';
+      let googleId = '';
+      let profilePicture = '';
+
+      const clientId = process.env.GOOGLE_CLIENT_ID;
+
+      // Verify Google token if CLIENT_ID is configured and token is not simulated
+      if (googleToken !== 'simulated_oauth_token' && clientId) {
+        try {
+          const ticket = await googleClient.verifyIdToken({
+            idToken: googleToken,
+            audience: clientId
+          });
+          const payload = ticket.getPayload();
+          email = payload.email;
+          firstName = payload.given_name || 'GoogleUser';
+          lastName = payload.family_name || 'Account';
+          googleId = payload.sub;
+          profilePicture = payload.picture || '';
+        } catch (verifyErr) {
+          console.error('Google token verification failed:', verifyErr.message);
+          return res.status(401).json({ error: 'Google authentication failed: Invalid token.' });
+        }
+      } else {
+        // Simulated / Local Development Fallback
+        email = req.body.email;
+        firstName = req.body.firstName || 'GoogleUser';
+        lastName = req.body.lastName || 'Account';
+        googleId = 'simulated_google_id_' + email;
+        profilePicture = '';
+
+        if (!email) {
+          return res.status(400).json({ error: 'Email is required for simulated login.' });
+        }
+      }
+
       const isMock = global.isMockDB;
       let user;
 
@@ -183,11 +224,14 @@ const authController = {
       // If user does not exist, register them automatically
       if (!user) {
         const userData = {
-          firstName: firstName || 'GoogleUser',
-          lastName: lastName || 'Account',
+          firstName,
+          lastName,
           email,
           mobile: 'N/A',
           passwordHash: 'oauth_managed', // flag that it's Google Auth
+          googleId,
+          authProvider: 'google',
+          profilePicture,
           role: 'User',
           emailVerified: true,
           profileCompleted: false
@@ -197,6 +241,30 @@ const authController = {
           user = localDb.create('users', userData);
         } else {
           user = await User.create(userData);
+        }
+      } else {
+        // If user already exists, update their Google ID, profile picture and provider if not set
+        const updateData = {};
+        let needsUpdate = false;
+        if (!user.googleId) {
+          updateData.googleId = googleId;
+          needsUpdate = true;
+        }
+        if (!user.profilePicture && profilePicture) {
+          updateData.profilePicture = profilePicture;
+          needsUpdate = true;
+        }
+        if (user.authProvider === 'local') {
+          updateData.authProvider = 'google';
+          needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+          if (isMock) {
+            user = localDb.findByIdAndUpdate('users', user._id, updateData);
+          } else {
+            user = await User.findByIdAndUpdate(user._id, { $set: updateData }, { new: true });
+          }
         }
       }
 
@@ -212,11 +280,13 @@ const authController = {
           email: user.email,
           mobile: user.mobile,
           role: user.role,
-          profileCompleted: user.profileCompleted
+          profileCompleted: user.profileCompleted,
+          profilePicture: user.profilePicture || profilePicture
         }
       });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      console.error('Unhandled googleLogin error:', err);
+      res.status(500).json({ error: err.message || 'An error occurred during Google authentication.' });
     }
   },
 

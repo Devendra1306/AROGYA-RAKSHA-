@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
@@ -43,6 +44,7 @@ const GlobalLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   const activeClass = (path) => 
     location.pathname === path 
@@ -80,27 +82,100 @@ const GlobalLayout = ({ children }) => {
           </button>
 
           {user ? (
-            <div className="flex items-center gap-base">
-              <span 
-                className="hidden md:inline text-label-md font-medium text-primary cursor-pointer hover:underline"
-                onClick={() => navigate('/dashboard')}
+            <div className="relative flex items-center">
+              {/* User Selector Row */}
+              <div 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-850 transition-all select-none"
               >
-                Dashboard
-              </span>
-              {user.role === 'Admin' && (
-                <span 
-                  className="hidden md:inline text-label-md text-secondary font-bold cursor-pointer hover:underline"
-                  onClick={() => navigate('/admin')}
-                >
-                  Admin
+                {user.profilePicture ? (
+                  <img 
+                    src={user.profilePicture} 
+                    alt={user.firstName} 
+                    className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 dark:ring-secondary/20"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = ''; // Clear image to fallback to initials
+                    }}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs ring-2 ring-primary/10 dark:ring-secondary/10">
+                    {user.firstName[0].toUpperCase()}{user.lastName[0].toUpperCase()}
+                  </div>
+                )}
+                <span className="hidden md:inline text-label-md font-semibold text-on-surface dark:text-slate-200 ml-1">
+                  {user.firstName}
                 </span>
+                <span className="text-[10px] text-on-surface-variant dark:text-slate-400 ml-0.5">▼</span>
+              </div>
+
+              {/* Dropdown Menu */}
+              {dropdownOpen && (
+                <>
+                  {/* Overlay to close on click outside */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setDropdownOpen(false)}
+                  ></div>
+                  
+                  {/* Dropdown Card */}
+                  <div className="absolute right-0 top-11 z-50 w-64 glass-card rounded-2xl p-4 bg-white dark:bg-slate-800 border border-outline-variant/30 dark:border-slate-700 shadow-2xl animate-scale-up text-slate-800 dark:text-slate-200">
+                    <div className="pb-3 border-b border-outline-variant/30 dark:border-slate-700/65 mb-2">
+                      <h4 className="font-bold text-sm text-on-surface dark:text-slate-100">
+                        {user.firstName} {user.lastName}
+                      </h4>
+                      <p className="text-xs text-on-surface-variant dark:text-slate-400 truncate mt-0.5">
+                        {user.email}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <button 
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          navigate('/dashboard');
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium hover:bg-primary/5 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2"
+                      >
+                        📊 Dashboard
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          navigate('/profile-setup');
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium hover:bg-primary/5 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2"
+                      >
+                        👤 Profile Setup
+                      </button>
+                      
+                      {user.role === 'Admin' && (
+                        <button 
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            navigate('/admin');
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold text-secondary hover:bg-secondary/5 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2"
+                        >
+                          🛡️ Admin Dashboard
+                        </button>
+                      )}
+                      
+                      <button 
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          logout();
+                          navigate('/');
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 dark:hover:text-red-400 transition-all flex items-center gap-2 mt-2 pt-2 border-t border-outline-variant/20 dark:border-slate-700/40"
+                      >
+                        🚪 Logout
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
-              <button 
-                onClick={logout}
-                className="bg-primary/10 hover:bg-primary/20 text-primary dark:text-secondary dark:bg-secondary/10 dark:hover:bg-secondary/20 px-4 py-2 rounded-xl text-label-md transition-all"
-              >
-                Logout
-              </button>
             </div>
           ) : (
             <div className="flex items-center gap-stack-sm">
@@ -224,30 +299,33 @@ const GlobalLayout = ({ children }) => {
 };
 
 export default function App() {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com';
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <GlobalLayout>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              
-              {/* Protected Routes */}
-              <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/emergency" element={<EmergencyHelp />} />
-              <Route path="/medical-assistant" element={<MedicalAssistant />} />
-              <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
-              <Route path="/diet-planner" element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
-              <Route path="/medicine-info" element={<MedicineInfo />} />
-              <Route path="/home-remedies" element={<HomeRemedies />} />
-              <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-            </Routes>
-          </GlobalLayout>
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={clientId}>
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <GlobalLayout>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                
+                {/* Protected Routes */}
+                <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/emergency" element={<EmergencyHelp />} />
+                <Route path="/medical-assistant" element={<MedicalAssistant />} />
+                <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
+                <Route path="/diet-planner" element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
+                <Route path="/medicine-info" element={<MedicineInfo />} />
+                <Route path="/home-remedies" element={<HomeRemedies />} />
+                <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+              </Routes>
+            </GlobalLayout>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   );
 }

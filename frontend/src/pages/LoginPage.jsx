@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
@@ -10,83 +11,9 @@ export default function LoginPage() {
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
-  // Google authentication states
-  const [gisLoaded, setGisLoaded] = useState(false);
+  // Google authentication fallback states
   const [showGoogleChooser, setShowGoogleChooser] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
-
-  // Dynamically load Google Identity Services library
-  useEffect(() => {
-    if (window.google?.accounts?.id) {
-      setGisLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setGisLoaded(true);
-    script.onerror = () => console.error('Failed to load Google Identity Services script.');
-    document.body.appendChild(script);
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  // Initialize GIS and render native button if client ID is present
-  useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (gisLoaded && clientId && window.google?.accounts?.id) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: async (response) => {
-            setLoading(true);
-            setError('');
-            try {
-              const jwtToken = response.credential;
-              // Decode token payload
-              const payload = JSON.parse(atob(jwtToken.split('.')[1]));
-              const data = await googleLogin({
-                token: jwtToken,
-                email: payload.email,
-                firstName: payload.given_name,
-                lastName: payload.family_name
-              });
-              if (data.user.profileCompleted) {
-                navigate('/dashboard');
-              } else {
-                navigate('/profile-setup');
-              }
-            } catch (err) {
-              setError(err.response?.data?.error || 'Google login failed.');
-            } finally {
-              setLoading(false);
-            }
-          }
-        });
-
-        const buttonDiv = document.getElementById('googleSignInButton');
-        if (buttonDiv) {
-          window.google.accounts.id.renderButton(
-            buttonDiv,
-            {
-              theme: 'outline',
-              size: 'large',
-              width: buttonDiv.offsetWidth || 382,
-              text: 'continue_with',
-              shape: 'pill'
-            }
-          );
-        }
-      } catch (err) {
-        console.error('Error initializing Google Sign-In:', err);
-      }
-    }
-  }, [gisLoaded]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,7 +34,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleClick = () => {
-    // This is the fallback handler for simulated authentication when no client ID is set
+    // Fallback handler for simulated authentication when no client ID is set
     setShowGoogleChooser(true);
   };
 
@@ -196,8 +123,42 @@ export default function LoginPage() {
           <div className="flex-grow border-t border-outline-variant/30"></div>
         </div>
 
-        {gisLoaded && import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
-          <div id="googleSignInButton" className="w-full flex justify-center min-h-[44px]"></div>
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+          <div className="w-full flex justify-center min-h-[44px]">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                setLoading(true);
+                setError('');
+                try {
+                  const jwtToken = credentialResponse.credential;
+                  // Decode token payload
+                  const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+                  const data = await googleLogin({
+                    token: jwtToken,
+                    email: payload.email,
+                    firstName: payload.given_name,
+                    lastName: payload.family_name
+                  });
+                  if (data.user.profileCompleted) {
+                    navigate('/dashboard');
+                  } else {
+                    navigate('/profile-setup');
+                  }
+                } catch (err) {
+                  setError(err.response?.data?.error || 'Google login failed.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              onError={() => {
+                setError('Google authentication cancelled or failed.');
+              }}
+              theme="outline"
+              shape="pill"
+              size="large"
+              width="382"
+            />
+          </div>
         ) : (
           <button 
             onClick={handleGoogleClick}
