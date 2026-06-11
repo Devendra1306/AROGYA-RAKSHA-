@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function SignupPage() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '173236579751-t2aa0hq2d83eo0939a37qbed74351np5.apps.googleusercontent.com';
-  const isIPAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(window.location.hostname);
-  const hasRealClientId = clientId && clientId !== 'mock' && !isIPAddress;
+  // Firebase Auth configuration is handled in firebase.js config
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -83,6 +82,43 @@ export default function SignupPage() {
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Google login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      console.log("Starting Firebase Google Auth Popup...");
+      const result = await signInWithPopup(auth, googleProvider);
+      const userObj = result.user;
+      const idToken = await userObj.getIdToken();
+      
+      console.log("Firebase Google Auth success! Sending ID token to backend...");
+      const data = await googleLogin({
+        token: idToken,
+        email: userObj.email,
+        firstName: userObj.displayName?.split(' ')[0] || 'GoogleUser',
+        lastName: userObj.displayName?.split(' ').slice(1).join(' ') || 'Account'
+      });
+      console.log("Authentication SUCCESS!", data.user);
+      if (data.user.profileCompleted) {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile-setup');
+      }
+    } catch (err) {
+      console.error("Firebase Google Auth error:", err);
+      // Check if it's user-cancelled or configuration issue
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError('Google login popup was closed before completion.');
+      } else {
+        setError(err.response?.data?.error || err.message || 'Google authentication failed.');
+      }
+      // Show chooser dialog fallback for local testing
+      setShowGoogleChooser(true);
     } finally {
       setLoading(false);
     }
@@ -224,57 +260,19 @@ export default function SignupPage() {
           <div className="flex-grow border-t border-outline-variant/30"></div>
         </div>
 
-        {hasRealClientId ? (
-          <div className="w-full flex justify-center min-h-[44px]">
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                setLoading(true);
-                setError('');
-                try {
-                  const jwtToken = credentialResponse.credential;
-                  // Decode token payload
-                  const payload = JSON.parse(atob(jwtToken.split('.')[1]));
-                  console.log("Google OAuth flow success! Sending token to backend for verification...", payload);
-                  const data = await googleLogin({
-                    token: jwtToken,
-                    email: payload.email,
-                    firstName: payload.given_name,
-                    lastName: payload.family_name
-                  });
-                  console.log("Google Authentication SUCCESS! Profile details:", data.user);
-                  if (data.user.profileCompleted) {
-                    navigate('/dashboard');
-                  } else {
-                    navigate('/profile-setup');
-                  }
-                } catch (err) {
-                  const errMsg = err.response?.data?.error || err.message || 'Google login failed.';
-                  console.error("Google Authentication FAILED on backend verify:", errMsg);
-                  setError(errMsg);
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              onError={() => {
-                console.error("Google Authentication FAILED: OAuth popup flow cancelled or origin not registered.");
-                setError('Google authentication cancelled or failed. Falling back to simulated login chooser.');
-                setShowGoogleChooser(true);
-              }}
-              theme="outline"
-              shape="pill"
-              size="large"
-              width="382"
-              auto_select={false}
-            />
-          </div>
-        ) : (
-          <button 
-            onClick={handleGoogleClick}
-            className="w-full border border-outline-variant py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-sm text-slate-800 dark:text-slate-200"
-          >
-            Continue with Google
-          </button>
-        )}
+        <button 
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+          className="w-full border border-outline-variant py-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 font-bold transition-all shadow-sm flex items-center justify-center gap-2.5 text-sm text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 disabled:opacity-50"
+        >
+          <svg className="w-5 h-5 mr-1" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+          </svg>
+          Continue with Google
+        </button>
 
         <p className="text-center text-label-md text-on-surface-variant dark:text-slate-400 mt-6">
           Already have an account? <Link to="/login" className="text-primary hover:underline font-bold">Login</Link>

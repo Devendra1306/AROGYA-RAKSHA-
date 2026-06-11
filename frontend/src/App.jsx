@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
@@ -370,35 +369,33 @@ export default function App() {
   console.log("===============================");
 
   return (
-    <GoogleOAuthProvider clientId={clientId}>
-      <ThemeProvider>
-        <AuthProvider>
-          <Router>
-            <GlobalLayout>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-                
-                {/* Protected Routes */}
-                <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                <Route path="/emergency" element={<EmergencyHelp />} />
-                <Route path="/medical-assistant" element={<MedicalAssistant />} />
-                <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
-                <Route path="/diet-planner" element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
-                <Route path="/medicine-info" element={<MedicineInfo />} />
-                <Route path="/home-remedies" element={<HomeRemedies />} />
-                <Route path="/nearby" element={<HealthcareDirectory />} />
-                <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-              </Routes>
-            </GlobalLayout>
-          </Router>
-        </AuthProvider>
-      </ThemeProvider>
-    </GoogleOAuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <GlobalLayout>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+              
+              {/* Protected Routes */}
+              <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/emergency" element={<EmergencyHelp />} />
+              <Route path="/medical-assistant" element={<MedicalAssistant />} />
+              <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
+              <Route path="/diet-planner" element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
+              <Route path="/medicine-info" element={<MedicineInfo />} />
+              <Route path="/home-remedies" element={<HomeRemedies />} />
+              <Route path="/nearby" element={<HealthcareDirectory />} />
+              <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+            </Routes>
+          </GlobalLayout>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
