@@ -218,11 +218,26 @@ const authController = {
         return res.status(400).json({ error: 'Invalid email or password.' });
       }
 
+      if (user.accountStatus === 'suspended') {
+        return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+      }
+      if (user.accountStatus === 'deleted') {
+        return res.status(403).json({ error: 'Your account has been deleted.' });
+      }
+
       const isMatch = await bcrypt.compare(password, user.passwordHash);
       if (!isMatch) {
         return res.status(400).json({ error: 'Invalid email or password.' });
       }
 
+      // Update lastLogin
+      if (!isMock) {
+        user.lastLogin = new Date();
+        await user.save();
+      } else {
+        user.lastLogin = new Date();
+        localDb.update('users', user._id, user);
+      }
       const token = generateToken(user);
       res.json({
         message: 'Login successful.',
@@ -303,11 +318,14 @@ const authController = {
           mobile: 'N/A',
           passwordHash: 'oauth_managed', // flag that it's Google Auth
           googleId,
+          uid: googleId,
           authProvider: 'google',
           profilePicture,
           role: 'User',
           emailVerified: true,
-          profileCompleted: false
+          profileCompleted: false,
+          accountStatus: 'active',
+          lastLogin: new Date()
         };
 
         if (isMock) {
@@ -316,21 +334,20 @@ const authController = {
           user = await User.create(userData);
         }
       } else {
+        if (user.accountStatus === 'suspended') {
+          return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+        }
+        if (user.accountStatus === 'deleted') {
+          return res.status(403).json({ error: 'Your account has been deleted.' });
+        }
+
         // If user already exists, update their Google ID, profile picture and provider if not set
-        const updateData = {};
-        let needsUpdate = false;
-        if (!user.googleId) {
-          updateData.googleId = googleId;
-          needsUpdate = true;
-        }
-        if (!user.profilePicture && profilePicture) {
-          updateData.profilePicture = profilePicture;
-          needsUpdate = true;
-        }
-        if (user.authProvider === 'local') {
-          updateData.authProvider = 'google';
-          needsUpdate = true;
-        }
+        const updateData = { lastLogin: new Date() };
+        let needsUpdate = true;
+        if (!user.googleId) updateData.googleId = googleId;
+        if (!user.uid) updateData.uid = googleId;
+        if (!user.profilePicture && profilePicture) updateData.profilePicture = profilePicture;
+        if (user.authProvider === 'local') updateData.authProvider = 'google';
 
         if (needsUpdate) {
           if (isMock) {
@@ -744,6 +761,26 @@ const authController = {
     } catch (err) {
       console.error('Error in resetPassword:', err.message);
       res.status(500).json({ error: err.message });
+    }
+  },
+  deleteAccount: async (req, res) => {
+    try {
+      const isMock = global.isMockDB;
+      if (isMock) {
+        const user = localDb.findById('users', req.user._id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        user.accountStatus = 'deleted';
+        user.deletedAt = new Date();
+        localDb.update('users', req.user._id, user);
+      } else {
+        await User.findByIdAndUpdate(req.user._id, {
+          $set: { accountStatus: 'deleted', deletedAt: new Date() }
+        });
+      }
+      res.status(200).json({ message: 'Account deleted successfully' });
+    } catch (err) {
+      console.error('Error deleting account:', err.message);
+      res.status(500).json({ error: 'Failed to delete account' });
     }
   }
 };

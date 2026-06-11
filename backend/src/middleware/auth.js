@@ -113,6 +113,13 @@ async function protect(req, res, next) {
       user = await User.findOne({ email });
     }
 
+    if (user && user.accountStatus === 'suspended') {
+      return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+    }
+    if (user && user.accountStatus === 'deleted') {
+      return res.status(403).json({ error: 'Your account has been deleted.' });
+    }
+
     // Auto-create user in MongoDB if not found (sync Firebase user state)
     if (!user) {
       const nameParts = (decoded.name || '').split(' ');
@@ -130,7 +137,10 @@ async function protect(req, res, next) {
         profilePicture: decoded.picture || '',
         role: 'User',
         emailVerified: true,
-        profileCompleted: false
+        profileCompleted: false,
+        uid: decoded.sub,
+        accountStatus: 'active',
+        lastLogin: new Date()
       };
 
       if (isMock) {
