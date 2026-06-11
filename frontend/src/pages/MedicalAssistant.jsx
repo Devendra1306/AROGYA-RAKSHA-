@@ -20,7 +20,7 @@ const renderMarkdown = (text) => {
     return line + '<br />';
   }).join('\n');
   
-  escaped = escaped.replace(/⚠️\s*(.*?)(?:<br \/>|$)/g, '<div class="my-2 p-3 bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-r-xl text-red-800 dark:text-red-300 text-sm flex items-start gap-2"><span class="material-symbols-outlined text-base shrink-0 text-red-500 mt-0.5">warning</span><span class="flex-1">$1</span></div>');
+  escaped = escaped.replace(/CRITICAL EMERGENCY DETECTED:\s*(.*?)(?:<br \/>|$)/g, '<div class="my-2 p-3 bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-r-xl text-red-800 dark:text-red-300 text-sm flex items-start gap-2"><span class="material-symbols-outlined text-base shrink-0 text-red-500 mt-0.5">warning</span><span class="flex-1">CRITICAL EMERGENCY DETECTED: $1</span></div>');
   
   return <div dangerouslySetInnerHTML={{ __html: escaped }} className="space-y-1 text-sm md:text-base" />;
 };
@@ -70,18 +70,18 @@ const StructuredResponseCard = ({ text }) => {
   
   let severityColor = 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300';
   let severityPulse = '';
-  if (sections.severity.toLowerCase().includes('mild') || sections.severity.includes('🟢')) {
+  if (sections.severity.toLowerCase().includes('mild')) {
     severityColor = 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-400';
-  } else if (sections.severity.toLowerCase().includes('moderate') || sections.severity.includes('🟡')) {
+  } else if (sections.severity.toLowerCase().includes('moderate')) {
     severityColor = 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-400';
-  } else if (sections.severity.toLowerCase().includes('high risk') || sections.severity.includes('🔴') || sections.severity.toLowerCase().includes('high')) {
+  } else if (sections.severity.toLowerCase().includes('high risk') || sections.severity.toLowerCase().includes('high')) {
     severityColor = 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-400';
     severityPulse = 'animate-pulse';
   }
 
   const medicinesList = [];
   if (sections.medicines && sections.medicines !== 'No medication suggested.' && sections.medicines !== 'No medication suggested') {
-    const parts = sections.medicines.split('💊').map(p => p.trim()).filter(Boolean);
+    const parts = sections.medicines.split('Medicine:').map(p => p.trim()).filter(Boolean);
     parts.forEach(part => {
       const lines = part.split('\n').map(l => l.trim()).filter(Boolean);
       if (lines.length > 0) {
@@ -535,7 +535,7 @@ export default function MedicalAssistant() {
         {/* Chat Header */}
         <div className="bg-primary text-white p-4 flex justify-between items-center dark:bg-slate-950">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🩺</span>
+            <span className="material-symbols-outlined text-2xl">medical_services</span>
             <div>
               <h3 className="font-bold text-lg">AI Medical Assistant</h3>
               <p className="text-[10px] opacity-80">RAG Clinical Knowledge Base Active</p>

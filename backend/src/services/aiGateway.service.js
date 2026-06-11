@@ -244,10 +244,10 @@ function checkEmergency(text) {
 const aiGateway = {
   validateConfig: () => {
     console.log('\n====================================');
-    console.log('🛡️  Arogya Raksha AI Gateway Startup Check');
-    console.log(`Gemini (Primary): ${process.env.GEMINI_API_KEY ? '✅ ENABLED' : '⚠️  WARNING (Missing key in environment, will fall back)'}`);
-    console.log(`Groq (Secondary): ${process.env.GROQ_API_KEY ? '✅ ENABLED' : '❌ DISABLED (Key Missing)'}`);
-    console.log(`OpenRouter (Tertiary): ${process.env.OPENROUTER_API_KEY ? '✅ ENABLED' : '❌ DISABLED (Key Missing)'}`);
+    console.log('  Arogya Raksha AI Gateway Startup Check');
+    console.log(`Gemini (Primary): ${process.env.GEMINI_API_KEY ? ' ENABLED' : ' WARNING (Missing key in environment, will fall back)'}`);
+    console.log(`Groq (Secondary): ${process.env.GROQ_API_KEY ? ' ENABLED' : ' DISABLED (Key Missing)'}`);
+    console.log(`OpenRouter (Tertiary): ${process.env.OPENROUTER_API_KEY ? ' ENABLED' : ' DISABLED (Key Missing)'}`);
     console.log('====================================\n');
   },
 
@@ -262,7 +262,7 @@ const aiGateway = {
         isEmergency: true,
         urgencyLevel: 'Critical',
         possibleEmergency: 'Detected High-Risk Symptom',
-        response: '⚠️ CRITICAL EMERGENCY DETECTED: Your symptoms suggest a potential life-threatening emergency. Please contact emergency services immediately or visit the nearest hospital emergency room. Do NOT delay medical attention.',
+        response: 'CRITICAL EMERGENCY DETECTED: Your symptoms suggest a potential life-threatening emergency. Please contact emergency services immediately or visit the nearest hospital emergency room. Do NOT delay medical attention.',
         immediateActions: [
           'Call emergency services (112 or local ambulance) immediately.',
           'If chest pain is present, sit comfortably and loosen tight clothing.',
@@ -297,12 +297,12 @@ CRITICAL RULES:
 Brief explanation in 1-2 lines. Use language like "Possible Condition: Your symptoms may be related to..." and NEVER give a definitive diagnosis.
 
 ### 2. SEVERITY LEVEL
-🟢 Mild
-(Choose only one from: 🟢 Mild, 🟡 Moderate, 🔴 High Risk)
+Mild
+(Choose only one from: Mild, Moderate, High Risk)
 
 ### 3. SUGGESTED MEDICINES
 Provide 1-2 suggestions. Format EXACTLY as:
-💊 [Medicine Name]
+Medicine: [Medicine Name]
 Used for:
 [Brief Purpose]
 

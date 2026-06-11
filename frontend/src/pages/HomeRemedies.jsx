@@ -15,7 +15,7 @@ const renderMarkdown = (text) => {
   escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
   escaped = escaped.replace(/^\s*[-*]\s+(.*?)$/gm, '<div class="flex items-start gap-1.5 my-1 text-xs"><span class="text-emerald-500 font-bold select-none">•</span><span class="flex-1">$1</span></div>');
   escaped = escaped.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<div class="flex items-start gap-1.5 my-1 text-xs"><span class="text-primary dark:text-secondary font-bold min-w-[15px]">$1.</span><span class="flex-1">$2</span></div>');
-  escaped = escaped.replace(/⚠️\s*(.*?)(?:<br \/?>|$)/g, '<div class="my-1.5 p-3 bg-amber-50 dark:bg-amber-950/20 border-l-4 border-amber-500 rounded-r-xl text-amber-800 dark:text-amber-300 text-xs flex items-center gap-1.5"><span class="material-symbols-outlined text-sm shrink-0 text-amber-500">warning</span><span class="flex-1">$1</span></div>');
+  escaped = escaped.replace(/Warning:\s*(.*?)(?:<br \/>|$)/gi, '<div class="my-1.5 p-3 bg-amber-50 dark:bg-amber-950/20 border-l-4 border-amber-500 rounded-r-xl text-amber-800 dark:text-amber-300 text-xs flex items-center gap-1.5"><span class="material-symbols-outlined text-sm shrink-0 text-amber-500">warning</span><span class="flex-1">$1</span></div>');
   
   escaped = escaped.split('\n').map(line => {
     if (line.includes('flex items-start') || line.includes('<h') || line.includes('bg-amber-50') || line.trim() === '') {
