@@ -54,7 +54,26 @@ export default function SignupPage() {
       await register(firstName, lastName, email, mobile, password);
       navigate('/profile-setup');
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Registration failed. Try again.');
+      let msg = err.message || 'Registration failed. Try again.';
+      if (err.code) {
+        switch (err.code) {
+          case 'auth/email-already-in-use':
+            msg = 'An account already exists with this email address.';
+            break;
+          case 'auth/invalid-email':
+            msg = 'Invalid email address format.';
+            break;
+          case 'auth/weak-password':
+            msg = 'The password is too weak.';
+            break;
+          case 'auth/network-request-failed':
+            msg = 'Network error. Please check your internet connection.';
+            break;
+        }
+      } else if (err.response?.data?.error) {
+        msg = err.response.data.error;
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }

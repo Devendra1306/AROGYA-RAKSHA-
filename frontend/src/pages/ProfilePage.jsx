@@ -1,11 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, api } from '../context/AuthContext';
+import { auth } from '../config/firebase';
 import { motion } from 'framer-motion';
 
 export default function ProfilePage() {
-  const { user, profile, logout } = useAuth();
+  const { user, profile, logout, sendVerification, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const [resendStatus, setResendStatus] = useState('');
+  const [resendError, setResendError] = useState('');
+
+  const handleResendVerification = async () => {
+    setResendStatus('sending');
+    setResendError('');
+    try {
+      await sendVerification();
+      setResendStatus('success');
+      setTimeout(() => setResendStatus(''), 5000);
+    } catch (err) {
+      console.error(err);
+      setResendError(err.message || 'Failed to resend verification email.');
+      setResendStatus('error');
+    }
+  };
+
+  const handleRefreshVerification = async () => {
+    setResendStatus('refreshing');
+    try {
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+        await refreshProfile();
+      }
+      setResendStatus('');
+    } catch (err) {
+      console.error(err);
+      setResendStatus('');
+    }
+  };
 
   const [savedMedicines, setSavedMedicines] = useState([]);
   const [savedRemedies, setSavedRemedies] = useState([]);
@@ -112,6 +143,36 @@ export default function ProfilePage() {
 
     return (
       <div className="bg-background text-on-surface px-margin-mobile pb-28 font-body-md">
+        {/* Verification Warning Banner */}
+        {user && !user.emailVerified && (
+          <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-350 rounded-2xl text-xs border border-amber-200 dark:border-amber-900/50 flex flex-col gap-3 animate-fade-in shadow-sm">
+            <div className="flex items-start gap-2.5">
+              <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 mt-0.5">mark_email_unread</span>
+              <div>
+                <p className="font-extrabold text-sm">Verify Your Email Address</p>
+                <p className="opacity-90 mt-0.5">Please verify your email address to secure your account and unlock all features.</p>
+                {resendStatus === 'success' && <p className="text-emerald-600 dark:text-emerald-400 font-bold mt-1">Verification email sent! Check your inbox.</p>}
+                {resendStatus === 'error' && <p className="text-red-655 dark:text-red-400 font-bold mt-1">{resendError}</p>}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-end shrink-0">
+              <button 
+                onClick={handleResendVerification}
+                disabled={resendStatus === 'sending'}
+                className="bg-amber-600 text-white font-bold px-3.5 py-1.5 rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-all text-[11px]"
+              >
+                {resendStatus === 'sending' ? 'Sending...' : 'Resend Email'}
+              </button>
+              <button 
+                onClick={handleRefreshVerification}
+                className="border border-amber-400 dark:border-amber-800 font-bold px-3.5 py-1.5 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all text-[11px]"
+              >
+                Check Status
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Bento Grid Layout */}
         <div className="flex flex-col gap-6 mt-4">
           
@@ -473,6 +534,36 @@ export default function ProfilePage() {
       transition={{ duration: 0.35 }}
       className="max-w-[600px] mx-auto px-4 pt-20 pb-28 text-slate-800 dark:text-slate-100"
     >
+      {/* Verification Warning Banner */}
+      {user && !user.emailVerified && (
+        <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-950/20 text-amber-900 dark:text-amber-300 rounded-2xl text-xs border border-amber-200 dark:border-amber-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in shadow-sm">
+          <div className="flex items-start gap-2.5">
+            <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 mt-0.5">mark_email_unread</span>
+            <div>
+              <p className="font-extrabold text-sm">Verify Your Email Address</p>
+              <p className="opacity-90 mt-0.5">Please verify your email address to secure your account and unlock all features.</p>
+              {resendStatus === 'success' && <p className="text-emerald-600 dark:text-emerald-400 font-bold mt-1">Verification email sent! Check your inbox.</p>}
+              {resendStatus === 'error' && <p className="text-red-655 dark:text-red-400 font-bold mt-1">{resendError}</p>}
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+            <button 
+              onClick={handleResendVerification}
+              disabled={resendStatus === 'sending'}
+              className="bg-amber-600 text-white font-bold px-3.5 py-1.5 rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-all text-[11px]"
+            >
+              {resendStatus === 'sending' ? 'Sending...' : 'Resend Email'}
+            </button>
+            <button 
+              onClick={handleRefreshVerification}
+              className="border border-amber-400 dark:border-amber-800 font-bold px-3.5 py-1.5 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-all text-[11px]"
+            >
+              Check Status
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Profile Header */}
       <section className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-800/70 shadow-sm border border-slate-200/50 dark:border-slate-700/50 mb-6 flex items-center gap-4">
         {user?.profilePicture ? (

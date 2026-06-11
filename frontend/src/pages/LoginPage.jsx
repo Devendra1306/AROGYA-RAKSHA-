@@ -41,7 +41,28 @@ export default function LoginPage() {
         navigate('/profile-setup');
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Invalid credentials or connection error.');
+      let msg = err.message || 'An error occurred during login.';
+      if (err.code) {
+        switch (err.code) {
+          case 'auth/invalid-email':
+            msg = 'Invalid email address format.';
+            break;
+          case 'auth/user-disabled':
+            msg = 'This account has been disabled.';
+            break;
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+          case 'auth/invalid-credential':
+            msg = 'Invalid email or password.';
+            break;
+          case 'auth/network-request-failed':
+            msg = 'Network error. Please check your internet connection.';
+            break;
+        }
+      } else if (err.response?.data?.error) {
+        msg = err.response.data.error;
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }

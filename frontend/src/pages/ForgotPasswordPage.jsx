@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -8,6 +8,7 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isGoogleAccount, setIsGoogleAccount] = useState(false);
+  const { forgotPassword } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,18 +18,25 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/forgot-password', { email });
-      setMessage(response.data.message || 'Reset link sent successfully!');
+      await forgotPassword(email);
+      setMessage('A password reset link has been sent to your email address.');
       setEmail('');
     } catch (err) {
-      const errMsg = err.response?.data?.error || err.message || 'Failed to request password reset link. Please try again.';
-      
-      // Check if it is a Google Login managed account
-      if (errMsg.includes('Google Sign-In')) {
-        setIsGoogleAccount(true);
-      } else {
-        setError(errMsg);
+      let errMsg = err.message || 'Failed to request password reset link. Please try again.';
+      if (err.code) {
+        switch (err.code) {
+          case 'auth/invalid-email':
+            errMsg = 'Invalid email address format.';
+            break;
+          case 'auth/user-not-found':
+            errMsg = 'No registered user was found with this email address.';
+            break;
+          case 'auth/network-request-failed':
+            errMsg = 'Network error. Please check your internet connection.';
+            break;
+        }
       }
+      setError(errMsg);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  sendPasswordResetEmail, 
+  sendEmailVerification, 
+  onAuthStateChanged,
+  updateProfile as updateFirebaseProfile
+} from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../config/firebase';
 
 const AuthContext = createContext(null);
 
@@ -8,33 +19,28 @@ const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
   const hostname = window.location.hostname;
   
-  // If we are testing locally on a mobile device (connected to the same Wi-Fi)
   if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1' && /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname)) {
     return `http://${hostname}:5000/api`;
   }
   
-  // If we are on localhost/127.0.0.1
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5000/api';
   }
-
-  // If in production on Vercel or other platforms, and envUrl is set to a non-localhost endpoint
+  
   if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
     return envUrl;
   }
-
-  // Fallback for production: relative path
+  
   return '/api';
 };
 
 export const API_URL = getApiUrl();
 
-// Create a configured axios instance
 export const api = axios.create({
   baseURL: API_URL
 });
 
-// Configure Axios request interceptor to dynamically attach token
+// Axios request interceptor to dynamically attach token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -48,17 +54,15 @@ api.interceptors.request.use(
   }
 );
 
-// Configure Axios response interceptor to globally intercept and customize network connection errors
+// Axios response interceptor for network and CORS blocks customization
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error("API Call Error Details:", error);
     
-    // Check if error is timeout
     if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
       error.message = "Request timeout: The server took too long to respond. Please try again.";
     } 
-    // Check if there is no response (network disconnect, DNS error, CORS block)
     else if (!error.response) {
       const isHttps = window.location.protocol === 'https:';
       const isLocalBackend = API_URL.startsWith('http://localhost') || 
@@ -75,7 +79,6 @@ api.interceptors.response.use(
         error.message = "Server unavailable: Could not connect to the backend API server. Ensure it is running and accessible.";
       }
     } 
-    // Check response status
     else {
       const status = error.response.status;
       if (status === 405) {
@@ -109,86 +112,120 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
 
-  // Configure sync profile
+  // Listen to Firebase Auth state change to persist sessions across page refreshes
   useEffect(() => {
-    const initializeAuth = async () => {
-      if (token) {
-        localStorage.setItem('token', token);
-        setIsAuthenticated(true);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
         try {
-          const res = await api.get('/auth/profile');
-          if (res.data && typeof res.data === 'object' && res.data.user) {
-            setUser(res.data.user);
-            localStorage.setItem('user', JSON.stringify(res.data.user));
+          const idToken = await firebaseUser.getIdToken();
+          localStorage.setItem('token', idToken);
+          setToken(idToken);
+          
+          // Sync with the backend MongoDB database
+          const res = await api.get('/auth/profile', {
+            headers: {
+              'Authorization': `Bearer ${idToken}`
+            }
+          });
+          
+          if (res.data && res.data.user) {
+            const syncedUser = {
+              ...res.data.user,
+              emailVerified: firebaseUser.emailVerified
+            };
+            setUser(syncedUser);
+            localStorage.setItem('user', JSON.stringify(syncedUser));
             setProfile(res.data.profile);
-          } else {
-            console.error('Failed to fetch user profile: Invalid response structure.');
-            logout();
+            setIsAuthenticated(true);
           }
         } catch (err) {
-          console.error('Failed to fetch user profile:', err.message);
-          // Only log out if it is an explicit authentication failure
-          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-            logout();
+          console.error("Error syncing auth session with backend on refresh:", err.message);
+          // Load local user details as a temporary fallback if backend is unreachable
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            try {
+              setUser(JSON.parse(savedUser));
+              setIsAuthenticated(true);
+            } catch (e) {
+              handleForceLogout();
+            }
           } else {
-            console.warn('Backend server is unreachable or returned network error. Retaining local session.');
+            handleForceLogout();
           }
         }
       } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setProfile(null);
-        setIsAuthenticated(false);
+        handleForceLogout();
       }
       setLoading(false);
-    };
+    });
+    
+    return () => unsubscribe();
+  }, []);
 
-    initializeAuth();
-  }, [token]);
+  const handleForceLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    setProfile(null);
+    setIsAuthenticated(false);
+  };
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    const { token: newToken, user: newUser } = res.data;
+    // 1. Authenticate with Firebase Auth
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
     
-    // Save to localStorage immediately
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    // 2. Obtain ID token
+    const idToken = await firebaseUser.getIdToken();
+    localStorage.setItem('token', idToken);
     
-    // Update state immediately
-    setToken(newToken);
-    setUser(newUser);
+    // 3. Sync and fetch user profile details from backend MongoDB
+    const res = await api.get('/auth/profile', {
+      headers: {
+        'Authorization': `Bearer ${idToken}`
+      }
+    });
+    
+    const syncedUser = {
+      ...res.data.user,
+      emailVerified: firebaseUser.emailVerified
+    };
+    
+    setToken(idToken);
+    setUser(syncedUser);
+    localStorage.setItem('user', JSON.stringify(syncedUser));
     setIsAuthenticated(true);
+    setProfile(res.data.profile);
     
-    try {
-      const profileRes = await api.get('/auth/profile');
-      setProfile(profileRes.data.profile);
-    } catch (e) {
-      console.error('Failed to fetch profile during login:', e.message);
-    }
-    
-    return res.data;
+    return { token: idToken, user: syncedUser };
   };
 
   const googleLogin = async (googleData) => {
+    // Verify/Register in backend
     const res = await api.post('/auth/google', googleData);
-    const { token: newToken, user: newUser } = res.data;
+    const { user: newUser } = res.data;
     
-    // Save to localStorage immediately
-    localStorage.setItem('token', newToken);
+    localStorage.setItem('token', googleData.token);
     localStorage.setItem('user', JSON.stringify(newUser));
-    
-    // Update state immediately
-    setToken(newToken);
+    setToken(googleData.token);
     setUser(newUser);
     setIsAuthenticated(true);
-
-    // Debugging logs as requested
-    console.log("Google Login Response:", res.data);
-    console.log("Token Saved:", localStorage.getItem("token"));
-    console.log("Current User:", localStorage.getItem("user"));
-    console.log("Is Authenticated:", true);
     
+    // Store user data in Firestore for profile completion checks
+    if (auth.currentUser) {
+      try {
+        await setDoc(doc(db, 'users', auth.currentUser.uid), {
+          uid: auth.currentUser.uid,
+          name: `${newUser.firstName} ${newUser.lastName}`,
+          email: newUser.email,
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (firestoreErr) {
+        console.warn('Could not store Google login details in Firestore:', firestoreErr.message);
+      }
+    }
+
     try {
       const profileRes = await api.get('/auth/profile');
       setProfile(profileRes.data.profile);
@@ -200,28 +237,69 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (firstName, lastName, email, mobile, password) => {
-    const res = await api.post('/auth/register', { firstName, lastName, email, mobile, password });
-    const { token: newToken, user: newUser } = res.data;
-    
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-    
-    setToken(newToken);
-    setUser(newUser);
+    // 1. Create user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
+
+    // 2. Set user's name in Firebase Auth
+    await updateFirebaseProfile(firebaseUser, {
+      displayName: `${firstName} ${lastName}`
+    });
+
+    // 3. Store additional user info in Firestore
+    await setDoc(doc(db, 'users', firebaseUser.uid), {
+      uid: firebaseUser.uid,
+      name: `${firstName} ${lastName}`,
+      email: firebaseUser.email,
+      createdAt: new Date().toISOString()
+    });
+
+    // 4. Send email verification request
+    await sendEmailVerification(firebaseUser);
+
+    // 5. Get ID Token
+    const idToken = await firebaseUser.getIdToken();
+    localStorage.setItem('token', idToken);
+
+    // 6. Sync register with backend MongoDB
+    const res = await api.post('/auth/register', {
+      firstName,
+      lastName,
+      email,
+      mobile,
+      password: 'firebase_managed'
+    }, {
+      headers: {
+        'Authorization': `Bearer ${idToken}`
+      }
+    });
+
+    const syncedUser = {
+      ...res.data.user,
+      emailVerified: firebaseUser.emailVerified
+    };
+
+    setToken(idToken);
+    setUser(syncedUser);
+    localStorage.setItem('user', JSON.stringify(syncedUser));
     setIsAuthenticated(true);
     
-    return res.data;
+    return { token: idToken, user: syncedUser };
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    delete api.defaults.headers.common['Authorization'];
-    setToken(null);
-    setUser(null);
-    setProfile(null);
-    setIsAuthenticated(false);
+  const logout = async () => {
+    await signOut(auth);
+    handleForceLogout();
+  };
+
+  const forgotPassword = async (email) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
+  const sendVerification = async () => {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+    }
   };
 
   const updateProfile = async (profileData) => {
@@ -254,6 +332,8 @@ export const AuthProvider = ({ children }) => {
     googleLogin,
     register,
     logout,
+    forgotPassword,
+    sendVerification,
     updateProfile,
     deleteAccount,
     refreshProfile: async () => {
