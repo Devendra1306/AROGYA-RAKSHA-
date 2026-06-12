@@ -1,82 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const localDb = require('../utils/localDb');
-const https = require('https');
-
-let publicKeyCache = {
-  keys: null,
-  expiresAt: 0
-};
-
-function fetchFirebasePublicKeys() {
-  return new Promise((resolve, reject) => {
-    https.get('https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com', (res) => {
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        try {
-          if (res.statusCode !== 200) {
-            reject(new Error(`Failed to fetch certificates: ${res.statusCode}`));
-          } else {
-            resolve(JSON.parse(data));
-          }
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }).on('error', (err) => {
-      reject(err);
-    });
-  });
-}
-
-async function getFirebasePublicKeys() {
-  const now = Date.now();
-  if (publicKeyCache.keys && publicKeyCache.expiresAt > now) {
-    return publicKeyCache.keys;
-  }
-  try {
-    const keys = await fetchFirebasePublicKeys();
-    publicKeyCache = {
-      keys,
-      expiresAt: now + (3600 * 1000) // Cache certificates for 1 hour
-    };
-    return keys;
-  } catch (err) {
-    console.error('Error fetching Firebase public keys in middleware:', err.message);
-    throw err;
-  }
-}
-
-async function verifyFirebaseToken(idToken, projectId) {
-  const decodedToken = jwt.decode(idToken, { complete: true });
-  if (!decodedToken || !decodedToken.header || !decodedToken.header.kid) {
-    throw new Error('Invalid Firebase token structure');
-  }
-
-  const kid = decodedToken.header.kid;
-  const keys = await getFirebasePublicKeys();
-  const certificate = keys[kid];
-  if (!certificate) {
-    throw new Error('Public key not found for kid: ' + kid);
-  }
-
-  return new Promise((resolve, reject) => {
-    jwt.verify(idToken, certificate, {
-      algorithms: ['RS256'],
-      audience: projectId,
-      issuer: `https://securetoken.google.com/${projectId}`
-    }, (err, payload) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(payload);
-      }
-    });
-  });
-}
+const { getAuth } = require('../config/firebase');
 
 async function protect(req, res, next) {
   let token;
@@ -99,8 +24,7 @@ async function protect(req, res, next) {
         picture: ''
       };
     } else {
-      const projectId = process.env.FIREBASE_PROJECT_ID || 'arogya-raksha-4af7e';
-      decoded = await verifyFirebaseToken(token, projectId);
+      decoded = await getAuth().verifyIdToken(token);
     }
 
     const email = decoded.email;
