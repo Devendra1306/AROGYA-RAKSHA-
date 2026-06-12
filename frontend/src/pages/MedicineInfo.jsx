@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 const renderCompareMarkdown = (text) => {
   if (!text) return '';
@@ -196,9 +198,20 @@ export default function MedicineInfo() {
   };
 
   return (
-    <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors animate-fade-in">
+    <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
+      <SEO 
+        title="Medicine Information & Drug Database | Arogya Raksha"
+        description="Search for medicines, check dosages, side effects, and drug interactions using our comprehensive medical database."
+        keywords="medicine info, drug database, side effects, drug interactions, pharmacy"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Medicine Information & Drug Database",
+          "url": "https://arogyaraksha.com/medicine-info"
+        }}
+      />
       
-      {/* Page Header */}
+      {/* Header Panel */}
       <header className="mb-6">
         <h1 className="text-2xl font-extrabold text-primary dark:text-secondary flex items-center gap-2">
           <span className="material-symbols-outlined text-xl text-primary animate-pulse">pill</span> Medicines

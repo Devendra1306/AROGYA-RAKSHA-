@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 // Helper to render clinical icons for emergency category cards
 const getCategoryIcon = (title) => {
@@ -261,6 +262,17 @@ export default function EmergencyHelp() {
 
     return (
       <div className="bg-background text-on-surface px-margin-mobile pb-40 font-body-md">
+        <SEO 
+          title="Emergency Help & First-Aid | Arogya Raksha"
+          description="Get immediate first-aid instructions, emergency guides, and find nearby medical help instantly."
+          keywords="emergency help, first aid, CPR, medical emergency, hospital finder"
+          schema={{
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Emergency Help & First-Aid",
+            "url": "https://arogyaraksha.com/emergency"
+          }}
+        />
         {/* Search Header */}
         <div className="py-6">
           <h2 className="text-xl font-bold text-primary dark:text-secondary mb-1">Emergency Assistance</h2>
@@ -568,6 +580,17 @@ export default function EmergencyHelp() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
+      <SEO 
+        title="Emergency Help & First-Aid | Arogya Raksha"
+        description="Get immediate first-aid instructions, emergency guides, and find nearby medical help instantly."
+        keywords="emergency help, first aid, CPR, medical emergency, hospital finder"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Emergency Help & First-Aid",
+          "url": "https://arogyaraksha.com/emergency"
+        }}
+      />
       
       {/* Red Clinical Emergency Disclaimer Banner */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-5 rounded-2xl mb-8 flex items-center justify-between shadow-lg border-l-8 border-red-800 animate-fade-in">

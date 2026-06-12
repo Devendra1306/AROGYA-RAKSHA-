@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 export default function HealthcareDirectory() {
   const [facilities, setFacilities] = useState([]);
@@ -73,6 +74,17 @@ export default function HealthcareDirectory() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-sm text-slate-800 dark:text-slate-100 transition-colors animate-fadeIn pt-24 pb-20">
+      <SEO 
+        title="Nearby Healthcare Directory | Arogya Raksha"
+        description="Search for nearby hospitals, clinics, and pharmacies. Get instant directions and contact info for local healthcare providers."
+        keywords="healthcare directory, nearby hospitals, local clinics, doctors near me, pharmacies"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Nearby Healthcare Directory",
+          "url": "https://arogyaraksha.com/nearby"
+        }}
+      />
       
       {/* Directory Hero Title */}
       <section className="space-y-4 mb-8">

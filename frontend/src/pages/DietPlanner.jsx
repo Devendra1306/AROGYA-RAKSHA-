@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 const MEAL_IMAGES = {
   breakfast: 'https://lh3.googleusercontent.com/aida-public/AB6AXuApKnP_JT0b4p0sD2cpbCJ7w8EYy8sodpLksPhe1U2hoKXKge-Lbw7P_QSEKL1QnwuCz_T6KqEfP-WYbeI1ZRlhDNll605bMuP5RbEzcAaqSc-GWMitfqct056IlDXCcYn-8P53Lcj05h1YB_dFAnoucPG4mLp6r4eMW65BzFGvKh3P9EciWUPJskWMdjY2OYvV6MOogNXJSp-BcEkf3Ksuzk8646RZIHQNrV8OuT56Sm2tSf8WZG4n0gQ5bRmTmwOyNcqT8Y43NNo',
@@ -262,6 +263,17 @@ export default function DietPlanner() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors animate-fade-in">
+      <SEO 
+        title="AI Diet Planner & Nutrition Tracker | Arogya Raksha"
+        description="Get custom diet plans based on your calories, macros, and health conditions using our AI Diet Planner."
+        keywords="diet planner, nutrition tracker, calorie counter, healthy diet, meal plan"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "AI Diet Planner & Nutrition Tracker",
+          "url": "https://arogyaraksha.com/diet-planner"
+        }}
+      />
       
       {/* Header Panel */}
       <header className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 // Render AI markdown responses with proper structure
 const renderMarkdown = (text) => {
@@ -159,6 +160,17 @@ export default function HomeRemedies() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors animate-fade-in">
+      <SEO 
+        title="Natural Home Remedies | Arogya Raksha"
+        description="Discover natural home remedies for common ailments using kitchen ingredients and traditional healing methods."
+        keywords="home remedies, natural healing, Ayurveda, natural cures, traditional medicine"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Natural Home Remedies",
+          "url": "https://arogyaraksha.com/home-remedies"
+        }}
+      />
       
       {/* Header */}
       <header className="mb-6">

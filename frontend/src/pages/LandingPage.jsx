@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -44,6 +45,17 @@ export default function LandingPage() {
     // Clean, mobile-optimized Landing Page without heavy animations/gradients/emojis
     return (
       <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 pb-16 font-body-md">
+        <SEO 
+          title="Arogya Raksha | Your AI Healthcare Companion"
+          description="Arogya Raksha provides emergency guides, health assessment scoring, custom diet plans, medicine databases, and clinical voice assistant guidance."
+          keywords="healthcare app, medical assistant, emergency health, diet planner"
+          schema={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Arogya Raksha",
+            "url": "https://arogyaraksha.com"
+          }}
+        />
         {/* Clean Hero Section */}
         <section className="px-4 pt-10 pb-8 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 rounded-full mb-4 text-[10px] font-bold uppercase tracking-wider">
@@ -190,7 +202,17 @@ export default function LandingPage() {
   // Desktop View (Original rich LandingPage)
   return (
     <div className="bg-surface dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
-      
+      <SEO 
+        title="Arogya Raksha | Your AI Healthcare Companion"
+        description="Arogya Raksha provides emergency guides, health assessment scoring, custom diet plans, medicine databases, and clinical voice assistant guidance."
+        keywords="healthcare app, medical assistant, emergency health, diet planner"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Arogya Raksha",
+          "url": "https://arogyaraksha.com"
+        }}
+      />
       {/* Hero Section */}
       <section className="px-margin-desktop py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-gutter max-w-[1280px] mx-auto">
         <div className="flex-1 space-y-6">

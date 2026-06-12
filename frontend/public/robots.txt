@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /profile-setup
+Disallow: /admin
+Disallow: /reset-password/
+
+Sitemap: https://arogyaraksha.com/sitemap.xml

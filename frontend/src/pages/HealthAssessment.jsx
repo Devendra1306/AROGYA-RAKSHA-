@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/SEO';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function HealthAssessment() {
@@ -181,6 +182,17 @@ export default function HealthAssessment() {
     // Mobile Assessment view (Multi-step wizard and results)
     return (
       <div className="max-w-[1280px] mx-auto px-margin-mobile py-6 text-slate-800 dark:text-slate-100 font-body-md">
+        <SEO 
+          title="Health Assessment & Daily Vitals | Arogya Raksha"
+          description="Assess your daily health score based on sleep, hydration, and nutrition. Track your vitals with our comprehensive AI assessment tool."
+          keywords="health assessment, track vitals, health score, daily health tracker"
+          schema={{
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Health Assessment & Daily Vitals",
+            "url": "https://arogyaraksha.com/health-assessment"
+          }}
+        />
         
         {wizardStep !== null ? (
           // Mobile Wizard Form
@@ -423,6 +435,17 @@ export default function HealthAssessment() {
   // Desktop View (Original health assessment details)
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
+      <SEO 
+        title="Health Assessment & Daily Vitals | Arogya Raksha"
+        description="Assess your daily health score based on sleep, hydration, and nutrition. Track your vitals with our comprehensive AI assessment tool."
+        keywords="health assessment, track vitals, health score, daily health tracker"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Health Assessment & Daily Vitals",
+          "url": "https://arogyaraksha.com/health-assessment"
+        }}
+      />
       
       {/* Header */}
       <header className="mb-stack-md flex flex-col md:flex-row justify-between items-start md:items-end gap-base">

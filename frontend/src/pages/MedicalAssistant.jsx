@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 const renderMarkdown = (text) => {
   if (!text) return '';
@@ -344,7 +345,18 @@ export default function MedicalAssistant() {
     // Mobile ChatGPT Assistant Layout (following medical_assistant/code.html from mobile.zip)
     return (
       <div className="w-full flex h-[calc(100vh-144px)] bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 overflow-hidden relative transition-all">
-        
+        <SEO 
+          title="AI Medical Assistant & Symptom Checker | Arogya Raksha"
+          description="Use our AI medical assistant to check symptoms, understand potential conditions, and get general healthcare guidance instantly."
+          keywords="AI doctor, symptom checker, medical assistant, online consultation"
+          schema={{
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Arogya Raksha AI Assistant",
+            "applicationCategory": "HealthApplication",
+            "operatingSystem": "All"
+          }}
+        />
         {/* Sidebar History Drawer Overlay */}
         <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-850 border-r border-slate-200 dark:border-slate-800 shadow-2xl p-4 flex flex-col justify-between transform transition-transform duration-300 ${historyOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="flex flex-col h-full overflow-hidden">
@@ -504,10 +516,20 @@ export default function MedicalAssistant() {
     );
   }
 
-  // Desktop View (Original rich MedicalAssistant with Sidebar history)
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 flex flex-col lg:flex-row gap-gutter h-[calc(100vh-64px)] transition-colors">
-      
+      <SEO 
+        title="AI Medical Assistant & Symptom Checker | Arogya Raksha"
+        description="Use our AI medical assistant to check symptoms, understand potential conditions, and get general healthcare guidance instantly."
+        keywords="AI doctor, symptom checker, medical assistant, online consultation"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "Arogya Raksha AI Assistant",
+          "applicationCategory": "HealthApplication",
+          "operatingSystem": "All"
+        }}
+      />
       {/* Sidebar: History */}
       <div className="w-full lg:w-64 flex-shrink-0 flex flex-col border border-outline-variant/30 dark:border-slate-800 rounded-2xl bg-white/70 dark:bg-slate-800/70 p-4 h-48 lg:h-full overflow-hidden shadow-sm">
         <button 
