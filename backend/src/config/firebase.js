@@ -22,6 +22,11 @@ if (!getApps().length) {
         credential: cert(serviceAccount)
       });
       console.log('Firebase Admin SDK initialized successfully with environment variable.');
+    } else if (process.env.FIREBASE_PROJECT_ID) {
+      app = initializeApp({
+        projectId: process.env.FIREBASE_PROJECT_ID
+      });
+      console.log('Firebase Admin SDK initialized successfully with project ID:', process.env.FIREBASE_PROJECT_ID);
     } else {
       // Fallback to Application Default Credentials
       app = initializeApp();
