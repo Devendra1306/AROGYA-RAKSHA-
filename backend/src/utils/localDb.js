@@ -1,9 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+const isServerless = !!process.env.VERCEL;
 
-if (!fs.existsSync(DATA_DIR)) {
+// Statically require all seed data files so Vercel bundles them
+const bundledSeeds = {
+  chatHistory: require('../../data/chatHistory.json'),
+  dietPlans: require('../../data/dietPlans.json'),
+  emergencyContacts: require('../../data/emergencyContacts.json'),
+  emergencyGuides: require('../../data/emergencyGuides.json'),
+  healthAssessments: require('../../data/healthAssessments.json'),
+  healthProfiles: require('../../data/healthProfiles.json'),
+  medicines: require('../../data/medicines.json'),
+  remedies: require('../../data/remedies.json'),
+  users: require('../../data/users.json')
+};
+
+const DATA_DIR = isServerless ? '/tmp' : path.join(__dirname, '..', '..', 'data');
+
+if (!isServerless && !fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
@@ -13,16 +28,24 @@ function getFilePath(collectionName) {
 
 function readCollection(collectionName) {
   const filePath = getFilePath(collectionName);
+  
   if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify([], null, 2));
-    return [];
+    try {
+      const initialData = bundledSeeds[collectionName] || [];
+      fs.writeFileSync(filePath, JSON.stringify(initialData, null, 2));
+      return initialData;
+    } catch (err) {
+      console.error(`Error writing initial collection ${collectionName}:`, err.message);
+      return bundledSeeds[collectionName] || [];
+    }
   }
+
   try {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data || '[]');
   } catch (err) {
     console.error(`Error reading collection ${collectionName}:`, err.message);
-    return [];
+    return bundledSeeds[collectionName] || [];
   }
 }
 
