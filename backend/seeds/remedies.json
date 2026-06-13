@@ -1,0 +1,93 @@
+[
+  {
+    "_id": "n6aj9f6zf",
+    "createdAt": "2026-06-12T05:59:16.027Z",
+    "updatedAt": "2026-06-12T05:59:16.027Z",
+    "condition": "Cold & Cough",
+    "causes": [
+      "Viral infections",
+      "Allergies",
+      "Change in weather",
+      "Weak immunity"
+    ],
+    "remedies": [
+      {
+        "name": "Ginger Turmeric Tea",
+        "ingredients": [
+          "Ginger root (sliced)",
+          "Turmeric powder (1/2 tsp)",
+          "Water (2 cups)",
+          "Honey (1 tbsp)"
+        ],
+        "steps": [
+          "Boil 2 cups of water in a saucepan.",
+          "Add sliced ginger and half a teaspoon of turmeric powder.",
+          "Simmer on low heat for 10 minutes.",
+          "Strain into a cup, add honey, and drink warm."
+        ],
+        "usageInstructions": "Drink 2-3 times daily for soothing throat relief.",
+        "reliefTime": "Within 20-30 minutes"
+      },
+      {
+        "name": "Honey and Black Pepper Syrup",
+        "ingredients": [
+          "Raw Honey (1 tbsp)",
+          "Crushed Black Pepper (1/4 tsp)"
+        ],
+        "steps": [
+          "Mix 1 tablespoon of raw honey with a pinch of freshly crushed black pepper.",
+          "Consume the mixture directly without water."
+        ],
+        "usageInstructions": "Take once in the morning and once before bedtime.",
+        "reliefTime": "Improves dry cough within 15 minutes"
+      }
+    ],
+    "warnings": [
+      "Do NOT give raw honey to infants under 1 year of age.",
+      "If cough persists for more than 7 days, consult a physician."
+    ]
+  },
+  {
+    "_id": "u5nuroye7",
+    "createdAt": "2026-06-12T05:59:16.027Z",
+    "updatedAt": "2026-06-12T05:59:16.027Z",
+    "condition": "Headache",
+    "causes": [
+      "Dehydration",
+      "Stress or eye strain",
+      "Lack of sleep",
+      "Sinus pressure"
+    ],
+    "remedies": [
+      {
+        "name": "Cold/Warm Compress",
+        "ingredients": [
+          "Ice pack or clean washcloth",
+          "Warm water pack"
+        ],
+        "steps": [
+          "For tension headaches, place a warm compress on the neck or forehead.",
+          "For migraine or throbbing headaches, place an ice pack wrapped in a cloth on your forehead or temples for 15 minutes."
+        ],
+        "usageInstructions": "Apply compress while resting in a quiet, dark room.",
+        "reliefTime": "15-20 minutes"
+      },
+      {
+        "name": "Peppermint Essential Oil Massage",
+        "ingredients": [
+          "Peppermint oil (2-3 drops)",
+          "Coconut oil (1 tsp)"
+        ],
+        "steps": [
+          "Mix 2-3 drops of peppermint oil with a teaspoon of coconut oil.",
+          "Gently massage onto temples, forehead, and back of the neck."
+        ],
+        "usageInstructions": "Avoid contact with eyes. Wash hands after massage.",
+        "reliefTime": "Relieves stress-related headaches within 10-15 minutes"
+      }
+    ],
+    "warnings": [
+      "If headache is sudden, severe, or accompanied by slurred speech, seek emergency care immediately."
+    ]
+  }
+]

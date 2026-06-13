@@ -5,15 +5,15 @@ const isServerless = !!process.env.VERCEL;
 
 // Statically require all seed data files so Vercel bundles them
 const bundledSeeds = {
-  chatHistory: require('../../data/chatHistory.json'),
-  dietPlans: require('../../data/dietPlans.json'),
-  emergencyContacts: require('../../data/emergencyContacts.json'),
-  emergencyGuides: require('../../data/emergencyGuides.json'),
-  healthAssessments: require('../../data/healthAssessments.json'),
-  healthProfiles: require('../../data/healthProfiles.json'),
-  medicines: require('../../data/medicines.json'),
-  remedies: require('../../data/remedies.json'),
-  users: require('../../data/users.json')
+  chatHistory: require('../../seeds/chatHistory.json'),
+  dietPlans: require('../../seeds/dietPlans.json'),
+  emergencyContacts: require('../../seeds/emergencyContacts.json'),
+  emergencyGuides: require('../../seeds/emergencyGuides.json'),
+  healthAssessments: require('../../seeds/healthAssessments.json'),
+  healthProfiles: require('../../seeds/healthProfiles.json'),
+  medicines: require('../../seeds/medicines.json'),
+  remedies: require('../../seeds/remedies.json'),
+  users: require('../../seeds/users.json')
 };
 
 const DATA_DIR = isServerless ? '/tmp' : path.join(__dirname, '..', '..', 'data');

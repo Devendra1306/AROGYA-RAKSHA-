@@ -1,0 +1,145 @@
+[
+  {
+    "_id": "iphu1s53d",
+    "createdAt": "2026-06-12T17:52:06.453Z",
+    "updatedAt": "2026-06-12T17:52:06.453Z",
+    "userId": "mfq19ji4s",
+    "goal": "Healthy Lifestyle",
+    "currentWeight": 89,
+    "targetWeight": 89,
+    "dailyCalories": 2647,
+    "protein": 132,
+    "carbs": 364,
+    "fats": 74,
+    "waterGoal": 2,
+    "mealPlan": [
+      {
+        "mealType": "Breakfast",
+        "foodItems": "Crunchy Omelette with Toast and Fresh Fruit",
+        "calories": 540,
+        "protein": 31,
+        "carbs": 30,
+        "fats": 32
+      },
+      {
+        "mealType": "Morning Snack",
+        "foodItems": "Peanut butter and Banana Toast Crunch",
+        "calories": 320,
+        "protein": 8,
+        "carbs": 40,
+        "fats": 20
+      },
+      {
+        "mealType": "Lunch",
+        "foodItems": "Tandoori Chicken with Brown Rice and Vegetable Salad",
+        "calories": 720,
+        "protein": 50,
+        "carbs": 60,
+        "fats": 24
+      },
+      {
+        "mealType": "Evening Snack",
+        "foodItems": "Greek Yogurt with Honey and Crunchy Almonds",
+        "calories": 280,
+        "protein": 20,
+        "carbs": 30,
+        "fats": 15
+      },
+      {
+        "mealType": "Dinner",
+        "foodItems": "Grilled Salmon with Coconut Rice and Steamed Vegetables",
+        "calories": 860,
+        "protein": 55,
+        "carbs": 40,
+        "fats": 45
+      }
+    ],
+    "groceryList": [
+      {
+        "item": "Eggs",
+        "quantity": "1 dozen",
+        "category": "Dairy",
+        "price": 50
+      },
+      {
+        "item": "Bananas",
+        "quantity": "6-7",
+        "category": "Produce",
+        "price": 40
+      },
+      {
+        "item": "Brown Rice",
+        "quantity": "2kg",
+        "category": "Grains",
+        "price": 120
+      },
+      {
+        "item": "Peanut Butter",
+        "quantity": "1kg",
+        "category": "Pantry",
+        "price": 600
+      },
+      {
+        "item": "Tandoori Chicken",
+        "quantity": "1kg (boneless)",
+        "category": "Meat",
+        "price": 400
+      },
+      {
+        "item": "Vegetables (Mixed)",
+        "quantity": "2 bunches (carrot, beetroot, bell pepper, etc.)",
+        "category": "Produce",
+        "price": 80
+      },
+      {
+        "item": "Greek Yogurt",
+        "quantity": "2L",
+        "category": "Dairy",
+        "price": 250
+      },
+      {
+        "item": "Honey",
+        "quantity": "1kg",
+        "category": "Pantry",
+        "price": 800
+      },
+      {
+        "item": "Almonds",
+        "quantity": "1kg",
+        "category": "Nuts",
+        "price": 900
+      },
+      {
+        "item": "Salmon Fillets",
+        "quantity": "2 (boneless)",
+        "category": "Meat",
+        "price": 800
+      },
+      {
+        "item": "Coconut Rice",
+        "quantity": "2kg",
+        "category": "Grains",
+        "price": 100
+      },
+      {
+        "item": "Coconut Oil",
+        "quantity": "1L",
+        "category": "Pantry",
+        "price": 400
+      },
+      {
+        "item": "Vegetables (Mixed)",
+        "quantity": "1 bunch",
+        "category": "Produce",
+        "price": 60
+      },
+      {
+        "item": "Spices and Herbs",
+        "quantity": " assorted pack",
+        "category": "Pantry",
+        "price": 100
+      }
+    ],
+    "extraFoods": []
+  }
+]

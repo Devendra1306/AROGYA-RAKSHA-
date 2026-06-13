@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "m7tbp3lte",
+    "createdAt": "2026-06-12T17:49:29.603Z",
+    "updatedAt": "2026-06-12T17:49:29.603Z",
+    "userId": "mfq19ji4s",
+    "healthScore": 80,
+    "activityScore": 70,
+    "nutritionScore": 80,
+    "sleepScore": 90,
+    "hydrationScore": 70,
+    "stressScore": 75,
+    "riskFactors": [],
+    "recommendations": [
+      "Drink at least 2 liters of water daily.",
+      "Maintain 7 hours of sleep nightly.",
+      "Set primary focus on your health goal: Healthy Lifestyle."
+    ]
+  }
+]

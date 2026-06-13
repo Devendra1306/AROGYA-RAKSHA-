@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "mfq19ji4s",
+    "createdAt": "2026-06-12T17:46:59.646Z",
+    "updatedAt": "2026-06-12T17:49:29.602Z",
+    "firstName": "Devendra",
+    "lastName": "Sagar",
+    "email": "devendrasagar0988@gmail.com",
+    "mobile": "N/A",
+    "authProvider": "firebase",
+    "profilePicture": "https://lh3.googleusercontent.com/a/ACg8ocLW5WJnoPFpczxKvbdDFS9XSs4hazR4K0NZq3KDo6Z3Zmoq1Q=s96-c",
+    "role": "User",
+    "emailVerified": true,
+    "profileCompleted": true,
+    "uid": "TFVs8dHVbfXeBe8V7niNzlNFgLt1",
+    "accountStatus": "active",
+    "lastLogin": "2026-06-12T17:46:59.646Z"
+  }
+]

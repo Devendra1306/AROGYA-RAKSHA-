@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "ikii8rvjo",
+    "createdAt": "2026-06-12T17:50:57.888Z",
+    "updatedAt": "2026-06-12T17:50:57.888Z",
+    "userId": "mfq19ji4s",
+    "conversationTitle": "stomach pain",
+    "module": "MedicalAssistant",
+    "messages": [
+      {
+        "role": "user",
+        "content": "stomach pain",
+        "timestamp": "2026-06-12T17:50:57.887Z"
+      },
+      {
+        "role": "assistant",
+        "content": "### 1. POSSIBLE CONDITION\nPossible Condition: Your stomach pain may be related to indigestion, acid reflux, or a minor stomach infection.\n\n### 2. SEVERITY LEVEL\nMild\n\n### 3. SUGGESTED MEDICINES\nMedicine: Antacid (e.g., Tums, Rolaids)\nUsed for: Neutralizing stomach acid and relieving heartburn and indigestion.\n\nMedicine: Ginger (e.g., ginger ale, ginger tea)\nUsed for: Soothing the stomach and reducing inflammation.\n\n### 4. QUICK CARE TIPS\n✓ Eat light meals and avoid fatty or spicy foods\n✓ Drink plenty of water to stay hydrated\n✓ Avoid lying down after eating\n✓ Consider over-the-counter ginger or antacid products\n\n### 5. DOCTOR VISIT INDICATOR\nN/A\n\n### 6. EMERGENCY ALERT\nN/A",
+        "timestamp": "2026-06-12T17:50:57.887Z"
+      }
+    ]
+  }
+]

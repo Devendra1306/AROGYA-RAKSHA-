@@ -23,9 +23,6 @@ export const db = getFirestore(app);
 
 // Configure Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
-// Request profiles and email
-googleProvider.addScope('profile');
-googleProvider.addScope('email');
 // Force account selection popup (optional but recommended for clear user choice)
 googleProvider.setCustomParameters({
   prompt: 'select_account'

@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "b97wooixv",
+    "createdAt": "2026-06-12T17:49:29.601Z",
+    "updatedAt": "2026-06-12T17:51:35.375Z",
+    "userId": "mfq19ji4s",
+    "age": 19,
+    "gender": "Male",
+    "height": 180,
+    "weight": 89,
+    "bloodGroup": "A+",
+    "activityLevel": "Lightly Active",
+    "exerciseFrequency": "Never",
+    "waterIntake": 2,
+    "sleepDuration": 7,
+    "stressLevel": "Moderate",
+    "medicalConditions": [
+      "None"
+    ],
+    "allergies": [],
+    "medications": [],
+    "familyHistory": [],
+    "dietPreference": "Non-Vegetarian",
+    "foodRestrictions": [],
+    "favoriteFoods": [],
+    "dislikedFoods": [],
+    "budgetPreference": "Medium Budget",
+    "healthGoal": "Healthy Lifestyle",
+    "targetDuration": "3 Months",
+    "healthScore": 80
+  }
+]

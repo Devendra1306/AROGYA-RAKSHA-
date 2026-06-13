@@ -1,0 +1,121 @@
+[
+  {
+    "_id": "djf3ebwjy",
+    "createdAt": "2026-06-12T05:59:16.025Z",
+    "updatedAt": "2026-06-12T05:59:16.025Z",
+    "medicineName": "Paracetamol",
+    "genericName": "Acetaminophen",
+    "brandNames": [
+      "Crocin",
+      "Dolo 650",
+      "Calpol",
+      "Tylenol"
+    ],
+    "category": "Pain Relief / Antipyretic",
+    "uses": [
+      "Mild to moderate pain relief",
+      "Fever reduction",
+      "Headache",
+      "Muscle ache"
+    ],
+    "dosage": "Adults: 500mg to 650mg every 4-6 hours as needed. Maximum daily limit: 4000mg (4g) to prevent liver damage.",
+    "sideEffects": [
+      "Nausea",
+      "Allergic skin rash",
+      "Liver toxicity (in case of overdose)"
+    ],
+    "precautions": [
+      "Avoid taking with alcohol.",
+      "Check other medications to prevent duplicate dosing.",
+      "Consult doctor if pain persists for >5 days."
+    ],
+    "interactions": [
+      "Alcohol (increases liver damage risk)",
+      "Warfarin (blood thinner interaction)"
+    ],
+    "contraindications": [
+      "Severe liver impairment",
+      "Known allergy to acetaminophen"
+    ],
+    "storageInfo": "Store below 30°C in a dry place away from direct sunlight."
+  },
+  {
+    "_id": "7h444hmrs",
+    "createdAt": "2026-06-12T05:59:16.026Z",
+    "updatedAt": "2026-06-12T05:59:16.026Z",
+    "medicineName": "Metformin",
+    "genericName": "Metformin Hydrochloride",
+    "brandNames": [
+      "Glycomet",
+      "Obimet",
+      "Glucophage"
+    ],
+    "category": "Anti-diabetic",
+    "uses": [
+      "Type 2 Diabetes mellitus management",
+      "Improves insulin sensitivity"
+    ],
+    "dosage": "Usually starts with 500mg once or twice daily with meals. Maximum daily limit: 2000mg.",
+    "sideEffects": [
+      "Diarrhea",
+      "Nausea or bloating",
+      "Metallic taste",
+      "Lactic acidosis (very rare but serious)"
+    ],
+    "precautions": [
+      "Take with meals to reduce stomach upset.",
+      "Monitor kidney function regularly.",
+      "Stay hydrated to prevent lactic acidosis."
+    ],
+    "interactions": [
+      "Contrast dyes used in medical scans",
+      "Alcohol",
+      "Diuretics"
+    ],
+    "contraindications": [
+      "Severe kidney failure",
+      "Diabetic ketoacidosis",
+      "Severe liver disease"
+    ],
+    "storageInfo": "Store at room temperature (15°C to 30°C) away from moisture."
+  },
+  {
+    "_id": "bn491jgb9",
+    "createdAt": "2026-06-12T05:59:16.026Z",
+    "updatedAt": "2026-06-12T05:59:16.026Z",
+    "medicineName": "Cetirizine",
+    "genericName": "Cetirizine Hydrochloride",
+    "brandNames": [
+      "Okacet",
+      "Alerid",
+      "Zyrtec"
+    ],
+    "category": "Antihistamine / Allergy",
+    "uses": [
+      "Allergic rhinitis",
+      "Sneezing and runny nose",
+      "Hives or skin allergies",
+      "Watery eyes"
+    ],
+    "dosage": "Adults: 10mg once daily, preferably in the evening.",
+    "sideEffects": [
+      "Drowsiness or sleepiness",
+      "Dry mouth",
+      "Fatigue",
+      "Dizziness"
+    ],
+    "precautions": [
+      "Avoid driving or operating heavy machinery if drowsy.",
+      "Avoid combining with alcohol or sedatives."
+    ],
+    "interactions": [
+      "Alcohol",
+      "Central nervous system depressants"
+    ],
+    "contraindications": [
+      "Severe kidney disease",
+      "Known allergy to cetirizine"
+    ],
+    "storageInfo": "Store in a cool, dry place away from heat and moisture."
+  }
+]
