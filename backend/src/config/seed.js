@@ -188,7 +188,14 @@ const remediesData = [
   }
 ];
 
+let isSeeding = false;
+let isSeeded = false;
+
 async function seedDatabase() {
+  if (isSeeded) return;
+  if (isSeeding) return;
+  isSeeding = true;
+
   const isMock = global.isMockDB;
 
   if (isMock) {
@@ -216,6 +223,8 @@ async function seedDatabase() {
     }
 
     console.log('✅ Local Database Fallback seeded successfully.');
+    isSeeded = true;
+    isSeeding = false;
     return;
   }
 
@@ -246,8 +255,11 @@ async function seedDatabase() {
     }
 
     console.log('✅ MongoDB Database seeded successfully.');
+    isSeeded = true;
   } catch (err) {
     console.error('❌ MongoDB Database seeding error:', err.message);
+  } finally {
+    isSeeding = false;
   }
 }
 

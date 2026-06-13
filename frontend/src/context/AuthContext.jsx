@@ -98,9 +98,37 @@ api.interceptors.response.use(
   }
 );
 
+// Check if a JWT token is expired locally
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (!payload.exp) return false;
+    return payload.exp * 1000 < Date.now();
+  } catch (e) {
+    return true;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    if (isTokenExpired(savedToken)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('profile');
+      return null;
+    }
+    return savedToken;
+  });
+
   const [user, setUser] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    if (isTokenExpired(savedToken)) {
+      return null;
+    }
     const savedUser = localStorage.getItem('user');
     try {
       return savedUser ? JSON.parse(savedUser) : null;
@@ -108,9 +136,30 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    return !!savedToken && !isTokenExpired(savedToken);
+  });
+
+  const [loading, setLoading] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    return !(savedToken && savedUser && !isTokenExpired(savedToken));
+  });
+
+  const [profile, setProfile] = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    if (isTokenExpired(savedToken)) {
+      return null;
+    }
+    const savedProfile = localStorage.getItem('profile');
+    try {
+      return savedProfile ? JSON.parse(savedProfile) : null;
+    } catch (e) {
+      return null;
+    }
+  });
 
   // Listen to Firebase Auth state change to persist sessions across page refreshes
   useEffect(() => {
@@ -136,6 +185,11 @@ export const AuthProvider = ({ children }) => {
             setUser(syncedUser);
             localStorage.setItem('user', JSON.stringify(syncedUser));
             setProfile(res.data.profile);
+            if (res.data.profile) {
+              localStorage.setItem('profile', JSON.stringify(res.data.profile));
+            } else {
+              localStorage.removeItem('profile');
+            }
             setIsAuthenticated(true);
           }
         } catch (err) {
@@ -165,6 +219,7 @@ export const AuthProvider = ({ children }) => {
   const handleForceLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('profile');
     setToken(null);
     setUser(null);
     setProfile(null);
@@ -197,20 +252,36 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(syncedUser));
     setIsAuthenticated(true);
     setProfile(res.data.profile);
+    if (res.data.profile) {
+      localStorage.setItem('profile', JSON.stringify(res.data.profile));
+    } else {
+      localStorage.removeItem('profile');
+    }
     
     return { token: idToken, user: syncedUser };
   };
 
   const googleLogin = async (googleData) => {
-    // Verify/Register in backend
-    const res = await api.post('/auth/google', googleData);
-    const { user: newUser } = res.data;
-    
     localStorage.setItem('token', googleData.token);
-    localStorage.setItem('user', JSON.stringify(newUser));
     setToken(googleData.token);
+
+    // Sync with backend by getting profile (middleware auto-creates user if needed)
+    const res = await api.get('/auth/profile', {
+      headers: {
+        'Authorization': `Bearer ${googleData.token}`
+      }
+    });
+    
+    const newUser = res.data.user;
+    localStorage.setItem('user', JSON.stringify(newUser));
     setUser(newUser);
     setIsAuthenticated(true);
+    setProfile(res.data.profile);
+    if (res.data.profile) {
+      localStorage.setItem('profile', JSON.stringify(res.data.profile));
+    } else {
+      localStorage.removeItem('profile');
+    }
     
     // Store user data in Firestore for profile completion checks
     if (auth.currentUser) {
@@ -225,15 +296,8 @@ export const AuthProvider = ({ children }) => {
         console.warn('Could not store Google login details in Firestore:', firestoreErr.message);
       }
     }
-
-    try {
-      const profileRes = await api.get('/auth/profile');
-      setProfile(profileRes.data.profile);
-    } catch (e) {
-      console.error('Failed to fetch profile during Google login:', e.message);
-    }
     
-    return res.data;
+    return { token: googleData.token, user: newUser };
   };
 
   const register = async (firstName, lastName, email, mobile, password) => {
@@ -266,8 +330,7 @@ export const AuthProvider = ({ children }) => {
       firstName,
       lastName,
       email,
-      mobile,
-      password: 'firebase_managed'
+      mobile
     }, {
       headers: {
         'Authorization': `Bearer ${idToken}`
@@ -305,6 +368,11 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     const res = await api.post('/auth/profile/setup', profileData);
     setProfile(res.data.profile);
+    if (res.data.profile) {
+      localStorage.setItem('profile', JSON.stringify(res.data.profile));
+    } else {
+      localStorage.removeItem('profile');
+    }
     if (token) {
       try {
         const profileRes = await api.get('/auth/profile');
@@ -343,6 +411,11 @@ export const AuthProvider = ({ children }) => {
           setUser(profileRes.data.user);
           localStorage.setItem('user', JSON.stringify(profileRes.data.user));
           setProfile(profileRes.data.profile);
+          if (profileRes.data.profile) {
+            localStorage.setItem('profile', JSON.stringify(profileRes.data.profile));
+          } else {
+            localStorage.removeItem('profile');
+          }
         } catch (e) {
           console.error('Failed to refresh profile details:', e.message);
         }

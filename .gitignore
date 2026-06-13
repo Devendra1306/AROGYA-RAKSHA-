@@ -35,3 +35,4 @@ backend/data/*.json
 
 .vercel
 CLIENT.json
+firebase.json

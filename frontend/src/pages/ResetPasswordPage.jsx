@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { api } from '../context/AuthContext';
+import { confirmPasswordReset } from 'firebase/auth';
+import { auth } from '../config/firebase';
 import { FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
 
 export default function ResetPasswordPage() {
@@ -52,12 +53,9 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/reset-password', {
-        token,
-        password
-      });
+      await confirmPasswordReset(auth, token, password);
 
-      setSuccess(response.data.message || 'Password updated successfully!');
+      setSuccess('Password updated successfully!');
       
       // Start countdown redirect
       let count = 3;
@@ -71,7 +69,14 @@ export default function ResetPasswordPage() {
       }, 1000);
 
     } catch (err) {
-      const errMsg = err.response?.data?.error || err.message || 'Failed to update password. Try again.';
+      let errMsg = err.message || 'Failed to update password. Try again.';
+      if (err.code === 'auth/invalid-action-code') {
+        errMsg = 'The password reset link is invalid or has expired.';
+      } else if (err.code === 'auth/expired-action-code') {
+        errMsg = 'The password reset link has expired.';
+      } else if (err.code === 'auth/weak-password') {
+        errMsg = 'The password is too weak.';
+      }
       setError(errMsg);
     } finally {
       setLoading(false);

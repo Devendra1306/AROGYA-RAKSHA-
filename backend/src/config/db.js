@@ -3,6 +3,14 @@ const mongoose = require('mongoose');
 let isMockDB = false;
 
 async function connectDB() {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+  if (mongoose.connection.readyState === 2) {
+    await mongoose.connection.asPromise();
+    return;
+  }
+
   const mongoURI = process.env.MONGO_URI;
   if (!mongoURI || mongoURI.includes('<db_password>')) {
     console.warn('\n⚠️  WARNING: MongoDB Atlas URI is unconfigured or contains <db_password> placeholder.');

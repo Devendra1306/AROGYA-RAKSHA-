@@ -11,10 +11,18 @@ const app = express();
 app.set('trust proxy', 1);
 
 const { connectDB } = require('./config/db');
-connectDB().then(() => {
-  seedDatabase();
-}).catch(err => {
-  console.error('Failed to initialize database connection:', err);
+
+// Lazy database connection middleware (ensures connection before route processing)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    seedDatabase().catch(err => {
+      console.error('Failed to run background database seeding:', err.message);
+    });
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Set security HTTP headers

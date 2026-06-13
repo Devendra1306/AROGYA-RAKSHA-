@@ -3,12 +3,9 @@ const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.post('/google', authController.googleLogin);
-router.post('/forgot-password', authController.forgotPassword);
-router.post('/reset-password', authController.resetPassword);
-
+// Since Firebase handles authentication, we only need routes to sync user data
+// and fetch/manage the user profile.
+router.post('/register', protect, authController.syncUser);
 router.get('/profile', protect, authController.getProfile);
 router.post('/profile/setup', protect, authController.setupProfile);
 router.delete('/profile/delete', protect, authController.deleteAccount);

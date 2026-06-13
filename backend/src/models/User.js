@@ -5,9 +5,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   mobile: { type: String, required: false, default: 'N/A' },
-  passwordHash: { type: String, required: false },
-  googleId: { type: String, required: false },
-  authProvider: { type: String, default: 'local' }, // 'local', 'google'
+  authProvider: { type: String, default: 'firebase' }, // 'firebase', etc.
   profilePicture: { type: String, required: false },
   role: { type: String, enum: ['User', 'Admin', 'SuperAdmin'], default: 'User' },
   emailVerified: { type: Boolean, default: false },
@@ -15,9 +13,7 @@ const userSchema = new mongoose.Schema({
   uid: { type: String, required: false, unique: true, sparse: true },
   accountStatus: { type: String, enum: ['active', 'suspended', 'deleted'], default: 'active' },
   lastLogin: { type: Date, required: false },
-  deletedAt: { type: Date, required: false },
-  resetPasswordToken: { type: String, required: false },
-  resetPasswordExpires: { type: Date, required: false }
+  deletedAt: { type: Date, required: false }
 }, {
   timestamps: true
 });
