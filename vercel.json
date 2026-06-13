@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://backend-phi-gold-btmkpc7a5u.vercel.app/api/:path*"
+    },
+    {
       "source": "/((?!assets/|sw\\.js|manifest\\.json|logo\\.jpg|favicon\\.svg|.*\\.(?:png|jpg|jpeg|gif|webp|ico|svg|css|js|woff2?|map)).*)",
       "destination": "/index.html"
     }
