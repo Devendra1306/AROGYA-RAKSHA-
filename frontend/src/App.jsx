@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Stubs imports (we will populate them with high-fidelity UIs)
 import LandingPage from './pages/LandingPage';
@@ -77,9 +78,9 @@ const GlobalLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-surface dark:bg-slate-900 text-on-surface dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-surface dark:bg-slate-950 text-on-surface dark:text-slate-100 flex flex-col transition-colors duration-350">
       {/* Sticky Top Navbar */}
-      <nav className="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-margin-mobile lg:px-margin-desktop h-16 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-800 shadow-sm transition-colors">
+      <nav className="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-margin-mobile lg:px-margin-desktop h-16 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-800/80 shadow-sm transition-colors">
         <div className="flex items-center gap-2 cursor-pointer animate-fade-in" onClick={() => navigate('/')}>
           <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-9 w-9 rounded-full object-cover ring-2 ring-primary dark:ring-secondary" />
           <span className="text-lg font-extrabold text-primary dark:text-secondary tracking-wide">Arogya Raksha</span>
@@ -90,10 +91,7 @@ const GlobalLayout = ({ children }) => {
           <Link className={activeClass('/')} to="/">Home</Link>
           <Link className={activeClass('/emergency')} to="/emergency">Emergency</Link>
           <Link className={activeClass('/medical-assistant')} to="/medical-assistant">AI Assistant</Link>
-          <Link className={activeClass('/health-assessment')} to="/health-assessment">Assessment</Link>
-          <Link className={activeClass('/diet-planner')} to="/diet-planner">Diet Planner</Link>
           <Link className={activeClass('/medicine-info')} to="/medicine-info">Medicines</Link>
-          <Link className={activeClass('/home-remedies')} to="/home-remedies">Remedies</Link>
           <Link className={activeClass('/nearby')} to="/nearby">Nearby</Link>
         </div>
 
@@ -101,7 +99,7 @@ const GlobalLayout = ({ children }) => {
         <div className="flex items-center gap-2">
           <button 
             onClick={toggleDarkMode}
-            className="p-2 text-on-surface-variant dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
+            className="p-2 text-on-surface-variant dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
             title="Toggle Dark Mode"
           >
             {darkMode ? <span className="material-symbols-outlined text-base select-none align-middle">light_mode</span> : <span className="material-symbols-outlined text-base select-none align-middle">dark_mode</span>}
@@ -111,7 +109,7 @@ const GlobalLayout = ({ children }) => {
             <div className="relative hidden lg:flex items-center">
               <div 
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-850 transition-all select-none"
+                className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all select-none"
               >
                 {user.profilePicture ? (
                   <img src={user.profilePicture} alt={user.firstName} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/25" />
@@ -133,16 +131,16 @@ const GlobalLayout = ({ children }) => {
                       <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
                     </div>
                     <div className="space-y-1">
-                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">
+                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">dashboard</span> Dashboard
                       </button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">
+                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">person</span> View Profile
                       </button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile-setup'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all flex items-center gap-2">
+                      <button onClick={() => { setDropdownOpen(false); navigate('/profile-setup'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center gap-2">
                         <span className="material-symbols-outlined text-sm">settings</span> Profile Setup
                       </button>
-                      <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 mt-2 pt-2">
+                      <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-650 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 mt-2 pt-2">
                         <span className="material-symbols-outlined text-sm text-red-650">logout</span> Logout
                       </button>
                     </div>
@@ -157,102 +155,179 @@ const GlobalLayout = ({ children }) => {
             </div>
           )}
 
-          {/* Mobile hamburger menu button */}
+          {/* Desktop/Mobile hamburger menu button */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-2xl text-on-surface-variant dark:text-slate-300 flex items-center"
+            className="p-2 text-2xl text-on-surface-variant dark:text-slate-300 flex items-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
+            title="Open Main Menu"
           >
             <span className="material-symbols-outlined">menu</span>
           </button>
         </div>
       </nav>
 
-      {/* Slide-out Mobile Hamburger Drawer */}
-      {mobileMenuOpen && (
-        <>
-          {/* Backdrop Blur Overlay */}
-          <div 
-            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm transition-all" 
-            onClick={() => setMobileMenuOpen(false)}
-          ></div>
+      {/* Slide-out Mobile/Desktop Navigation Drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop Blur Overlay */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs cursor-pointer" 
+              onClick={() => setMobileMenuOpen(false)}
+            ></motion.div>
 
-          {/* Drawer Panel */}
-          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 shadow-2xl p-6 flex flex-col justify-between animate-slide-in text-slate-800 dark:text-slate-100">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
-                <span className="font-extrabold text-base text-primary dark:text-secondary">App Options</span>
-                <button onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold flex items-center">
-                  <span className="material-symbols-outlined">close</span>
-                </button>
-              </div>
-
-              {/* Reminder Settings Toggles */}
-              <div className="space-y-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Reminders</span>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs text-blue-500">water_drop</span> Water Tracker
-                  </span>
-                  <input 
-                    type="checkbox" 
-                    checked={waterActive} 
-                    onChange={() => toggleReminder('remind_water', waterActive, setWaterActive)}
-                    className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
-                  />
+            {/* Drawer Panel */}
+            <motion.div 
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed inset-y-0 right-0 z-50 w-80 bg-white dark:bg-slate-900 border-l border-slate-200/50 dark:border-slate-800 shadow-2xl p-6 flex flex-col justify-between text-slate-800 dark:text-slate-100 overflow-y-auto"
+            >
+              <div className="space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <span className="font-extrabold text-base text-primary dark:text-secondary">App Navigation</span>
+                  <button onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold flex items-center hover:opacity-80 transition-opacity">
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs text-emerald-500">restaurant</span> Diet Log Checks
-                  </span>
-                  <input 
-                    type="checkbox" 
-                    checked={dietActive} 
-                    onChange={() => toggleReminder('remind_diet', dietActive, setDietActive)}
-                    className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
-                  />
+                {/* Profile card if authenticated */}
+                {user && (
+                  <div 
+                    onClick={() => { setMobileMenuOpen(false); navigate('/profile'); }}
+                    className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-2xl border border-slate-150/40 dark:border-slate-800/85 transition-all group"
+                  >
+                    {user.profilePicture ? (
+                      <img src={user.profilePicture} alt={user.firstName} className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/25" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs">
+                        {(user.firstName ? user.firstName[0].toUpperCase() : '') + (user.lastName ? user.lastName[0].toUpperCase() : '')}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-extrabold text-xs text-slate-800 dark:text-white truncate group-hover:text-primary dark:group-hover:text-secondary transition-colors">{user.firstName} {user.lastName}</h4>
+                      <p className="text-[9px] text-slate-400 truncate mt-0.5">View Profile Page →</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional navigation features */}
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">More Features</span>
+                  
+                  <Link 
+                    to="/health-assessment" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
+                  >
+                    <span className="material-symbols-outlined text-base text-violet-500">analytics</span>
+                    Health Assessment
+                  </Link>
+
+                  <Link 
+                    to="/diet-planner" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
+                  >
+                    <span className="material-symbols-outlined text-base text-emerald-500">restaurant</span>
+                    Diet Planner
+                  </Link>
+
+                  <Link 
+                    to="/home-remedies" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
+                  >
+                    <span className="material-symbols-outlined text-base text-orange-500">eco</span>
+                    Home Remedies
+                  </Link>
+
+                  {user && (
+                    <Link 
+                      to="/profile" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
+                    >
+                      <span className="material-symbols-outlined text-base text-primary dark:text-secondary">person</span>
+                      My Profile
+                    </Link>
+                  )}
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs text-indigo-500">analytics</span> Weekly Vitals
-                  </span>
-                  <input 
-                    type="checkbox" 
-                    checked={healthActive} 
-                    onChange={() => toggleReminder('remind_health', healthActive, setHealthActive)}
-                    className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
-                  />
+                {/* Reminder Settings Toggles */}
+                <div className="space-y-4 border-t border-slate-100 dark:border-slate-800/60 pt-4">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Reminders</span>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-semibold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs text-blue-500">water_drop</span> Water Tracker
+                    </span>
+                    <input 
+                      type="checkbox" 
+                      checked={waterActive} 
+                      onChange={() => toggleReminder('remind_water', waterActive, setWaterActive)}
+                      className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-semibold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs text-emerald-500">restaurant</span> Diet Log Checks
+                    </span>
+                    <input 
+                      type="checkbox" 
+                      checked={dietActive} 
+                      onChange={() => toggleReminder('remind_diet', dietActive, setDietActive)}
+                      className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-semibold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs text-indigo-500">analytics</span> Weekly Vitals
+                    </span>
+                    <input 
+                      type="checkbox" 
+                      checked={healthActive} 
+                      onChange={() => toggleReminder('remind_health', healthActive, setHealthActive)}
+                      className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* App links */}
+                <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Information</span>
+                  <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>About Arogya</Link>
+                  <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Privacy Policy</Link>
+                  <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Terms of Service</Link>
                 </div>
               </div>
 
-              {/* App links */}
-              <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-700">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Information</span>
-                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>About Arogya</Link>
-                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Privacy Policy</Link>
-                <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Terms of Service</Link>
+              {/* Logout/Account */}
+              <div className="mt-8">
+                {user ? (
+                  <button 
+                    onClick={() => { setMobileMenuOpen(false); logout(); navigate('/'); }}
+                    className="w-full bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold py-3.5 rounded-2xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all text-xs uppercase tracking-wider"
+                  >
+                    Log Out
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="border border-slate-250 py-3 rounded-2xl font-bold text-center text-xs uppercase tracking-wider">Login</Link>
+                    <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="bg-primary text-white py-3 rounded-2xl font-bold text-center text-xs uppercase tracking-wider shadow-sm">Sign Up</Link>
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* Logout/Account */}
-            {user ? (
-              <button 
-                onClick={() => { setMobileMenuOpen(false); logout(); navigate('/'); }}
-                className="w-full bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold py-3 rounded-2xl hover:bg-red-100 transition-all text-xs"
-              >
-                Log Out
-              </button>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="border border-slate-250 py-3 rounded-2xl font-bold text-center text-xs">Login</Link>
-                <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="bg-primary text-white py-3 rounded-2xl font-bold text-center text-xs">Sign Up</Link>
-              </div>
-            )}
-          </div>
-        </>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Main Content Body - padding bottom added to clear mobile nav */}
       <main className="flex-grow pt-16 pb-20 lg:pb-0">
