@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Stubs imports (we will populate them with high-fidelity UIs)
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -23,409 +22,425 @@ import HealthcareDirectory from './pages/HealthcareDirectory';
 import ProfilePage from './pages/ProfilePage';
 import { startNotificationScheduler } from './utils/notificationManager';
 
-
-
+// ─── Protected Route ─────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { isAuthenticated, user, loading } = useAuth();
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-surface dark:bg-slate-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0052CC] dark:border-[#10B981]"></div>
       </div>
     );
   }
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (requireAdmin && user.role !== 'Admin' && user.role !== 'SuperAdmin') {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
+  if (requireAdmin && user.role !== 'Admin' && user.role !== 'SuperAdmin') return <Navigate to="/dashboard" replace />;
   return children;
 };
 
-// Global Layout containing navbar, bottom navigation, drawer, and floating SOS speed dial
+// ─── Global Layout ────────────────────────────────────────────────────────────
 const GlobalLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [dropdownOpen, setDropdownOpen] = React.useState(false);
-  const [sosOpen, setSosOpen] = React.useState(false);
 
-  // Reminders status
-  const [waterActive, setWaterActive] = React.useState(() => localStorage.getItem('remind_water') === 'true');
-  const [dietActive, setDietActive] = React.useState(() => localStorage.getItem('remind_diet') === 'true');
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [dropdownOpen, setDropdownOpen]     = React.useState(false);
+  const [sosOpen, setSosOpen]               = React.useState(false);
+  const [scrolled, setScrolled]             = React.useState(false);
+
+  // Reminder toggles (for drawer)
+  const [waterActive,  setWaterActive]  = React.useState(() => localStorage.getItem('remind_water')  === 'true');
+  const [dietActive,   setDietActive]   = React.useState(() => localStorage.getItem('remind_diet')   === 'true');
   const [healthActive, setHealthActive] = React.useState(() => localStorage.getItem('remind_health') === 'true');
 
-  // Premium pill-style active class
-  const activeClass = (path) =>
-    location.pathname === path
-      ? 'relative text-primary dark:text-secondary font-bold text-sm px-4 py-2 rounded-full bg-primary/8 dark:bg-secondary/10 transition-all duration-200 nav-link-active'
-      : 'relative text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 font-medium text-sm px-4 py-2 rounded-full hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-all duration-200';
+  // Scroll-aware navbar shadow
+  React.useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  const isActive = (path) => location.pathname === path;
 
   const activeMobileClass = (path) =>
-    location.pathname === path
-      ? 'text-primary dark:text-secondary font-extrabold flex flex-col items-center justify-center text-xs'
-      : 'text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-secondary flex flex-col items-center justify-center text-xs transition-colors';
+    isActive(path)
+      ? 'text-[#0052CC] dark:text-[#10B981] font-extrabold flex flex-col items-center justify-center text-[10px] gap-0.5'
+      : 'text-slate-400 dark:text-slate-500 hover:text-[#0052CC] dark:hover:text-[#10B981] flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors';
 
-  const toggleReminder = (type, currentVal, setter) => {
-    const newVal = !currentVal;
-    setter(newVal);
-    localStorage.setItem(type, newVal.toString());
-    if (newVal && 'Notification' in window && Notification.permission !== 'granted') {
-      Notification.requestPermission();
-    }
+  const toggleReminder = (key, val, setter) => {
+    setter(val);
+    localStorage.setItem(key, val.toString());
+    if (val && 'Notification' in window && Notification.permission !== 'granted') Notification.requestPermission();
   };
 
   const NAV_LINKS = [
-    { path: '/',                 label: 'Home',         icon: 'home'        },
-    { path: '/emergency',        label: 'Emergency',    icon: 'emergency'   },
-    { path: '/medical-assistant',label: 'AI Assistant', icon: 'smart_toy'   },
-    { path: '/medicine-info',    label: 'Medicines',    icon: 'pill'        },
-    { path: '/nearby',           label: 'Nearby',       icon: 'location_on' },
+    { path: '/',                  label: 'Home',         icon: 'home'        },
+    { path: '/emergency',         label: 'Emergency',    icon: 'emergency'   },
+    { path: '/medical-assistant', label: 'AI Assistant', icon: 'smart_toy'   },
+    { path: '/medicine-info',     label: 'Medicines',    icon: 'pill'        },
+    { path: '/nearby',            label: 'Nearby',       icon: 'location_on' },
+  ];
+
+  const DRAWER_LINKS = [
+    { path: '/dashboard',        label: 'Dashboard',        icon: 'dashboard'       },
+    { path: '/emergency',        label: 'Emergency Help',   icon: 'emergency'       },
+    { path: '/medical-assistant',label: 'AI Assistant',     icon: 'smart_toy'       },
+    { path: '/medicine-info',    label: 'Medicines',        icon: 'pill'            },
+    { path: '/home-remedies',    label: 'Home Remedies',    icon: 'eco'             },
+    { path: '/diet-planner',     label: 'Diet Planner',     icon: 'nutrition'       },
+    { path: '/health-assessment',label: 'Health Assessment',icon: 'monitor_heart'   },
+    { path: '/nearby',           label: 'Nearby Healthcare',icon: 'location_on'     },
+    { path: '/profile',          label: 'My Profile',       icon: 'manage_accounts' },
   ];
 
   const userInitials =
     (user?.firstName ? user.firstName[0].toUpperCase() : '') +
     (user?.lastName  ? user.lastName[0].toUpperCase()  : '');
 
+  // ── Close dropdown on route change
+  React.useEffect(() => { setDropdownOpen(false); setMobileMenuOpen(false); }, [location.pathname]);
+
   return (
-    <div className="min-h-screen bg-surface dark:bg-slate-950 text-on-surface dark:text-slate-100 flex flex-col transition-colors duration-350">
+    <div className="min-h-screen bg-surface dark:bg-slate-950 text-on-surface dark:text-slate-100 flex flex-col transition-colors duration-300">
 
-      {/* ─── Premium Sticky Navbar ────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 w-full z-40 transition-all duration-300"
-           style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+      {/* ════════════════════════════════════════════════════════════════════
+          PREMIUM NAVBAR
+          ════════════════════════════════════════════════════════════════════ */}
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 transition-shadow duration-300 ${
+          scrolled ? 'shadow-[0_8px_32px_-4px_rgba(0,82,204,0.13)] dark:shadow-[0_8px_32px_-4px_rgba(0,0,0,0.55)]' : ''
+        }`}
+        style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
+      >
+        {/* Top tri-colour accent */}
+        <div className="h-[3px] bg-gradient-to-r from-[#0052CC] via-[#10B981] to-[#6366F1]" />
 
-        {/* Subtle top accent line */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/50 dark:via-secondary/40 to-transparent" />
+        <div className={`flex items-center justify-between h-16 px-4 lg:px-8 xl:px-14 transition-all duration-300 ${
+          scrolled
+            ? 'bg-white/92 dark:bg-slate-900/96 border-b border-slate-200 dark:border-slate-800'
+            : 'bg-white/72 dark:bg-slate-900/78 border-b border-slate-200/40 dark:border-slate-800/40'
+        }`}>
 
-        <div className="flex justify-between items-center h-[68px] px-4 lg:px-10
-                        bg-white/75 dark:bg-slate-900/80
-                        border-b border-slate-200/60 dark:border-slate-800/70
-                        shadow-[0_2px_24px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_24px_-4px_rgba(0,0,0,0.35)]">
-
-          {/* ── Brand ─────────────────────────────────────────────────── */}
-          <div className="flex items-center gap-3 cursor-pointer select-none group" onClick={() => navigate('/')}>
+          {/* ── BRAND ─────────────────────────────────────────────────────── */}
+          <button onClick={() => navigate('/')} className="flex items-center gap-2.5 group focus:outline-none shrink-0">
             <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-primary/20 dark:bg-secondary/20 blur-sm group-hover:blur-md transition-all" />
-              <img src="/logo.jpg" alt="Arogya Raksha"
-                className="relative h-10 w-10 rounded-full object-cover ring-2 ring-primary/40 dark:ring-secondary/40
-                           shadow-md group-hover:ring-primary dark:group-hover:ring-secondary transition-all duration-300" />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#0052CC]/30 to-[#10B981]/20 blur-md scale-125 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+              <div className="relative w-9 h-9 rounded-xl overflow-hidden ring-2 ring-[#0052CC]/25 dark:ring-[#10B981]/25 shadow-md group-hover:ring-[#0052CC]/60 dark:group-hover:ring-[#10B981]/50 transition-all duration-300">
+                <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
+              </div>
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-base font-black tracking-tight
-                               bg-gradient-to-r from-primary to-primary/70 dark:from-secondary dark:to-secondary/70
-                               bg-clip-text text-transparent">
+            <div className="text-left leading-none">
+              <span className="block text-[15px] font-black tracking-tight bg-gradient-to-r from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#34d399] bg-clip-text text-transparent">
                 Arogya Raksha
               </span>
-              <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium tracking-widest uppercase hidden sm:block">
+              <span className="block text-[8px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mt-0.5 hidden sm:block">
                 Health · Safety · Care
               </span>
             </div>
+          </button>
+
+          {/* ── PILL NAV (desktop) ─────────────────────────────────────────── */}
+          <div className="hidden lg:flex items-center bg-slate-100/80 dark:bg-slate-800/60 rounded-2xl px-1.5 py-1.5 gap-0.5 border border-slate-200/50 dark:border-slate-700/40">
+            {NAV_LINKS.map(({ path, label, icon }) => {
+              const active = isActive(path);
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`relative flex items-center gap-1.5 px-3.5 py-[7px] rounded-xl text-[12.5px] font-semibold transition-all duration-200 select-none ${
+                    active
+                      ? 'bg-white dark:bg-slate-700 text-[#0052CC] dark:text-[#10B981] shadow-md shadow-slate-200/60 dark:shadow-slate-900/60'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-700/50'
+                  }`}
+                >
+                  <span
+                    className={`material-symbols-outlined text-[14px] ${active ? 'text-[#0052CC] dark:text-[#10B981]' : 'text-slate-400 dark:text-slate-500'}`}
+                    style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
+                  >
+                    {icon}
+                  </span>
+                  {label}
+                  {active && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#0052CC] dark:bg-[#10B981]" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* ── Centre Nav Links ───────────────────────────────────────── */}
-          <div className="hidden lg:flex items-center gap-1 bg-slate-50/80 dark:bg-slate-800/50 rounded-full px-2 py-1.5
-                          border border-slate-200/60 dark:border-slate-700/40 shadow-inner">
-            {NAV_LINKS.map(({ path, label }) => (
-              <Link key={path} className={activeClass(path)} to={path}>{label}</Link>
-            ))}
-          </div>
+          {/* ── RIGHT CONTROLS ────────────────────────────────────────────── */}
+          <div className="flex items-center gap-1">
 
-          {/* ── Right Controls ─────────────────────────────────────────── */}
-          <div className="flex items-center gap-1.5">
-
-            {/* Dark mode toggle */}
-            <button onClick={toggleDarkMode} title="Toggle Theme"
-              className="w-9 h-9 flex items-center justify-center rounded-full
-                         text-slate-500 dark:text-slate-400
-                         hover:bg-slate-100 dark:hover:bg-slate-800
-                         border border-transparent hover:border-slate-200 dark:hover:border-slate-700
-                         transition-all duration-200">
-              {darkMode
-                ? <span className="material-symbols-outlined text-[18px] select-none">light_mode</span>
-                : <span className="material-symbols-outlined text-[18px] select-none">dark_mode</span>}
+            {/* Theme toggle */}
+            <button
+              onClick={toggleDarkMode}
+              title={darkMode ? 'Light mode' : 'Dark mode'}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#0052CC] dark:hover:text-[#10B981] transition-all duration-200"
+            >
+              <span className="material-symbols-outlined text-[19px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                {darkMode ? 'light_mode' : 'dark_mode'}
+              </span>
             </button>
 
-            {/* ── User area ─────────────────────────────────────────── */}
+            {/* ── LOGGED-IN USER ──── */}
             {user ? (
-              <div className="relative hidden lg:flex items-center">
+              <div className="relative hidden lg:block">
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2.5 cursor-pointer pl-1 pr-3 py-1 rounded-full
-                             hover:bg-slate-100 dark:hover:bg-slate-800
-                             border border-transparent hover:border-slate-200 dark:hover:border-slate-700
-                             transition-all duration-200 select-none">
+                  onClick={() => setDropdownOpen(v => !v)}
+                  className={`flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-xl transition-all duration-200 ${
+                    dropdownOpen ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
                   {user.profilePicture ? (
-                    <img src={user.profilePicture} alt={user.firstName}
-                      className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/30 dark:ring-secondary/30 shadow-sm" />
+                    <img src={user.profilePicture} alt={user.firstName} className="w-7 h-7 rounded-lg object-cover ring-2 ring-[#0052CC]/20 dark:ring-[#10B981]/25" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm
-                                    bg-gradient-to-br from-primary to-primary/70 dark:from-secondary dark:to-secondary/70">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-black text-white bg-gradient-to-br from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#059669] shadow-sm">
                       {userInitials}
                     </div>
                   )}
-                  <div className="flex flex-col items-start leading-tight">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{user.firstName}</span>
-                    <span className="text-[9px] text-slate-400">Member</span>
+                  <div className="text-left leading-none">
+                    <p className="text-[12px] font-bold text-slate-700 dark:text-slate-200">{user.firstName}</p>
+                    <p className="text-[9px] text-slate-400">Member</p>
                   </div>
-                  <span className="material-symbols-outlined text-sm text-slate-400"
-                        style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
-                    keyboard_arrow_down
-                  </span>
+                  <span
+                    className="material-symbols-outlined text-[16px] text-slate-400 transition-transform duration-200"
+                    style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >keyboard_arrow_down</span>
                 </button>
 
-                {/* Dropdown */}
-                {dropdownOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-12 z-50 w-64
-                                 bg-white dark:bg-slate-900
-                                 border border-slate-200/80 dark:border-slate-700/60
-                                 rounded-2xl shadow-2xl shadow-slate-200/60 dark:shadow-slate-950/60
-                                 overflow-hidden">
-                      {/* Header */}
-                      <div className="p-4 bg-gradient-to-br from-primary/5 to-transparent dark:from-secondary/5 border-b border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3">
-                          {user.profilePicture ? (
-                            <img src={user.profilePicture} alt={user.firstName}
-                              className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/20" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white
-                                            bg-gradient-to-br from-primary to-primary/70 dark:from-secondary dark:to-secondary/70">
-                              {userInitials}
+                {/* Dropdown panel */}
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                        transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ width: 272 }}
+                        className="absolute right-0 top-[calc(100%+8px)] z-50 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/50 shadow-2xl shadow-slate-300/30 dark:shadow-slate-950/70"
+                      >
+                        {/* Header */}
+                        <div className="p-4 bg-gradient-to-br from-[#0052CC]/8 to-[#10B981]/4 dark:from-[#0052CC]/15 dark:to-[#10B981]/8 border-b border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center gap-3">
+                            {user.profilePicture ? (
+                              <img src={user.profilePicture} alt={user.firstName} className="w-11 h-11 rounded-xl object-cover ring-2 ring-[#0052CC]/20 shadow" />
+                            ) : (
+                              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-base font-black text-white bg-gradient-to-br from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#059669] shadow-md">
+                                {userInitials}
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="font-bold text-[13px] text-slate-800 dark:text-white truncate">{user.firstName} {user.lastName}</p>
+                              <p className="text-[10px] text-slate-400 truncate mt-0.5">{user.email}</p>
+                              <span className="inline-flex items-center gap-1 mt-1 bg-[#0052CC]/10 dark:bg-[#10B981]/15 text-[#0052CC] dark:text-[#10B981] text-[8.5px] font-bold px-2 py-0.5 rounded-full">
+                                <span className="material-symbols-outlined text-[8px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                Active Member
+                              </span>
                             </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-bold text-sm text-slate-800 dark:text-white truncate">{user.firstName} {user.lastName}</p>
-                            <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
                           </div>
                         </div>
-                      </div>
-                      {/* Links */}
-                      <div className="p-2">
-                        {[
-                          { icon: 'dashboard', label: 'Dashboard',    path: '/dashboard'    },
-                          { icon: 'person',    label: 'View Profile', path: '/profile'       },
-                          { icon: 'settings',  label: 'Profile Setup', path: '/profile-setup' },
-                        ].map(({ icon, label, path }) => (
-                          <button key={path}
-                            onClick={() => { setDropdownOpen(false); navigate(path); }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                                       text-slate-600 dark:text-slate-300
-                                       hover:bg-slate-50 dark:hover:bg-slate-800
-                                       hover:text-primary dark:hover:text-secondary
-                                       transition-all duration-150">
-                            <span className="material-symbols-outlined text-base">{icon}</span>
-                            {label}
+
+                        {/* Menu items */}
+                        <div className="p-1.5 space-y-0.5">
+                          {[
+                            { icon: 'dashboard',      label: 'Dashboard',    sub: 'Your health overview',  path: '/dashboard'    },
+                            { icon: 'manage_accounts',label: 'My Profile',   sub: 'View & edit account',   path: '/profile'      },
+                            { icon: 'settings',       label: 'Profile Setup',sub: 'Update health info',    path: '/profile-setup'},
+                          ].map(({ icon, label, sub, path }) => (
+                            <button key={path} onClick={() => { setDropdownOpen(false); navigate(path); }}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl group/item hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150">
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover/item:bg-[#0052CC]/10 dark:group-hover/item:bg-[#10B981]/15 flex items-center justify-center transition-all">
+                                <span className="material-symbols-outlined text-[15px] text-slate-500 dark:text-slate-400 group-hover/item:text-[#0052CC] dark:group-hover/item:text-[#10B981] transition-colors" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
+                              </div>
+                              <div className="text-left min-w-0">
+                                <p className="text-[12px] font-semibold text-slate-700 dark:text-slate-200 group-hover/item:text-[#0052CC] dark:group-hover/item:text-[#10B981] transition-colors">{label}</p>
+                                <p className="text-[9px] text-slate-400 truncate">{sub}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Logout */}
+                        <div className="p-1.5 pt-0 mx-1.5 mb-1.5 border-t border-slate-100 dark:border-slate-800">
+                          <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150 group/logout mt-1">
+                            <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/20 flex items-center justify-center">
+                              <span className="material-symbols-outlined text-[15px] text-red-400" style={{ fontVariationSettings: "'FILL' 1" }}>logout</span>
+                            </div>
+                            <div className="text-left">
+                              <p className="text-[12px] font-bold text-red-500">Log Out</p>
+                              <p className="text-[9px] text-red-400/70">Sign out of your account</p>
+                            </div>
                           </button>
-                        ))}
-                        <div className="my-1.5 border-t border-slate-100 dark:border-slate-800" />
-                        <button
-                          onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold
-                                     text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150">
-                          <span className="material-symbols-outlined text-base">logout</span>
-                          Log Out
-                        </button>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <div className="hidden lg:flex items-center gap-2">
-                <Link to="/login"
-                  className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-secondary
-                             font-semibold text-sm px-3 py-2 rounded-full
-                             hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200">Login</Link>
-                <Link to="/signup"
-                  className="bg-gradient-to-r from-primary to-primary/85 dark:from-secondary dark:to-secondary/85
-                             text-white font-bold text-sm px-4 py-2 rounded-full shadow-md
-                             hover:shadow-primary/30 hover:scale-105 active:scale-95
-                             transition-all duration-200">Sign Up</Link>
+                <Link to="/login" className="px-4 py-2 text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:text-[#0052CC] dark:hover:text-[#10B981] hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200">
+                  Log In
+                </Link>
+                <Link to="/signup" className="px-4 py-2 text-[13px] font-bold text-white bg-gradient-to-r from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#059669] rounded-xl shadow-md hover:shadow-lg hover:shadow-[#0052CC]/25 dark:hover:shadow-[#10B981]/25 hover:scale-[1.03] active:scale-95 transition-all duration-200">
+                  Get Started
+                </Link>
               </div>
             )}
 
-            {/* Hamburger / More */}
+            {/* Hamburger */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              title="More Navigation"
-              className="w-9 h-9 flex items-center justify-center rounded-full
-                         text-slate-500 dark:text-slate-400
-                         hover:bg-slate-100 dark:hover:bg-slate-800
-                         border border-transparent hover:border-slate-200 dark:hover:border-slate-700
-                         transition-all duration-200">
-              <span className="material-symbols-outlined text-[20px] select-none">
-                {mobileMenuOpen ? 'close' : 'menu'}
-              </span>
+              onClick={() => setMobileMenuOpen(v => !v)}
+              className={`w-9 h-9 ml-0.5 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                mobileMenuOpen
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={mobileMenuOpen ? 'close' : 'menu'}
+                  initial={{ rotate: -80, opacity: 0, scale: 0.7 }}
+                  animate={{ rotate: 0,   opacity: 1, scale: 1   }}
+                  exit={{    rotate:  80, opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.18 }}
+                  className="material-symbols-outlined text-[20px]"
+                  style={{ fontVariationSettings: "'FILL' 0" }}
+                >
+                  {mobileMenuOpen ? 'close' : 'menu'}
+                </motion.span>
+              </AnimatePresence>
             </button>
           </div>
         </div>
       </nav>
+      {/* ════════════════════════════════════════════════════════════════════ */}
 
       {/* Slide-out Mobile/Desktop Navigation Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Backdrop Blur Overlay */}
-            <motion.div 
+            {/* Backdrop */}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs cursor-pointer" 
+              className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm cursor-pointer"
               onClick={() => setMobileMenuOpen(false)}
-            ></motion.div>
+            />
 
             {/* Drawer Panel */}
-            <motion.div 
-              initial={{ x: "100%" }}
+            <motion.div
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 220 }}
-              className="fixed inset-y-0 right-0 z-50 w-80 bg-white dark:bg-slate-900 border-l border-slate-200/50 dark:border-slate-800 shadow-2xl p-6 flex flex-col justify-between text-slate-800 dark:text-slate-100 overflow-y-auto"
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 220 }}
+              className="fixed inset-y-0 right-0 z-50 w-80 bg-white dark:bg-slate-900 border-l border-slate-200/50 dark:border-slate-800 shadow-2xl flex flex-col overflow-y-auto"
             >
-              <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <span className="font-extrabold text-base text-primary dark:text-secondary">App Navigation</span>
-                  <button onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold flex items-center hover:opacity-80 transition-opacity">
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
-                </div>
-
-                {/* Profile card if authenticated */}
-                {user && (
-                  <div 
-                    onClick={() => { setMobileMenuOpen(false); navigate('/profile'); }}
-                    className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-2xl border border-slate-150/40 dark:border-slate-800/85 transition-all group"
-                  >
-                    {user.profilePicture ? (
-                      <img src={user.profilePicture} alt={user.firstName} className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/25" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs">
-                        {(user.firstName ? user.firstName[0].toUpperCase() : '') + (user.lastName ? user.lastName[0].toUpperCase() : '')}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-extrabold text-xs text-slate-800 dark:text-white truncate group-hover:text-primary dark:group-hover:text-secondary transition-colors">{user.firstName} {user.lastName}</h4>
-                      <p className="text-[9px] text-slate-400 truncate mt-0.5">View Profile Page →</p>
-                    </div>
+              {/* Drawer Header */}
+              <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl overflow-hidden ring-2 ring-[#0052CC]/20 dark:ring-[#10B981]/20">
+                    <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
                   </div>
-                )}
-
-                {/* Additional navigation features */}
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">More Features</span>
-                  
-                  <Link 
-                    to="/health-assessment" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
-                  >
-                    <span className="material-symbols-outlined text-base text-violet-500">analytics</span>
-                    Health Assessment
-                  </Link>
-
-                  <Link 
-                    to="/diet-planner" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
-                  >
-                    <span className="material-symbols-outlined text-base text-emerald-500">restaurant</span>
-                    Diet Planner
-                  </Link>
-
-                  <Link 
-                    to="/home-remedies" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
-                  >
-                    <span className="material-symbols-outlined text-base text-orange-500">eco</span>
-                    Home Remedies
-                  </Link>
-
-                  {user && (
-                    <Link 
-                      to="/profile" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-xs border border-transparent hover:border-slate-150 dark:hover:border-slate-800"
-                    >
-                      <span className="material-symbols-outlined text-base text-primary dark:text-secondary">person</span>
-                      My Profile
-                    </Link>
-                  )}
+                  <span className="font-black text-[14px] bg-gradient-to-r from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#34d399] bg-clip-text text-transparent">Arogya Raksha</span>
                 </div>
-
-                {/* Reminder Settings Toggles */}
-                <div className="space-y-4 border-t border-slate-100 dark:border-slate-800/60 pt-4">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Local Reminders</span>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs text-blue-500">water_drop</span> Water Tracker
-                    </span>
-                    <input 
-                      type="checkbox" 
-                      checked={waterActive} 
-                      onChange={() => toggleReminder('remind_water', waterActive, setWaterActive)}
-                      className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs text-emerald-500">restaurant</span> Diet Log Checks
-                    </span>
-                    <input 
-                      type="checkbox" 
-                      checked={dietActive} 
-                      onChange={() => toggleReminder('remind_diet', dietActive, setDietActive)}
-                      className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs text-indigo-500">analytics</span> Weekly Vitals
-                    </span>
-                    <input 
-                      type="checkbox" 
-                      checked={healthActive} 
-                      onChange={() => toggleReminder('remind_health', healthActive, setHealthActive)}
-                      className="w-8 h-4 bg-slate-200 checked:bg-primary rounded-full cursor-pointer appearance-none relative before:content-[''] before:absolute before:h-3 before:w-3 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-4 transition-all outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* App links */}
-                <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/60">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Information</span>
-                  <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>About Arogya</Link>
-                  <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Privacy Policy</Link>
-                  <Link className="block text-xs font-semibold hover:text-primary transition-all" to="/" onClick={() => setMobileMenuOpen(false)}>Terms of Service</Link>
-                </div>
+                <button onClick={() => setMobileMenuOpen(false)} className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                  <span className="material-symbols-outlined text-[18px] text-slate-500">close</span>
+                </button>
               </div>
 
-              {/* Logout/Account */}
-              <div className="mt-8">
-                {user ? (
-                  <button 
-                    onClick={() => { setMobileMenuOpen(false); logout(); navigate('/'); }}
-                    className="w-full bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 font-bold py-3.5 rounded-2xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all text-xs uppercase tracking-wider"
-                  >
+              {/* User card in drawer */}
+              {user && (
+                <div
+                  onClick={() => { setMobileMenuOpen(false); navigate('/profile'); }}
+                  className="mx-3 mt-4 p-3 bg-gradient-to-br from-[#0052CC]/8 to-[#10B981]/5 dark:from-[#0052CC]/15 dark:to-[#10B981]/10 rounded-2xl border border-[#0052CC]/10 dark:border-[#10B981]/15 cursor-pointer hover:border-[#0052CC]/25 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    {user.profilePicture ? (
+                      <img src={user.profilePicture} alt={user.firstName} className="w-10 h-10 rounded-xl object-cover ring-2 ring-[#0052CC]/20" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-sm bg-gradient-to-br from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#059669] shadow">
+                        {userInitials}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-bold text-[13px] text-slate-800 dark:text-white truncate">{user.firstName} {user.lastName}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                    </div>
+                    <span className="material-symbols-outlined text-[16px] text-slate-300 ml-auto shrink-0">chevron_right</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Nav links */}
+              <div className="flex-1 p-3 pt-3 space-y-0.5 overflow-y-auto">
+                <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 px-3 py-2">Navigation</p>
+                {DRAWER_LINKS.map(({ path, label, icon }) => {
+                  const active = isActive(path);
+                  return (
+                    <button
+                      key={path}
+                      onClick={() => { setMobileMenuOpen(false); navigate(path); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-150 text-left ${
+                        active
+                          ? 'bg-[#0052CC]/10 dark:bg-[#10B981]/15 text-[#0052CC] dark:text-[#10B981]'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}>{icon}</span>
+                      {label}
+                      {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#0052CC] dark:bg-[#10B981]" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Reminders section */}
+              <div className="mx-3 mb-3 p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-700/40">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-3">Health Reminders</p>
+                {[
+                  { label: 'Water Tracker',    icon: 'water_drop',  val: waterActive,  key: 'remind_water',  setter: setWaterActive,  color: 'text-blue-500'   },
+                  { label: 'Diet Log Check',   icon: 'restaurant',  val: dietActive,   key: 'remind_diet',   setter: setDietActive,   color: 'text-emerald-500'},
+                  { label: 'Health Check-in',  icon: 'analytics',   val: healthActive, key: 'remind_health', setter: setHealthActive, color: 'text-violet-500' },
+                ].map(({ label, icon, val, key, setter, color }) => (
+                  <div key={key} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700/30 last:border-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`material-symbols-outlined text-[16px] ${color}`} style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
+                      <span className="text-[12px] font-medium text-slate-700 dark:text-slate-200">{label}</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked={val} onChange={e => toggleReminder(key, e.target.checked, setter)} className="sr-only peer" />
+                      <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-[#0052CC] dark:peer-checked:bg-[#10B981]
+                          after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4" />
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Drawer footer */}
+              <div className="p-3 border-t border-slate-100 dark:border-slate-800 shrink-0 space-y-1.5">
+                {!user ? (
+                  <>
+                    <button onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                      className="w-full py-2.5 text-[13px] font-semibold text-[#0052CC] dark:text-[#10B981] border border-[#0052CC]/25 dark:border-[#10B981]/25 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/10 rounded-xl transition-all">
+                      Log In
+                    </button>
+                    <button onClick={() => { setMobileMenuOpen(false); navigate('/signup'); }}
+                      className="w-full py-2.5 text-[13px] font-bold text-white bg-gradient-to-r from-[#0052CC] to-[#1a6fe8] dark:from-[#10B981] dark:to-[#059669] rounded-xl shadow-md transition-all">
+                      Get Started
+                    </button>
+                  </>
+                ) : (
+                  <button onClick={() => { setMobileMenuOpen(false); logout(); navigate('/'); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold text-[13px] transition-all">
+                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>logout</span>
                     Log Out
                   </button>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="border border-slate-250 py-3 rounded-2xl font-bold text-center text-xs uppercase tracking-wider">Login</Link>
-                    <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="bg-primary text-white py-3 rounded-2xl font-bold text-center text-xs uppercase tracking-wider shadow-sm">Sign Up</Link>
-                  </div>
                 )}
               </div>
             </motion.div>
@@ -433,147 +448,167 @@ const GlobalLayout = ({ children }) => {
         )}
       </AnimatePresence>
 
-      {/* Main Content Body - padding bottom added to clear mobile nav */}
-      <main className="flex-grow pt-16 pb-20 lg:pb-0">
+      {/* ── Main Content ────────────────────────────────────────────────────── */}
+      <main className="flex-grow pt-[67px] pb-20 lg:pb-0">
         {children}
       </main>
 
-      {/* Global Footer - hidden on mobile screens to feel like an App */}
-      <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-margin-desktop border-t border-slate-800 transition-colors">
-        <div className="max-w-[1280px] mx-auto flex justify-between items-center gap-gutter">
-          <div className="flex items-center gap-4">
-            <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-14 w-14 rounded-full object-cover" />
+      {/* ── Bottom Mobile Nav ────────────────────────────────────────────────── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/80 shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.4)]">
+        <div className="flex items-center justify-around h-16 px-1">
+          {[
+            { path: '/',                  label: 'Home',      icon: 'home'       },
+            { path: '/emergency',         label: 'Emergency', icon: 'emergency'  },
+            { path: '/medical-assistant', label: 'AI',        icon: 'smart_toy'  },
+            { path: '/medicine-info',     label: 'Medicines', icon: 'pill'       },
+            { path: '/nearby',            label: 'Nearby',    icon: 'location_on'},
+            { path: '/profile',           label: 'Profile',   icon: 'person'     },
+          ].map(({ path, label, icon }) => {
+            const active = isActive(path);
+            return (
+              <Link key={path} to={path} className={activeMobileClass(path)}>
+                <span className={`material-symbols-outlined text-[22px] transition-transform duration-200 ${active ? 'scale-110' : ''}`} style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}>
+                  {icon}
+                </span>
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* ── Emergency SOS FAB ──────────────────────────────────────────────── */}
+      <div className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-40">
+        <AnimatePresence>
+          {sosOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.9 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 260 }}
+              className="mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 min-w-[180px]"
+            >
+              {[
+                { label: 'Call Ambulance',     icon: 'ambulance',   href: 'tel:108',     color: 'text-red-600 bg-red-50 dark:bg-red-950/30'     },
+                { label: 'Call Police',        icon: 'local_police',href: 'tel:100',     color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30'   },
+                { label: 'Emergency Guide',    icon: 'emergency',   href: '/emergency',  color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30' },
+              ].map(({ label, icon, href, color }) => (
+                <a key={label} href={href}
+                  onClick={() => setSosOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-[12px] transition-all hover:opacity-80 ${color}`}>
+                  <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
+                  {label}
+                </a>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <motion.button
+          onClick={() => setSosOpen(v => !v)}
+          whileTap={{ scale: 0.93 }}
+          className={`w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center font-black text-white text-[13px] tracking-wider transition-all duration-300 ${
+            sosOpen
+              ? 'bg-slate-700 dark:bg-slate-800 shadow-slate-400/30'
+              : 'bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105'
+          }`}
+          title="Emergency SOS"
+        >
+          {sosOpen ? (
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
+          ) : (
+            <span className="text-[11px] font-black tracking-widest">SOS</span>
+          )}
+        </motion.button>
+      </div>
+
+      {/* ── Global Footer (desktop only) ──────────────────────────────────── */}
+      <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-14 border-t border-slate-800">
+        <div className="max-w-[1280px] mx-auto flex justify-between items-center gap-8">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-[#0052CC]/30">
+              <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
+            </div>
             <div>
-              <h3 className="text-white font-bold text-lg">Arogya Raksha</h3>
-              <p className="text-[10px] opacity-75 mt-0.5">PROTECTING YOUR HEALTH. SECURING YOUR FUTURE.</p>
+              <p className="font-black text-white text-[14px]">Arogya Raksha</p>
+              <p className="text-[10px] text-slate-500 tracking-widest uppercase">Health · Safety · Care</p>
             </div>
           </div>
-          <div className="flex gap-4">
-            <a href="mailto:devendrasagar0988@gmail.com" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-red-600"><span className="material-symbols-outlined text-sm text-white">mail</span></a>
-            <a href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-[#0077b5]"><span className="text-white text-sm">in</span></a>
-            <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-900"><span className="text-white text-sm">git</span></a>
+          <p className="text-[11px] text-slate-500 text-center">
+            © {new Date().getFullYear()} Arogya Raksha · For informational purposes only.<br />
+            Not a substitute for professional medical advice.
+          </p>
+          <div className="flex items-center gap-4">
+            {['/emergency','medicine-info','/nearby'].map(p => (
+              <Link key={p} to={p} className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors capitalize">
+                {p.replace('/', '').replace('-', ' ')}
+              </Link>
+            ))}
           </div>
         </div>
       </footer>
-
-      {/* Sticky Bottom Navigation Bar for Mobile and Tablet viewports */}
-      <div className="fixed bottom-0 left-0 w-full z-45 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-xl h-16 grid grid-cols-5 items-center px-2 lg:hidden transition-colors">
-        <Link className={activeMobileClass(user ? '/dashboard' : '/')} to={user ? '/dashboard' : '/'}>
-          <span className="material-symbols-outlined text-xl mb-0.5">home</span>
-          <span>Home</span>
-        </Link>
-        
-        <Link className={activeMobileClass('/emergency')} to="/emergency">
-          <span className="material-symbols-outlined text-xl mb-0.5">emergency</span>
-          <span>SOS</span>
-        </Link>
-        
-        <Link className={activeMobileClass('/medical-assistant')} to="/medical-assistant">
-          <span className="material-symbols-outlined text-xl mb-0.5">smart_toy</span>
-          <span>Assistant</span>
-        </Link>
-        
-        <Link className={activeMobileClass('/medicine-info')} to="/medicine-info">
-          <span className="material-symbols-outlined text-xl mb-0.5">pill</span>
-          <span>Medicines</span>
-        </Link>
-        
-        <Link className={activeMobileClass(user ? '/profile' : '/login')} to={user ? '/profile' : '/login'}>
-          <span className="material-symbols-outlined text-xl mb-0.5">person</span>
-          <span>Profile</span>
-        </Link>
-      </div>
-
-      {/* Floating SOS Emergency Speed Dial Widget */}
-      <div className="fixed bottom-20 right-6 z-40 lg:bottom-8 lg:right-8 flex flex-col items-center">
-        {sosOpen && (
-          <div className="flex flex-col gap-2.5 mb-3 animate-scale-up">
-            {/* Call 112 */}
-            <a 
-              href="tel:112"
-              className="w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-              title="Call Emergency 112"
-            >
-              <span className="material-symbols-outlined text-xl text-white">call</span>
-            </a>
-
-            {/* Find Nearby Help */}
-            <button 
-              onClick={() => { setSosOpen(false); navigate('/nearby'); }}
-              className="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-              title="Find Nearby Healthcare"
-            >
-              <span className="material-symbols-outlined text-xl text-white">local_hospital</span>
-            </button>
-
-            {/* First-Aid Instructions */}
-            <button 
-              onClick={() => { setSosOpen(false); navigate('/emergency'); }}
-              className="w-12 h-12 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-              title="Emergency First-Aid Guides"
-            >
-              <span className="material-symbols-outlined text-xl text-white">medical_services</span>
-            </button>
-          </div>
-        )}
-        <button 
-          onClick={() => setSosOpen(!sosOpen)}
-          className={`w-14 h-14 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all select-none ${!sosOpen ? 'animate-pulse' : 'bg-slate-700 hover:bg-slate-800'}`}
-          title="SOS DIAL"
-        >
-          {sosOpen ? (
-            <span className="material-symbols-outlined text-2xl text-white">close</span>
-          ) : (
-            <span className="material-symbols-outlined text-2xl text-white">emergency</span>
-          )}
-        </button>
-      </div>
     </div>
   );
 };
 
-export default function App() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '173236579751-t2aa0hq2d83eo0939a37qbed74351np5.apps.googleusercontent.com';
-  
-  // Initialize PWA scheduler alert reminders
+// ─── App Root ─────────────────────────────────────────────────────────────────
+function AppWithRouter() {
+  const { isAuthenticated, loading, user } = useAuth();
+  const { darkMode } = useTheme();
+
   useEffect(() => {
-    startNotificationScheduler();
-  }, []);
+    if (darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [darkMode]);
 
-  // Detailed Google OAuth Initialization Logs
-  console.log("=== Google OAuth Audit Logs ===");
-  console.log("Active Client ID:", clientId);
-  console.log("Active Origin:", window.location.origin);
-  console.log("OAuth Provider Initialization: SUCCESS (Wrapped in GoogleOAuthProvider)");
-  console.log("===============================");
+  useEffect(() => {
+    if (isAuthenticated && user) startNotificationScheduler(user);
+  }, [isAuthenticated, user]);
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-surface dark:bg-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden ring-4 ring-[#0052CC]/20 shadow-xl animate-pulse">
+            <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
+          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0052CC] dark:border-[#10B981]"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Router>
+      <GlobalLayout>
+        <Routes>
+          <Route path="/"                  element={<LandingPage />} />
+          <Route path="/login"             element={<LoginPage />} />
+          <Route path="/signup"            element={<SignupPage />} />
+          <Route path="/forgot-password"   element={<ForgotPasswordPage />} />
+          <Route path="/reset-password"    element={<ResetPasswordPage />} />
+          <Route path="/dashboard"         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/profile-setup"     element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
+          <Route path="/profile"           element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/emergency"         element={<EmergencyHelp />} />
+          <Route path="/medical-assistant" element={<ProtectedRoute><MedicalAssistant /></ProtectedRoute>} />
+          <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
+          <Route path="/diet-planner"      element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
+          <Route path="/medicine-info"     element={<MedicineInfo />} />
+          <Route path="/home-remedies"     element={<HomeRemedies />} />
+          <Route path="/nearby"            element={<HealthcareDirectory />} />
+          <Route path="/admin"             element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="*"                  element={<Navigate to="/" replace />} />
+        </Routes>
+      </GlobalLayout>
+    </Router>
+  );
+}
+
+export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <GlobalLayout>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-              
-              {/* Protected Routes */}
-              <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/emergency" element={<EmergencyHelp />} />
-              <Route path="/medical-assistant" element={<MedicalAssistant />} />
-              <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
-              <Route path="/diet-planner" element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
-              <Route path="/medicine-info" element={<MedicineInfo />} />
-              <Route path="/home-remedies" element={<HomeRemedies />} />
-              <Route path="/nearby" element={<HealthcareDirectory />} />
-              <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-            </Routes>
-          </GlobalLayout>
-        </Router>
+        <AppWithRouter />
       </AuthProvider>
     </ThemeProvider>
   );
