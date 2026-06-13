@@ -56,7 +56,16 @@ api.interceptors.request.use(
 
 // Axios response interceptor for network and CORS blocks customization
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Detect HTML response pages served by Vercel static routing (SPA fallback) instead of backend JSON
+    if (response.data && typeof response.data === 'string' && (response.data.trim().startsWith('<!DOCTYPE') || response.data.trim().startsWith('<html') || response.data.trim().startsWith('<head'))) {
+      const htmlError = new Error("API request returned HTML instead of JSON. The VITE_API_URL may be missing/misconfigured on Vercel, causing requests to be routed to static index.html.");
+      htmlError.status = 405;
+      htmlError.response = response;
+      return Promise.reject(htmlError);
+    }
+    return response;
+  },
   (error) => {
     console.error("API Call Error Details:", error);
     
@@ -177,7 +186,7 @@ export const AuthProvider = ({ children }) => {
             }
           });
           
-          if (res.data && res.data.user) {
+          if (res.data && typeof res.data === 'object' && res.data.user) {
             const syncedUser = {
               ...res.data.user,
               emailVerified: firebaseUser.emailVerified
@@ -191,6 +200,9 @@ export const AuthProvider = ({ children }) => {
               localStorage.removeItem('profile');
             }
             setIsAuthenticated(true);
+          } else {
+            console.error("Failed to sync auth session: Invalid response structure from backend.");
+            handleForceLogout();
           }
         } catch (err) {
           console.error("Error syncing auth session with backend on refresh:", err.message);
