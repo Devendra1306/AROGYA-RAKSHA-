@@ -30,8 +30,11 @@ npm-debug.log*
 stitch_new_project/
 hospitalmd.txt
 
-# Local Database
+# Local Database (legacy)
 backend/data/*.json
+
+# Temporary / cleanup folder
+tmp/
 
 .vercel
 CLIENT.json

@@ -58,15 +58,16 @@ const GlobalLayout = ({ children }) => {
   const [dietActive, setDietActive] = React.useState(() => localStorage.getItem('remind_diet') === 'true');
   const [healthActive, setHealthActive] = React.useState(() => localStorage.getItem('remind_health') === 'true');
 
-  const activeClass = (path) => 
-    location.pathname === path 
-      ? "text-primary dark:text-secondary font-bold border-b-2 border-primary dark:border-secondary pb-1" 
-      : "text-on-surface-variant hover:text-primary dark:text-slate-300 dark:hover:text-secondary transition-colors";
+  // Premium pill-style active class
+  const activeClass = (path) =>
+    location.pathname === path
+      ? 'relative text-primary dark:text-secondary font-bold text-sm px-4 py-2 rounded-full bg-primary/8 dark:bg-secondary/10 transition-all duration-200 nav-link-active'
+      : 'relative text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 font-medium text-sm px-4 py-2 rounded-full hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-all duration-200';
 
-  const activeMobileClass = (path) => 
-    location.pathname === path 
-      ? "text-primary dark:text-secondary font-extrabold flex flex-col items-center justify-center text-xs" 
-      : "text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-secondary flex flex-col items-center justify-center text-xs transition-colors";
+  const activeMobileClass = (path) =>
+    location.pathname === path
+      ? 'text-primary dark:text-secondary font-extrabold flex flex-col items-center justify-center text-xs'
+      : 'text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-secondary flex flex-col items-center justify-center text-xs transition-colors';
 
   const toggleReminder = (type, currentVal, setter) => {
     const newVal = !currentVal;
@@ -77,92 +78,195 @@ const GlobalLayout = ({ children }) => {
     }
   };
 
+  const NAV_LINKS = [
+    { path: '/',                 label: 'Home',         icon: 'home'        },
+    { path: '/emergency',        label: 'Emergency',    icon: 'emergency'   },
+    { path: '/medical-assistant',label: 'AI Assistant', icon: 'smart_toy'   },
+    { path: '/medicine-info',    label: 'Medicines',    icon: 'pill'        },
+    { path: '/nearby',           label: 'Nearby',       icon: 'location_on' },
+  ];
+
+  const userInitials =
+    (user?.firstName ? user.firstName[0].toUpperCase() : '') +
+    (user?.lastName  ? user.lastName[0].toUpperCase()  : '');
+
   return (
     <div className="min-h-screen bg-surface dark:bg-slate-950 text-on-surface dark:text-slate-100 flex flex-col transition-colors duration-350">
-      {/* Sticky Top Navbar */}
-      <nav className="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-margin-mobile lg:px-margin-desktop h-16 bg-surface/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-outline-variant/30 dark:border-slate-800/80 shadow-sm transition-colors">
-        <div className="flex items-center gap-2 cursor-pointer animate-fade-in" onClick={() => navigate('/')}>
-          <img src="/logo.jpg" alt="Arogya Raksha Logo" className="h-9 w-9 rounded-full object-cover ring-2 ring-primary dark:ring-secondary" />
-          <span className="text-lg font-extrabold text-primary dark:text-secondary tracking-wide">Arogya Raksha</span>
-        </div>
 
-        {/* Center Nav Links - hidden on mobile/tablet */}
-        <div className="hidden lg:flex items-center gap-gutter">
-          <Link className={activeClass('/')} to="/">Home</Link>
-          <Link className={activeClass('/emergency')} to="/emergency">Emergency</Link>
-          <Link className={activeClass('/medical-assistant')} to="/medical-assistant">AI Assistant</Link>
-          <Link className={activeClass('/medicine-info')} to="/medicine-info">Medicines</Link>
-          <Link className={activeClass('/nearby')} to="/nearby">Nearby</Link>
-        </div>
+      {/* ─── Premium Sticky Navbar ────────────────────────────────────────── */}
+      <nav className="fixed top-0 left-0 w-full z-40 transition-all duration-300"
+           style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
-        {/* Right Controls */}
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={toggleDarkMode}
-            className="p-2 text-on-surface-variant dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
-            title="Toggle Dark Mode"
-          >
-            {darkMode ? <span className="material-symbols-outlined text-base select-none align-middle">light_mode</span> : <span className="material-symbols-outlined text-base select-none align-middle">dark_mode</span>}
-          </button>
+        {/* Subtle top accent line */}
+        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary/50 dark:via-secondary/40 to-transparent" />
 
-          {user ? (
-            <div className="relative hidden lg:flex items-center">
-              <div 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all select-none"
-              >
-                {user.profilePicture ? (
-                  <img src={user.profilePicture} alt={user.firstName} className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/25" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary/15 text-primary dark:bg-secondary/15 dark:text-secondary font-bold flex items-center justify-center text-xs">
-                    {(user.firstName ? user.firstName[0].toUpperCase() : '') + (user.lastName ? user.lastName[0].toUpperCase() : '')}
+        <div className="flex justify-between items-center h-[68px] px-4 lg:px-10
+                        bg-white/75 dark:bg-slate-900/80
+                        border-b border-slate-200/60 dark:border-slate-800/70
+                        shadow-[0_2px_24px_-4px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_24px_-4px_rgba(0,0,0,0.35)]">
+
+          {/* ── Brand ─────────────────────────────────────────────────── */}
+          <div className="flex items-center gap-3 cursor-pointer select-none group" onClick={() => navigate('/')}>
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-primary/20 dark:bg-secondary/20 blur-sm group-hover:blur-md transition-all" />
+              <img src="/logo.jpg" alt="Arogya Raksha"
+                className="relative h-10 w-10 rounded-full object-cover ring-2 ring-primary/40 dark:ring-secondary/40
+                           shadow-md group-hover:ring-primary dark:group-hover:ring-secondary transition-all duration-300" />
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-base font-black tracking-tight
+                               bg-gradient-to-r from-primary to-primary/70 dark:from-secondary dark:to-secondary/70
+                               bg-clip-text text-transparent">
+                Arogya Raksha
+              </span>
+              <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium tracking-widest uppercase hidden sm:block">
+                Health · Safety · Care
+              </span>
+            </div>
+          </div>
+
+          {/* ── Centre Nav Links ───────────────────────────────────────── */}
+          <div className="hidden lg:flex items-center gap-1 bg-slate-50/80 dark:bg-slate-800/50 rounded-full px-2 py-1.5
+                          border border-slate-200/60 dark:border-slate-700/40 shadow-inner">
+            {NAV_LINKS.map(({ path, label }) => (
+              <Link key={path} className={activeClass(path)} to={path}>{label}</Link>
+            ))}
+          </div>
+
+          {/* ── Right Controls ─────────────────────────────────────────── */}
+          <div className="flex items-center gap-1.5">
+
+            {/* Dark mode toggle */}
+            <button onClick={toggleDarkMode} title="Toggle Theme"
+              className="w-9 h-9 flex items-center justify-center rounded-full
+                         text-slate-500 dark:text-slate-400
+                         hover:bg-slate-100 dark:hover:bg-slate-800
+                         border border-transparent hover:border-slate-200 dark:hover:border-slate-700
+                         transition-all duration-200">
+              {darkMode
+                ? <span className="material-symbols-outlined text-[18px] select-none">light_mode</span>
+                : <span className="material-symbols-outlined text-[18px] select-none">dark_mode</span>}
+            </button>
+
+            {/* ── User area ─────────────────────────────────────────── */}
+            {user ? (
+              <div className="relative hidden lg:flex items-center">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2.5 cursor-pointer pl-1 pr-3 py-1 rounded-full
+                             hover:bg-slate-100 dark:hover:bg-slate-800
+                             border border-transparent hover:border-slate-200 dark:hover:border-slate-700
+                             transition-all duration-200 select-none">
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.firstName}
+                      className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/30 dark:ring-secondary/30 shadow-sm" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shadow-sm
+                                    bg-gradient-to-br from-primary to-primary/70 dark:from-secondary dark:to-secondary/70">
+                      {userInitials}
+                    </div>
+                  )}
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{user.firstName}</span>
+                    <span className="text-[9px] text-slate-400">Member</span>
                   </div>
+                  <span className="material-symbols-outlined text-sm text-slate-400"
+                        style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
+                    keyboard_arrow_down
+                  </span>
+                </button>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-12 z-50 w-64
+                                 bg-white dark:bg-slate-900
+                                 border border-slate-200/80 dark:border-slate-700/60
+                                 rounded-2xl shadow-2xl shadow-slate-200/60 dark:shadow-slate-950/60
+                                 overflow-hidden">
+                      {/* Header */}
+                      <div className="p-4 bg-gradient-to-br from-primary/5 to-transparent dark:from-secondary/5 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          {user.profilePicture ? (
+                            <img src={user.profilePicture} alt={user.firstName}
+                              className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/20" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white
+                                            bg-gradient-to-br from-primary to-primary/70 dark:from-secondary dark:to-secondary/70">
+                              {userInitials}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm text-slate-800 dark:text-white truncate">{user.firstName} {user.lastName}</p>
+                            <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Links */}
+                      <div className="p-2">
+                        {[
+                          { icon: 'dashboard', label: 'Dashboard',    path: '/dashboard'    },
+                          { icon: 'person',    label: 'View Profile', path: '/profile'       },
+                          { icon: 'settings',  label: 'Profile Setup', path: '/profile-setup' },
+                        ].map(({ icon, label, path }) => (
+                          <button key={path}
+                            onClick={() => { setDropdownOpen(false); navigate(path); }}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                                       text-slate-600 dark:text-slate-300
+                                       hover:bg-slate-50 dark:hover:bg-slate-800
+                                       hover:text-primary dark:hover:text-secondary
+                                       transition-all duration-150">
+                            <span className="material-symbols-outlined text-base">{icon}</span>
+                            {label}
+                          </button>
+                        ))}
+                        <div className="my-1.5 border-t border-slate-100 dark:border-slate-800" />
+                        <button
+                          onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold
+                                     text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150">
+                          <span className="material-symbols-outlined text-base">logout</span>
+                          Log Out
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
                 )}
-                <span className="text-label-md font-semibold ml-1">{user.firstName}</span>
-                <span className="text-[9px] text-slate-400 ml-0.5">▼</span>
               </div>
+            ) : (
+              <div className="hidden lg:flex items-center gap-2">
+                <Link to="/login"
+                  className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-secondary
+                             font-semibold text-sm px-3 py-2 rounded-full
+                             hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200">Login</Link>
+                <Link to="/signup"
+                  className="bg-gradient-to-r from-primary to-primary/85 dark:from-secondary dark:to-secondary/85
+                             text-white font-bold text-sm px-4 py-2 rounded-full shadow-md
+                             hover:shadow-primary/30 hover:scale-105 active:scale-95
+                             transition-all duration-200">Sign Up</Link>
+              </div>
+            )}
 
-              {dropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)}></div>
-                  <div className="absolute right-0 top-11 z-50 w-60 glass-card rounded-2xl p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl animate-scale-up">
-                    <div className="pb-2.5 border-b border-slate-100 dark:border-slate-700 mb-2">
-                      <h4 className="font-bold text-sm">{user.firstName} {user.lastName}</h4>
-                      <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <button onClick={() => { setDropdownOpen(false); navigate('/dashboard'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">dashboard</span> Dashboard
-                      </button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">person</span> View Profile
-                      </button>
-                      <button onClick={() => { setDropdownOpen(false); navigate('/profile-setup'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-sm">settings</span> Profile Setup
-                      </button>
-                      <button onClick={() => { setDropdownOpen(false); logout(); navigate('/'); }} className="w-full text-left px-3 py-2 rounded-xl text-xs text-red-650 font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-all flex items-center gap-2 border-t border-slate-100 dark:border-slate-700 mt-2 pt-2">
-                        <span className="material-symbols-outlined text-sm text-red-650">logout</span> Logout
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="hidden lg:flex items-center gap-2">
-              <Link to="/login" className="text-on-surface-variant hover:text-primary transition-colors text-label-md px-2">Login</Link>
-              <Link to="/signup" className="bg-primary text-white hover:opacity-90 px-4 py-2 rounded-xl text-label-md font-bold transition-all shadow-sm">Sign Up</Link>
-            </div>
-          )}
-
-          {/* Desktop/Mobile hamburger menu button */}
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-2xl text-on-surface-variant dark:text-slate-300 flex items-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
-            title="Open Main Menu"
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
+            {/* Hamburger / More */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              title="More Navigation"
+              className="w-9 h-9 flex items-center justify-center rounded-full
+                         text-slate-500 dark:text-slate-400
+                         hover:bg-slate-100 dark:hover:bg-slate-800
+                         border border-transparent hover:border-slate-200 dark:hover:border-slate-700
+                         transition-all duration-200">
+              <span className="material-symbols-outlined text-[20px] select-none">
+                {mobileMenuOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+          </div>
         </div>
       </nav>
 
