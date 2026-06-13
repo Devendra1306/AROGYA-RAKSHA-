@@ -15,6 +15,9 @@ if (!getApps().length) {
       console.log('Firebase Admin SDK initialized successfully with local firebase.json.');
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      if (serviceAccount.private_key) {
+        serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+      }
       app = initializeApp({
         credential: cert(serviceAccount)
       });

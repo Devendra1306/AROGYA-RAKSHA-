@@ -12,7 +12,12 @@ async function connectDB() {
   }
 
   const mongoURI = process.env.MONGO_URI;
+  const isServer = !!(process.env.VERCEL || process.env.NODE_ENV === 'production');
+
   if (!mongoURI || mongoURI.includes('<db_password>')) {
+    if (isServer) {
+      throw new Error('MongoDB Atlas Connection Error: MONGO_URI environment variable is missing or unconfigured.');
+    }
     console.warn('\n⚠️  WARNING: MongoDB Atlas URI is unconfigured or contains <db_password> placeholder.');
     console.warn('⚠️  The backend will run using a local JSON-based persistent file fallback database for development.\n');
     isMockDB = true;
@@ -30,6 +35,9 @@ async function connectDB() {
     global.isMockDB = false;
   } catch (err) {
     console.error(`\n❌ MongoDB connection failed: ${err.message}`);
+    if (isServer) {
+      throw err;
+    }
     console.warn('⚠️  Falling back to a local JSON-based persistent file database.\n');
     isMockDB = true;
     global.isMockDB = true;
