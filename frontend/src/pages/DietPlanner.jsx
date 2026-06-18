@@ -57,10 +57,21 @@ export default function DietPlanner() {
   const [checkedGroceries, setCheckedGroceries] = useState([]);
   
   // AI Logs
-  const [foodLogs, setFoodLogs] = useState([]);
   const [foodQuery, setFoodQuery] = useState('');
-  const [foodLoading, setFoodLoading] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
+  const [foodLoading, setFoodLoading] = useState(false);
+
+  const handleRemoveFoodLog = async (logIndex) => {
+    try {
+      const res = await api.post('/diet/remove-food-log', { logIndex });
+      if (res.data && res.data.plan) {
+        setDietPlan(res.data.plan);
+      }
+    } catch (err) {
+      console.error("Failed to remove food log:", err);
+    }
+  };
+  const [foodLogs, setFoodLogs] = useState([]);
 
   const recipeContainerRef = useRef(null);
 
@@ -702,7 +713,16 @@ export default function DietPlanner() {
                         <span className="font-bold text-white text-xs block truncate">{food.foodName}</span> 
                         <span className="text-[9px] text-slate-400 font-medium">{food.quantity}</span>
                       </div>
-                      <span className="text-primary font-black text-xs whitespace-nowrap">{food.calories} kcal</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-primary font-black text-xs whitespace-nowrap">{food.calories} kcal</span>
+                        <button 
+                          onClick={() => handleRemoveFoodLog(idx)}
+                          className="text-slate-500 hover:text-red-500 transition-colors bg-white/5 hover:bg-red-500/10 p-1 rounded-md"
+                          title="Remove Log"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </div>
                     </motion.div>
                   ))}
                 </div>

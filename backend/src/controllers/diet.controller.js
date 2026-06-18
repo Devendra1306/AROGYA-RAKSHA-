@@ -265,6 +265,34 @@ Return ONLY JSON.`;
     }
   },
 
+  removeFoodLog: async (req, res) => {
+    const { logIndex } = req.body;
+    if (logIndex === undefined) return res.status(400).json({ error: 'Log index required.' });
+
+    try {
+      const isMock = global.isMockDB;
+      let plan;
+      
+      if (isMock) {
+        plan = localDb.findOne('dietPlans', { userId: req.user._id });
+        if (plan && plan.foodLogs) {
+          plan.foodLogs.splice(logIndex, 1);
+          localDb.findByIdAndUpdate('dietPlans', plan._id, { foodLogs: plan.foodLogs });
+        }
+      } else {
+        plan = await DietPlan.findOne({ userId: req.user._id });
+        if (plan && plan.foodLogs) {
+          plan.foodLogs.splice(logIndex, 1);
+          await plan.save();
+        }
+      }
+
+      res.json({ message: 'Log removed successfully.', plan });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   swapMeal: async (req, res) => {
     const { mealType, currentFood, dietPreference } = req.body;
     if (!mealType) return res.status(400).json({ error: 'Meal type is required.' });

@@ -7,41 +7,24 @@ const spoonacularService = {
   // Search food nutrition directly
   searchFoodNutrition: async (query) => {
     try {
-      // 1. Search for ingredient
-      const searchRes = await axios.get(`${BASE_URL}/food/ingredients/search`, {
-        params: { apiKey: API_KEY, query: query, number: 1 },
+      const res = await axios.get(`${BASE_URL}/recipes/guessNutrition`, {
+        params: { apiKey: API_KEY, title: query },
         timeout: 5000
       });
-      const searchData = searchRes.data;
+      const data = res.data;
       
-      if (!searchData.results || searchData.results.length === 0) {
+      if (!data || !data.calories) {
         return null;
       }
       
-      const ingredientId = searchData.results[0].id;
-      
-      // 2. Get nutrition info
-      const infoRes = await axios.get(`${BASE_URL}/food/ingredients/${ingredientId}/information`, {
-        params: { apiKey: API_KEY, amount: 100, unit: 'grams' },
-        timeout: 5000
-      });
-      const infoData = infoRes.data;
-      
-      const nutrition = infoData.nutrition?.nutrients || [];
-      const getMacro = (name) => {
-        const n = nutrition.find(n => n.name === name);
-        return n ? Math.round(n.amount) : 0;
-      };
-
       return {
-        foodName: infoData.name || query,
-        quantity: '100g',
-        calories: getMacro('Calories'),
-        protein: getMacro('Protein'),
-        carbs: getMacro('Carbohydrates'),
-        fats: getMacro('Fat'),
-        fiber: getMacro('Fiber'),
-        description: `100g serving of ${infoData.name}`
+        foodName: query,
+        quantity: 'Analyzed Serving',
+        calories: Math.round(data.calories.value || 0),
+        protein: Math.round(data.protein.value || 0),
+        carbs: Math.round(data.carbs.value || 0),
+        fats: Math.round(data.fat.value || 0),
+        description: `AI Estimated Nutrition`
       };
     } catch (err) {
       console.error('Spoonacular Search Error:', err);

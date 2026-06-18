@@ -10,6 +10,7 @@ router.post('/analyze-food', protect, dietController.analyzeFood);
 router.post('/swap-meal', protect, dietController.swapMeal);
 router.post('/add-extra-food', protect, dietController.addExtraFood);
 router.post('/clear-extra-foods', protect, dietController.clearExtraFoods);
+router.post('/remove-food-log', protect, dietController.removeFoodLog);
 
 module.exports = router;
 
