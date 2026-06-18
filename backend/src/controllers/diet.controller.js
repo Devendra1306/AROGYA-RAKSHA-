@@ -240,9 +240,20 @@ Return ONLY JSON.`;
         return res.json(spoonData);
       }
 
-      // 2. Fallback: Use Gemini if Spoonacular fails or has no results
-      const prompt = `You are a clinical dietitian AI. The user logged: "${query}". Estimate the nutrition.
-      Return ONLY valid JSON: {"foodName": "...", "quantity": "...", "calories": 100, "protein": 5, "carbs": 20, "fats": 2, "description": "..."}`;
+      // 2. Fallback: Use Gemini if Spoonacular fails or has no results (NLP parsing)
+      const prompt = `You are a clinical dietitian AI. The user logged: "${query}".
+      Estimate the nutrition for this food.
+      Return ONLY valid JSON matching this exact structure (do not use ellipsis or placeholders):
+      {
+        "foodName": "Accurate descriptive name (e.g. 1 Bowl Chicken & 1 Bowl Curd)",
+        "quantity": "Estimated portion size",
+        "calories": 350,
+        "protein": 30,
+        "carbs": 10,
+        "fats": 15,
+        "description": "Brief nutritional overview"
+      }
+      Do not include any markdown wrappers or text outside the JSON.`;
 
       const aiResponse = await aiGateway.generateRaw(null, prompt);
       const parsed = extractJSON(aiResponse);
@@ -259,6 +270,13 @@ Return ONLY JSON.`;
     if (!mealType) return res.status(400).json({ error: 'Meal type is required.' });
 
     try {
+      // 1. Try Spoonacular API
+      const spoonSwap = await spoonacularService.getAlternativeMeal(mealType, dietPreference);
+      if (spoonSwap) {
+        return res.json(spoonSwap);
+      }
+
+      // 2. Fallback to Gemini AI
       const prompt = `You are a clinical nutritionist. Swap this specific meal:
       - Meal Category: ${mealType}
       - Current Food: ${currentFood || 'Any'}

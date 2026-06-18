@@ -151,6 +151,46 @@ const spoonacularService = {
       console.error('Spoonacular Recipes Error:', err);
       return [];
     }
+  },
+
+  // Get Alternative Meal (Swap)
+  getAlternativeMeal: async (mealType, dietPref) => {
+    try {
+      // Map frontend mealType to Spoonacular type
+      let typeMap = 'main course';
+      if (mealType.toLowerCase().includes('breakfast')) typeMap = 'breakfast';
+      if (mealType.toLowerCase().includes('snack')) typeMap = 'snack';
+      if (mealType.toLowerCase().includes('soup')) typeMap = 'soup';
+
+      let url = `${BASE_URL}/recipes/complexSearch?apiKey=${API_KEY}&cuisine=Indian&type=${typeMap}&addRecipeNutrition=true&number=1&offset=${Math.floor(Math.random() * 20)}`;
+      
+      if (dietPref && dietPref.toLowerCase().includes('veg')) {
+        url += '&diet=vegetarian';
+      }
+
+      const res = await axios.get(url, { timeout: 8000 });
+      if (res.status === 200 && res.data.results && res.data.results.length > 0) {
+        const recipe = res.data.results[0];
+        const nutrients = recipe.nutrition?.nutrients || [];
+        const getMacro = (name) => {
+          const n = nutrients.find(n => n.name === name);
+          return n ? Math.round(n.amount) : 0;
+        };
+
+        return {
+          mealType: mealType,
+          foodItems: recipe.title,
+          calories: getMacro('Calories'),
+          protein: getMacro('Protein'),
+          carbs: getMacro('Carbohydrates'),
+          fats: getMacro('Fat')
+        };
+      }
+      return null;
+    } catch (err) {
+      console.error('Spoonacular Alternative Meal Error:', err);
+      return null;
+    }
   }
 };
 
