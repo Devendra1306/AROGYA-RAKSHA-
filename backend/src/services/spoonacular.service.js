@@ -108,7 +108,27 @@ const spoonacularService = {
                 }
               });
             }
+          } else {
+            // Fallback for missing meal type from Spoonacular
+            meals.push({
+              mealType: types[i].mealName,
+              foodItems: `Healthy Indian ${types[i].mealName}`,
+              calories: targetCal,
+              protein: Math.round(targetCal * 0.15 / 4),
+              carbs: Math.round(targetCal * 0.55 / 4),
+              fats: Math.round(targetCal * 0.30 / 9)
+            });
           }
+        } else {
+          // Fallback on network error for this specific meal
+          meals.push({
+            mealType: types[i].mealName,
+            foodItems: `Healthy Indian ${types[i].mealName}`,
+            calories: targetCal,
+            protein: Math.round(targetCal * 0.15 / 4),
+            carbs: Math.round(targetCal * 0.55 / 4),
+            fats: Math.round(targetCal * 0.30 / 9)
+          });
         }
       }
 
