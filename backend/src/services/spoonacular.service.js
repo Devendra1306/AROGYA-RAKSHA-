@@ -1,16 +1,4 @@
-const fetchWithTimeout = async (url, options = {}) => {
-  const { timeout = 5000 } = options;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return response;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
-};
+const axios = require('axios');
 
 const API_KEY = process.env.SPOONACULAR_API_KEY || '1692016fba5c4177af39f79e6d95ca8f';
 const BASE_URL = 'https://api.spoonacular.com';
@@ -20,8 +8,11 @@ const spoonacularService = {
   searchFoodNutrition: async (query) => {
     try {
       // 1. Search for ingredient
-      const searchRes = await fetchWithTimeout(`${BASE_URL}/food/ingredients/search?apiKey=${API_KEY}&query=${encodeURIComponent(query)}&number=1`);
-      const searchData = await searchRes.json();
+      const searchRes = await axios.get(`${BASE_URL}/food/ingredients/search`, {
+        params: { apiKey: API_KEY, query: query, number: 1 },
+        timeout: 5000
+      });
+      const searchData = searchRes.data;
       
       if (!searchData.results || searchData.results.length === 0) {
         return null;
@@ -30,8 +21,11 @@ const spoonacularService = {
       const ingredientId = searchData.results[0].id;
       
       // 2. Get nutrition info
-      const infoRes = await fetchWithTimeout(`${BASE_URL}/food/ingredients/${ingredientId}/information?apiKey=${API_KEY}&amount=100&unit=grams`);
-      const infoData = await infoRes.json();
+      const infoRes = await axios.get(`${BASE_URL}/food/ingredients/${ingredientId}/information`, {
+        params: { apiKey: API_KEY, amount: 100, unit: 'grams' },
+        timeout: 5000
+      });
+      const infoData = infoRes.data;
       
       const nutrition = infoData.nutrition?.nutrients || [];
       const getMacro = (name) => {
@@ -81,9 +75,9 @@ const spoonacularService = {
           url += '&diet=vegetarian';
         }
 
-        const res = await fetchWithTimeout(url);
-        if (res.ok) {
-          const data = await res.json();
+        const res = await axios.get(url, { timeout: 8000 });
+        if (res.status === 200) {
+          const data = res.data;
           if (data.results && data.results.length > 0) {
             const recipe = data.results[0];
             const nutrients = recipe.nutrition?.nutrients || [];
@@ -135,8 +129,8 @@ const spoonacularService = {
       const sortDirection = isWeightLoss ? 'asc' : 'desc';
       
       const url = `${BASE_URL}/recipes/complexSearch?apiKey=${API_KEY}&cuisine=Indian&addRecipeInformation=true&addRecipeNutrition=true&number=4&sort=${sort}&sortDirection=${sortDirection}`;
-      const res = await fetchWithTimeout(url);
-      const data = await res.json();
+      const res = await axios.get(url, { timeout: 8000 });
+      const data = res.data;
       
       if (!data.results) return [];
 
