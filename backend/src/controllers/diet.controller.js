@@ -121,7 +121,7 @@ const dietController = {
       } catch (err) {
         console.warn('Spoonacular Meal Plan generation failed, falling back to Gemini:', err.message);
       }  // Fallback to Gemini AI if Spoonacular fails or hits limits
-      let data = spoonacularPlan && spoonacularPlan.mealPlan ? spoonacularPlan : null;
+      let data = spoonacularPlan && spoonacularPlan.mealPlan && spoonacularPlan.mealPlan.length >= 3 ? spoonacularPlan : null;
 
       if (!data) {
         const randomSeedWord = ['spicy', 'herbal', 'savory', 'crunchy', 'zesty', 'mild', 'tangy', 'fragrant'][Math.floor(Math.random() * 8)];
@@ -142,7 +142,7 @@ Return ONLY JSON.`;
           console.error('AI Fallback parsing failed.');
         }
 
-        if (!data || !data.mealPlan) {
+        if (!data || !data.mealPlan || data.mealPlan.length === 0) {
           data = {
             mealPlan: [
               { mealType: 'Breakfast', foodItems: 'Poha with peanuts', calories: 350, protein: 12, carbs: 55, fats: 6 },

@@ -69,7 +69,7 @@ const spoonacularService = {
 
       for (let i = 0; i < types.length; i++) {
         const targetCal = Math.round(targetCalories * calDistribution[i]);
-        let url = `${BASE_URL}/recipes/complexSearch?apiKey=${API_KEY}&cuisine=Indian&type=${types[i].type}&addRecipeNutrition=true&number=1&offset=${Math.floor(Math.random() * 5)}`;
+        let url = `${BASE_URL}/recipes/complexSearch?apiKey=${API_KEY}&cuisine=Indian&type=${types[i].type}&addRecipeNutrition=true&number=1&sort=random`;
         
         if (dietPref && dietPref.toLowerCase().includes('veg')) {
           url += '&diet=vegetarian';
