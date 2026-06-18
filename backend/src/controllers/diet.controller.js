@@ -293,6 +293,33 @@ Return ONLY JSON.`;
     }
   },
 
+  refreshRecipes: async (req, res) => {
+    try {
+      const isMock = global.isMockDB;
+      let plan;
+      if (isMock) {
+        plan = localDb.findOne('dietPlans', { userId: req.user._id });
+      } else {
+        plan = await DietPlan.findOne({ userId: req.user._id });
+      }
+      
+      if (!plan) return res.status(404).json({ error: 'No plan found' });
+      
+      const newRecipes = await spoonacularService.getSmartRecipes(plan.goal);
+      plan.smartRecipes = newRecipes;
+      
+      if (isMock) {
+        localDb.findByIdAndUpdate('dietPlans', plan._id, { smartRecipes: newRecipes });
+      } else {
+        await plan.save();
+      }
+      
+      res.json({ plan });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
   swapMeal: async (req, res) => {
     const { mealType, currentFood, dietPreference } = req.body;
     if (!mealType) return res.status(400).json({ error: 'Meal type is required.' });

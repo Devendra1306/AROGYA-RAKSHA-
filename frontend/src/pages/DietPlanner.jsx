@@ -60,6 +60,10 @@ export default function DietPlanner() {
   const [foodQuery, setFoodQuery] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [foodLoading, setFoodLoading] = useState(false);
+  
+  // Recipe Modal
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [refreshingRecipes, setRefreshingRecipes] = useState(false);
 
   const handleRemoveFoodLog = async (logIndex) => {
     try {
@@ -69,6 +73,20 @@ export default function DietPlanner() {
       }
     } catch (err) {
       console.error("Failed to remove food log:", err);
+    }
+  };
+
+  const handleRefreshRecipes = async () => {
+    setRefreshingRecipes(true);
+    try {
+      const res = await api.post('/diet/refresh-recipes');
+      if (res.data && res.data.plan) {
+        setDietPlan(res.data.plan);
+      }
+    } catch (err) {
+      console.error("Failed to refresh recipes", err);
+    } finally {
+      setRefreshingRecipes(false);
     }
   };
   const [foodLogs, setFoodLogs] = useState([]);
@@ -716,7 +734,8 @@ export default function DietPlanner() {
                       <div className="flex items-center gap-2">
                         <span className="text-primary font-black text-xs whitespace-nowrap">{food.calories} kcal</span>
                         <button 
-                          onClick={() => handleRemoveFoodLog(idx)}
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); handleRemoveFoodLog(idx); }}
                           className="text-slate-500 hover:text-red-500 transition-colors bg-white/5 hover:bg-red-500/10 p-1 rounded-md"
                           title="Remove Log"
                         >
@@ -736,16 +755,31 @@ export default function DietPlanner() {
             <div className="lg:col-span-12 mt-8" ref={recipeContainerRef}>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
                 <h3 className="font-black text-2xl text-slate-800 dark:text-white flex items-center gap-3">
-                  <Flame className="w-6 h-6 text-orange-500" /> Smart Spoonacular Recipes
+                  <Flame className="w-6 h-6 text-orange-500" /> Smart Recipe Suggestions
                 </h3>
-                <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-primary/20 flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Indian Cuisine Mode
-                </span>
+                <div className="flex gap-3">
+                  <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-primary/20 flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Indian Cuisine
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={handleRefreshRecipes}
+                    disabled={refreshingRecipes}
+                    className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 px-4 py-1.5 rounded-full text-xs font-black transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${refreshingRecipes ? 'animate-spin' : ''}`} /> 
+                    {refreshingRecipes ? 'Refreshing...' : 'Refresh Dishes'}
+                  </button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {activePlan.smartRecipes.map((recipe, idx) => (
-                  <div key={idx} className="smart-recipe-card group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col hover:-translate-y-2 transition-transform duration-300">
+                  <div 
+                    key={idx} 
+                    onClick={() => setSelectedRecipe(recipe)}
+                    className="smart-recipe-card cursor-pointer group bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col hover:-translate-y-2 transition-transform duration-300"
+                  >
                     <div className="relative h-48 overflow-hidden">
                       {recipe.image ? (
                         <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out" />
@@ -791,9 +825,95 @@ export default function DietPlanner() {
               </div>
             </div>
           )}
-
         </div>
       )}
+
+      {/* Recipe Modal Overlay */}
+      <AnimatePresence>
+        {selectedRecipe && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSelectedRecipe(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 30, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 20, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800"
+            >
+              {/* Modal Header Image */}
+              <div className="relative h-48 sm:h-64 flex-shrink-0">
+                {selectedRecipe.image ? (
+                  <img src={selectedRecipe.image} alt={selectedRecipe.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                    <Utensils className="w-12 h-12 text-slate-400" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                <button 
+                  onClick={() => setSelectedRecipe(null)}
+                  className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <h2 className="absolute bottom-4 left-6 right-6 text-2xl font-black text-white leading-tight">
+                  {selectedRecipe.title}
+                </h2>
+              </div>
+
+              {/* Modal Content Scrollable Area */}
+              <div className="p-6 overflow-y-auto custom-scrollbar">
+                <div className="flex flex-wrap gap-3 mb-6">
+                  <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold">
+                    <Clock className="w-4 h-4" /> {selectedRecipe.readyInMinutes} mins
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm font-bold">
+                    <Utensils className="w-4 h-4" /> {selectedRecipe.servings} Servings
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-sm font-black">
+                    <Flame className="w-4 h-4" /> {selectedRecipe.calories} kcal
+                  </span>
+                </div>
+
+                <div className="mb-8">
+                  <h3 className="text-lg font-black text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500" /> Ingredients
+                  </h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {selectedRecipe.ingredients && selectedRecipe.ingredients.map((ing, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" /> <span className="truncate">{ing}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black text-slate-800 dark:text-white mb-3 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary" /> Step-by-Step Instructions
+                  </h3>
+                  <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-4 bg-slate-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    {selectedRecipe.instructions ? (
+                      <div dangerouslySetInnerHTML={{ __html: selectedRecipe.instructions }} className="prose dark:prose-invert max-w-none prose-sm" />
+                    ) : (
+                      <p className="italic">No specific instructions provided.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
-}
+};
+
+export default DietPlanner;

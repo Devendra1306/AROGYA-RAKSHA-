@@ -11,6 +11,7 @@ router.post('/swap-meal', protect, dietController.swapMeal);
 router.post('/add-extra-food', protect, dietController.addExtraFood);
 router.post('/clear-extra-foods', protect, dietController.clearExtraFoods);
 router.post('/remove-food-log', protect, dietController.removeFoodLog);
+router.post('/refresh-recipes', protect, dietController.refreshRecipes);
 
 module.exports = router;
 
