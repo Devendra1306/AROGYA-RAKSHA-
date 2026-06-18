@@ -295,7 +295,7 @@ const medicineController = {
         if (!med) {
           console.log(`Compare lookup: Dynamic resolving and caching "${name}"`);
           const searchUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=openfda.brand_name:"${encodeURIComponent(name)}"&limit=1`;
-          const searchRes = await fetch(searchUrl);
+          const searchRes = await fetchWithTimeout(searchUrl, { timeout: 3000 }).catch(() => ({ ok: false }));
           if (searchRes.ok) {
             const searchData = await searchRes.json();
             const fdaId = searchData.results?.[0]?.id;
@@ -320,8 +320,7 @@ const medicineController = {
         return med;
       };
 
-      const m1 = await getMed(med1);
-      const m2 = await getMed(med2);
+      const [m1, m2] = await Promise.all([getMed(med1), getMed(med2)]);
 
       if (!m1 || !m2) return res.status(404).json({ error: 'One or both medicines could not be found for comparison.' });
 
