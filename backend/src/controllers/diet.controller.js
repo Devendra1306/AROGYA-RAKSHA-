@@ -283,6 +283,7 @@ Return ONLY JSON.`;
         plan = await DietPlan.findOne({ userId: req.user._id });
         if (plan && plan.foodLogs) {
           plan.foodLogs.splice(logIndex, 1);
+          plan.markModified('foodLogs');
           await plan.save();
         }
       }

@@ -177,6 +177,12 @@ export default function DietPlanner() {
   const handleSearchFoodSubmit = async (e) => {
     e.preventDefault();
     if (!foodQuery.trim()) return;
+
+    if (searchResult && searchResult.foodName && foodQuery.trim().toLowerCase() === searchResult.foodName.toLowerCase()) {
+      handleAddToDiet();
+      return;
+    }
+
     setFoodLoading(true);
     setSearchResult(null);
     try {
@@ -662,7 +668,7 @@ export default function DietPlanner() {
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" /> AI Nutrition Engine
                   </h3>
                   {foodLogs.length > 0 && (
-                    <button onClick={handleClearExtraFoods} className="text-[9px] text-slate-400 hover:text-white transition-colors font-bold uppercase tracking-wider">
+                    <button type="button" onClick={handleClearExtraFoods} className="text-[9px] text-slate-400 hover:text-white transition-colors font-bold uppercase tracking-wider">
                       Clear All
                     </button>
                   )}
