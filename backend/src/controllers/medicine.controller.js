@@ -3,15 +3,29 @@ const HealthProfile = require('../models/HealthProfile');
 const localDb = require('../utils/localDb');
 const aiGateway = require('../services/aiGateway.service');
 
+const fetchWithTimeout = async (url, options = {}) => {
+  const { timeout = 5000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+};
+
 const fetchOpenFDADetailsAndCache = async (fdaId, fallbackName) => {
   const isMock = global.isMockDB;
   
   let labelUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=id:${fdaId}`;
-  let response = await fetch(labelUrl);
+  let response = await fetchWithTimeout(labelUrl).catch(() => ({ ok: false }));
   
   if (!response.ok && fallbackName) {
     labelUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=openfda.brand_name:"${encodeURIComponent(fallbackName)}"&limit=1`;
-    response = await fetch(labelUrl);
+    response = await fetchWithTimeout(labelUrl).catch(() => ({ ok: false }));
   }
 
   if (!response.ok) {
@@ -125,7 +139,7 @@ const medicineController = {
       if (results.length < 5 && queryLower.length > 2) {
         try {
           const openfdaUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.brand_name:${encodeURIComponent(queryLower)}*+openfda.generic_name:${encodeURIComponent(queryLower)}*)&limit=6`;
-          const response = await fetch(openfdaUrl);
+          const response = await fetchWithTimeout(openfdaUrl, { timeout: 3000 });
           
           if (response.ok) {
             const data = await response.json();
@@ -217,7 +231,7 @@ const medicineController = {
       if (!med) {
         console.log(`Medicine not found in local DB. Querying OpenFDA by name: ${id}`);
         const searchUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=openfda.brand_name:"${encodeURIComponent(id)}"&limit=1`;
-        const searchRes = await fetch(searchUrl);
+        const searchRes = await fetchWithTimeout(searchUrl, { timeout: 4000 }).catch(() => ({ ok: false }));
         if (searchRes.ok) {
           const searchData = await searchRes.json();
           const fdaId = searchData.results?.[0]?.id;

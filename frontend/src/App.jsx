@@ -478,7 +478,12 @@ const GlobalLayout = ({ children }) => {
       </nav>
 
       {/* ── Emergency SOS FAB ──────────────────────────────────────────────── */}
-      <div className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-40">
+      <motion.div 
+        drag
+        dragConstraints={{ left: -window.innerWidth + 100, right: 100, top: -window.innerHeight + 100, bottom: 100 }}
+        dragElastic={0.1}
+        className="fixed bottom-32 right-4 lg:bottom-12 lg:left-12 z-50 flex flex-col items-end lg:items-start"
+      >
         <AnimatePresence>
           {sosOpen && (
             <motion.div
@@ -486,7 +491,7 @@ const GlobalLayout = ({ children }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.9 }}
               transition={{ type: 'spring', damping: 22, stiffness: 260 }}
-              className="mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 min-w-[180px]"
+              className={`mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 min-w-[180px] origin-bottom ${sosOpen ? 'cursor-default' : 'cursor-grab'}`}
             >
               {[
                 { label: 'Call Ambulance',     icon: 'ambulance',   href: 'tel:108',     color: 'text-red-600 bg-red-50 dark:bg-red-950/30'     },
@@ -506,12 +511,12 @@ const GlobalLayout = ({ children }) => {
         <motion.button
           onClick={() => setSosOpen(v => !v)}
           whileTap={{ scale: 0.93 }}
-          className={`w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center font-black text-white text-[13px] tracking-wider transition-all duration-300 ${
+          className={`w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center font-black text-white text-[13px] tracking-wider transition-all duration-300 cursor-pointer ${
             sosOpen
-              ? 'bg-slate-700 dark:bg-slate-800 shadow-slate-400/30'
-              : 'bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105'
+              ? 'bg-slate-700 dark:bg-slate-800 shadow-slate-400/30 ring-4 ring-slate-500/30'
+              : 'bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105 ring-4 ring-red-500/20'
           }`}
-          title="Emergency SOS"
+          title="Emergency SOS (Drag to move)"
         >
           {sosOpen ? (
             <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
@@ -519,30 +524,52 @@ const GlobalLayout = ({ children }) => {
             <span className="text-[11px] font-black tracking-widest">SOS</span>
           )}
         </motion.button>
-      </div>
+      </motion.div>
 
       {/* ── Global Footer (desktop only) ──────────────────────────────────── */}
       <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-14 border-t border-slate-800">
-        <div className="max-w-[1280px] mx-auto flex justify-between items-center gap-8">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-[#0052CC]/30">
-              <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="col-span-1 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-[#0052CC]/30">
+                <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <p className="font-black text-white text-[14px]">Arogya Raksha</p>
+                <p className="text-[10px] text-slate-500 tracking-widest uppercase">Health · Safety · Care</p>
+              </div>
             </div>
-            <div>
-              <p className="font-black text-white text-[14px]">Arogya Raksha</p>
-              <p className="text-[10px] text-slate-500 tracking-widest uppercase">Health · Safety · Care</p>
-            </div>
+            <p className="text-[11px] text-slate-500 mt-2">
+              © {new Date().getFullYear()} Arogya Raksha · For informational purposes only.<br />
+              Not a substitute for professional medical advice.
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 text-center">
-            © {new Date().getFullYear()} Arogya Raksha · For informational purposes only.<br />
-            Not a substitute for professional medical advice.
-          </p>
-          <div className="flex items-center gap-4">
-            {['/emergency','medicine-info','/nearby'].map(p => (
-              <Link key={p} to={p} className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors capitalize">
-                {p.replace('/', '').replace('-', ' ')}
-              </Link>
-            ))}
+
+          <div className="col-span-1 flex flex-col gap-2">
+            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Legal & Info</h4>
+            <a href="/about" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">About Us</a>
+            <a href="/policy" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">Privacy Policy</a>
+            <a href="/license" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">License</a>
+          </div>
+
+          <div className="col-span-1 flex flex-col gap-2">
+            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Data Partners</h4>
+            <a href="https://open.fda.gov/" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">verified</span> OpenFDA Approved
+            </a>
+          </div>
+
+          <div className="col-span-1 flex flex-col gap-2">
+            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Developer Connect</h4>
+            <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px]">code</span> GitHub
+            </a>
+            <a href="https://linkedin.com/in/devendrasagar" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px]">work</span> LinkedIn
+            </a>
+            <a href="mailto:devendra@example.com" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px]">mail</span> Email
+            </a>
           </div>
         </div>
       </footer>
