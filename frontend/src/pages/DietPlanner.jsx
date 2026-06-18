@@ -530,18 +530,18 @@ export default function DietPlanner() {
             </section>
 
             {/* Custom Extra Food Log Search */}
-            <section className="glass-card rounded-2xl p-5 bg-slate-900 text-white dark:bg-slate-950 border border-slate-800 shadow-md space-y-4">
+            <section className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
-                <span className="bg-secondary text-slate-900 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">AI Recipe log</span>
+                <span className="bg-primary text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">AI Recipe log</span>
                 {foodLogs.length > 0 && (
-                  <button onClick={handleClearExtraFoods} className="text-[10px] text-slate-300 underline">
+                  <button onClick={handleClearExtraFoods} className="text-[10px] text-slate-500 hover:text-slate-800 dark:text-slate-300 underline">
                     Clear All
                   </button>
                 )}
               </div>
               <div>
-                <h4 className="font-bold text-xs text-secondary">Log custom dishes & meals</h4>
-                <p className="text-[10px] text-slate-300 mt-1">Specify amount: (e.g. "2 boiled eggs", "1 cup oatmeal")</p>
+                <h4 className="font-bold text-xs text-slate-800 dark:text-secondary">Log custom dishes & meals</h4>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Specify amount: (e.g. "2 boiled eggs", "1 cup oatmeal")</p>
               </div>
 
               <form onSubmit={handleSearchFoodSubmit} className="flex gap-1.5">
@@ -556,24 +556,24 @@ export default function DietPlanner() {
                 <button 
                   type="submit" 
                   disabled={foodLoading}
-                  className="bg-secondary text-slate-900 font-bold px-3 rounded-lg text-xs"
+                  className="bg-primary text-white hover:bg-primary/90 font-bold px-3 rounded-lg text-xs transition-colors"
                 >
                   {foodLoading ? 'Analyzing' : 'Check'}
                 </button>
               </form>
 
               {searchResult && (
-                <div className="bg-white/10 p-3 rounded-xl text-xs space-y-2.5">
+                <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-3 rounded-xl text-xs space-y-2.5">
                   <div className="flex justify-between">
                     <div>
-                      <span className="font-bold text-white text-xs">{searchResult.foodName}</span>
-                      <span className="text-[9px] block text-slate-350">{searchResult.quantity}</span>
+                      <span className="font-bold text-slate-800 dark:text-white text-xs">{searchResult.foodName}</span>
+                      <span className="text-[9px] block text-slate-500 dark:text-slate-400">{searchResult.quantity}</span>
                     </div>
-                    <span className="text-secondary font-black">{searchResult.calories} kcal</span>
+                    <span className="text-primary dark:text-secondary font-black">{searchResult.calories} kcal</span>
                   </div>
                   <button 
                     onClick={handleAddToDiet}
-                    className="w-full bg-secondary text-slate-900 font-bold py-1.5 rounded-lg text-center text-xs flex items-center justify-center gap-1"
+                    className="w-full bg-primary text-white hover:bg-primary/90 font-bold py-1.5 rounded-lg text-center text-xs flex items-center justify-center gap-1 transition-colors"
                   >
                     <span className="material-symbols-outlined text-sm">add</span> Log to My Diet
                   </button>
@@ -584,11 +584,11 @@ export default function DietPlanner() {
               {foodLogs.length > 0 && (
                 <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
                   {foodLogs.map((food, idx) => (
-                    <div key={idx} className="bg-white/5 p-2 rounded-lg text-[10px] flex justify-between items-center">
+                    <div key={idx} className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-2 rounded-lg text-[10px] flex justify-between items-center">
                       <div>
-                        <span className="font-semibold text-white">{food.foodName}</span> ({food.quantity})
+                        <span className="font-semibold text-slate-800 dark:text-white">{food.foodName}</span> <span className="text-slate-500">({food.quantity})</span>
                       </div>
-                      <span className="text-secondary font-bold">{food.calories} kcal</span>
+                      <span className="text-primary dark:text-secondary font-bold">{food.calories} kcal</span>
                     </div>
                   ))}
                 </div>

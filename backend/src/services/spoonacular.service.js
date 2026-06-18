@@ -128,7 +128,7 @@ const spoonacularService = {
       const sort = isWeightLoss ? 'calories' : 'protein';
       const sortDirection = isWeightLoss ? 'asc' : 'desc';
       
-      const url = `${BASE_URL}/recipes/complexSearch?apiKey=${API_KEY}&cuisine=Indian&addRecipeInformation=true&addRecipeNutrition=true&number=4&sort=${sort}&sortDirection=${sortDirection}`;
+      const url = `${BASE_URL}/recipes/complexSearch?apiKey=${API_KEY}&query=indian&cuisine=Indian&type=main course&addRecipeInformation=true&addRecipeNutrition=true&number=4&sort=${sort}&sortDirection=${sortDirection}`;
       const res = await axios.get(url, { timeout: 8000 });
       const data = res.data;
       
