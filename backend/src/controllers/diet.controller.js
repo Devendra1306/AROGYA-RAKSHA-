@@ -113,12 +113,17 @@ const dietController = {
       const needs = calculateCalorieNeeds(profile);
 
       // 2. Spoonacular Data Fetching
-      // Use Spoonacular to generate the meal plan and grocery list based on calories
-      const spoonData = await spoonacularService.generateIndianMealPlan(needs.dailyCalories, profile.dietPreference);
-      let data = spoonData.mealPlan ? spoonData : null;
+      // 2. Try Spoonacular First for dynamic high-quality Indian recipes
+      let spoonacularPlan = null;
+      try {
+        const dietPref = profile.allergies?.join(' ') + ' ' + (profile.medicalConditions?.join(' ') || '');
+        spoonacularPlan = await spoonacularService.generateIndianMealPlan(needs.dailyCalories, dietPref);
+      } catch (err) {
+        console.warn('Spoonacular Meal Plan generation failed, falling back to Gemini:', err.message);
+      }  // Fallback to Gemini AI if Spoonacular fails or hits limits
+      let data = spoonacularPlan && spoonacularPlan.mealPlan ? spoonacularPlan : null;
 
       if (!data) {
-        // Fallback to Gemini AI if Spoonacular fails or hits limits
         const randomSeedWord = ['spicy', 'herbal', 'savory', 'crunchy', 'zesty', 'mild', 'tangy', 'fragrant'][Math.floor(Math.random() * 8)];
         const prompt = `You are a clinical nutritionist designing an Indian diet plan for a user.
 Target Calories: ${needs.dailyCalories} kcal.

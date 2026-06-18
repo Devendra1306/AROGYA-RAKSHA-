@@ -75,14 +75,13 @@ Specify the remedy name, ingredients utilized, preparation steps, and what it cu
 
   getPopular: async (req, res) => {
     try {
-      const isMock = global.isMockDB;
-      let list = [];
-      if (isMock) {
-        list = localDb.find('remedies');
-      } else {
-        list = await Remedy.find({});
-      }
-      res.json(list.map(r => ({ _id: r._id, condition: r.condition })));
+      const defaultSymptoms = [
+        { _id: '1', condition: 'Headache' },
+        { _id: '2', condition: 'Cough & Cold' },
+        { _id: '3', condition: 'Acidity' },
+        { _id: '4', condition: 'Sore Throat' }
+      ];
+      res.json(defaultSymptoms);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
