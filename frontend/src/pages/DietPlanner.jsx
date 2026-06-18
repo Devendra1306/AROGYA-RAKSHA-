@@ -914,6 +914,4 @@ export default function DietPlanner() {
 
     </div>
   );
-};
-
-export default DietPlanner;
+}
