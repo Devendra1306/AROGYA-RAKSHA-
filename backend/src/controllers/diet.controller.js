@@ -2,6 +2,7 @@ const HealthProfile = require('../models/HealthProfile');
 const DietPlan = require('../models/DietPlan');
 const localDb = require('../utils/localDb');
 const aiGateway = require('../services/aiGateway.service');
+const spoonacularService = require('../services/spoonacular.service');
 
 function calculateCalorieNeeds(profile) {
   const { weight, height, age, gender, activityLevel, healthGoal } = profile;
@@ -111,63 +112,45 @@ const dietController = {
       // Calculate base caloric requirements
       const needs = calculateCalorieNeeds(profile);
 
-      // Assemble prompt for AI Gateway with strong variety seeds and weekly rupee pricing
-      const randomSeedWord = ['spicy', 'herbal', 'savory', 'crunchy', 'zesty', 'mild', 'tangy', 'fragrant'][Math.floor(Math.random() * 8)];
-      const prompt = `You are a clinical nutritionist designing a daily diet plan for a user.
+      // 2. Spoonacular Data Fetching
+      // Use Spoonacular to generate the meal plan and grocery list based on calories
+      const spoonData = await spoonacularService.generateIndianMealPlan(needs.dailyCalories, profile.dietPreference);
+      let data = spoonData.mealPlan ? spoonData : null;
+
+      if (!data) {
+        // Fallback to Gemini AI if Spoonacular fails or hits limits
+        const randomSeedWord = ['spicy', 'herbal', 'savory', 'crunchy', 'zesty', 'mild', 'tangy', 'fragrant'][Math.floor(Math.random() * 8)];
+        const prompt = `You are a clinical nutritionist designing an Indian diet plan for a user.
 Target Calories: ${needs.dailyCalories} kcal.
 Target Macros: Protein: ${needs.protein}g, Carbohydrates: ${needs.carbs}g, Fats: ${needs.fats}g.
 Dietary Preference: ${profile.dietPreference}.
-Affordability Budget Level: ${profile.budgetPreference}.
-Health Goal: ${profile.healthGoal}.
-Existing Medical Conditions (if any, restrict foods accordingly): ${profile.medicalConditions?.join(', ') || 'None'}.
-Allergies / Restrictions: ${profile.allergies?.join(', ') || 'None'} / ${profile.foodRestrictions?.join(', ') || 'None'}.
-
-RULES FOR VARIETY:
-- Ensure the meal plan is highly varied and different on every generation. Do NOT repeat the exact same dishes or items in consecutive runs. Use unique ingredients and menu designs.
-- Dynamic variety theme: ${randomSeedWord}
-- Dynamic seed tracker: ${Date.now()}_${Math.random()}
 
 Please generate a JSON block containing two fields:
-1. "mealPlan": An array of 5 meal objects. Each meal object must have: "mealType" (must be one of: "Breakfast", "Morning Snack", "Lunch", "Evening Snack", "Dinner"), "foodItems" (string description of foods, e.g. "2 Idlis with coconut chutney"), "calories" (number), "protein" (number of grams), "carbs" (number of grams), "fats" (number of grams). Include Indian food options appropriate for the preference. Keep budget items realistic (e.g. eggs/rice/peanuts for low budget; salmon/greek yogurt/almonds for premium).
-2. "groceryList": An array of objects. Since the user wants shopping ingredients for the WHOLE WEEK (7 days), compile the weekly ingredients with approximate quantities needed to prepare the meals. Each item object MUST have: "item" (name), "quantity" (weekly quantity, e.g. "2kg" or "5 liters"), "category" (e.g. "Produce", "Dairy", "Grains", "Protein"), and "price" (estimated retail cost in Indian Rupees (INR / ₹) as an integer number, e.g. 150).
+1. "mealPlan": Array of 5 meal objects ("Breakfast", "Morning Snack", "Lunch", "Evening Snack", "Dinner") with "foodItems", "calories", "protein", "carbs", "fats".
+2. "groceryList": Array of weekly ingredients with "item", "quantity", "category", "price" (in Rupees).
+Return ONLY JSON.`;
 
-Response Format MUST be ONLY valid JSON:
-{
-  "mealPlan": [...],
-  "groceryList": [...]
-}`;
+        const aiResponse = await aiGateway.generateRaw(null, prompt, 0.85);
+        try {
+          data = extractJSON(aiResponse);
+        } catch (err) {
+          console.error('AI Fallback parsing failed.');
+        }
 
-      // Call gateway with high temperature for variety
-      const aiResponse = await aiGateway.generateRaw(null, prompt, 0.85);
-      let data = null;
-      
-      try {
-        data = extractJSON(aiResponse);
-      } catch (err) {
-        console.error('Failed to parse AI diet plan response as JSON:', err.message);
+        if (!data || !data.mealPlan) {
+          data = {
+            mealPlan: [
+              { mealType: 'Breakfast', foodItems: 'Poha with peanuts', calories: 350, protein: 12, carbs: 55, fats: 6 },
+              { mealType: 'Lunch', foodItems: '2 Rotis with dal tadka', calories: 500, protein: 18, carbs: 75, fats: 12 },
+              { mealType: 'Dinner', foodItems: 'Grilled paneer/tofu with veggies', calories: 420, protein: 22, carbs: 18, fats: 25 }
+            ],
+            groceryList: [{ item: 'Poha', quantity: '1kg', category: 'Grains', price: 80 }]
+          };
+        }
       }
 
-      if (!data || !data.mealPlan) {
-        // Load fallback meal plan with weekly rupee estimates
-        data = {
-          mealPlan: [
-            { mealType: 'Breakfast', foodItems: 'Oatmeal with sliced banana and skimmed milk', calories: 350, protein: 12, carbs: 55, fats: 6 },
-            { mealType: 'Morning Snack', foodItems: 'A handful of peanuts or a green apple', calories: 150, protein: 4, carbs: 22, fats: 5 },
-            { mealType: 'Lunch', foodItems: '2 Rotis with dal tadka and cucumber salad', calories: 500, protein: 18, carbs: 75, fats: 12 },
-            { mealType: 'Evening Snack', foodItems: 'Boiled chana salad (chickpeas)', calories: 180, protein: 8, carbs: 28, fats: 3 },
-            { mealType: 'Dinner', foodItems: 'Grilled paneer/tofu with sautéed vegetables', calories: 420, protein: 22, carbs: 18, fats: 25 }
-          ],
-          groceryList: [
-            { item: 'Oats', quantity: '1.5kg', category: 'Grains', price: 180 },
-            { item: 'Bananas', quantity: '2 Dozen', category: 'Fruits', price: 120 },
-            { item: 'Skimmed Milk', quantity: '7 Liters', category: 'Dairy', price: 420 },
-            { item: 'Peanuts', quantity: '1kg', category: 'Nuts', price: 200 },
-            { item: 'Wheat Flour', quantity: '5kg', category: 'Grains', price: 250 },
-            { item: 'Dal (Lentils)', quantity: '2kg', category: 'Grains', price: 300 },
-            { item: 'Paneer / Tofu', quantity: '1.5kg', category: 'Protein', price: 450 }
-          ]
-        };
-      }
+      // Fetch smart recipes from Spoonacular
+      const smartRecipes = await spoonacularService.getSmartRecipes(profile.healthGoal);
 
       const dietPlanData = {
         userId: req.user._id,
@@ -181,7 +164,9 @@ Response Format MUST be ONLY valid JSON:
         waterGoal: profile.waterIntake || 3.5,
         mealPlan: data.mealPlan,
         groceryList: data.groceryList,
-        extraFoods: []
+        extraFoods: [],
+        foodLogs: [],
+        smartRecipes: smartRecipes
       };
 
       let newPlan;
@@ -244,44 +229,23 @@ Response Format MUST be ONLY valid JSON:
     if (!query) return res.status(400).json({ error: 'Please enter a food query to analyze.' });
 
     try {
-      const prompt = `You are a clinical dietitian AI with expert knowledge in food nutrition and Indian cuisine.
-      
-      The user has logged the following food item or recipe:
-      "${query}"
-      
-      Analyze the EXACT quantity mentioned in the query. If the query includes quantity like "500g", "2 cups", "1 bowl", use that exact amount.
-      If no quantity is given, assume a standard serving size for that food.
-      
-      CRITICAL: Your response MUST exactly reflect the calories and macros for the SPECIFIC quantity mentioned.
-      For example:
-      - "Chicken 100g" → ~165 calories
-      - "Chicken 500g" → ~825 calories  
-      - "Rice 1 cup cooked" → ~206 calories
-      - "2 rotis" → ~160 calories (80 each)
-      
-      Return ONLY a valid JSON object with NO markdown wrappers or backticks:
-      {
-        "foodName": "Clear food name including quantity",
-        "quantity": "Exact amount with units (e.g. 500g, 2 cups, 1 bowl)",
-        "calories": <calculated integer based on exact quantity>,
-        "protein": <grams as integer>,
-        "carbs": <grams as integer>,
-        "fats": <grams as integer>,
-        "description": "One sentence about this food and its key nutritional benefit."
-      }`;
+      // 1. Primary: Use Spoonacular for accurate database lookup
+      const spoonData = await spoonacularService.searchFoodNutrition(query);
+      if (spoonData) {
+        return res.json(spoonData);
+      }
+
+      // 2. Fallback: Use Gemini if Spoonacular fails or has no results
+      const prompt = `You are a clinical dietitian AI. The user logged: "${query}". Estimate the nutrition.
+      Return ONLY valid JSON: {"foodName": "...", "quantity": "...", "calories": 100, "protein": 5, "carbs": 20, "fats": 2, "description": "..."}`;
 
       const aiResponse = await aiGateway.generateRaw(null, prompt);
       const parsed = extractJSON(aiResponse);
-      if (!parsed) {
-        throw new Error('Failed to parse AI response as JSON');
-      }
+      if (!parsed) throw new Error('Failed parsing AI fallback');
       res.json(parsed);
     } catch (err) {
-      console.error('Error analyzing extra food:', err.message);
-      res.status(503).json({
-        error: 'AI analysis temporarily unavailable. Please try again in a moment.',
-        _isError: true
-      });
+      console.error('Error analyzing food:', err.message);
+      res.status(503).json({ error: 'Analysis unavailable. Try again.' });
     }
   },
 
@@ -328,8 +292,9 @@ Response Format MUST be ONLY valid JSON:
   },
 
   addExtraFood: async (req, res) => {
-    const { foodName, quantity, calories, protein, carbs, fats, description } = req.body;
-    if (!foodName || !calories) {
+    // This logs food to the foodLogs array for calorie tracking
+    const { foodName, quantity, calories, protein, carbs, fats, fiber, description } = req.body;
+    if (!foodName || calories === undefined) {
       return res.status(400).json({ error: 'Food name and calories are required.' });
     }
 
@@ -337,98 +302,30 @@ Response Format MUST be ONLY valid JSON:
       const isMock = global.isMockDB;
       let plan;
       
-      const newFood = {
+      const newLog = {
         foodName,
-        quantity: quantity || 'Unspecified',
+        quantity: quantity || '1 serving',
         calories: Number(calories),
         protein: Number(protein || 0),
         carbs: Number(carbs || 0),
         fats: Number(fats || 0),
-        description: description || ''
+        fiber: Number(fiber || 0),
+        loggedAt: new Date()
       };
 
       if (isMock) {
         plan = localDb.findOne('dietPlans', { userId: req.user._id });
-        if (!plan) {
-          // Auto-create plan
-          const profile = localDb.findOne('healthProfiles', { userId: req.user._id });
-          const needs = profile ? calculateCalorieNeeds(profile) : { dailyCalories: 2000, protein: 100, carbs: 250, fats: 65 };
-          const dietPlanData = {
-            userId: req.user._id,
-            goal: profile ? profile.healthGoal : 'Maintenance',
-            currentWeight: profile ? profile.weight : 70,
-            targetWeight: profile ? (profile.healthGoal === 'Weight Loss' ? profile.weight - 5 : profile.healthGoal === 'Weight Gain' ? profile.weight + 5 : profile.weight) : 70,
-            dailyCalories: needs.dailyCalories,
-            protein: needs.protein,
-            carbs: needs.carbs,
-            fats: needs.fats,
-            waterGoal: profile ? (profile.waterIntake || 3.5) : 3,
-            mealPlan: [
-              { mealType: 'Breakfast', foodItems: 'Oatmeal with sliced banana and skimmed milk', calories: 350, protein: 12, carbs: 55, fats: 6 },
-              { mealType: 'Morning Snack', foodItems: 'A handful of peanuts or a green apple', calories: 150, protein: 4, carbs: 22, fats: 5 },
-              { mealType: 'Lunch', foodItems: '2 Rotis with dal tadka and cucumber salad', calories: 500, protein: 18, carbs: 75, fats: 12 },
-              { mealType: 'Evening Snack', foodItems: 'Boiled chana salad (chickpeas)', calories: 180, protein: 8, carbs: 28, fats: 3 },
-              { mealType: 'Dinner', foodItems: 'Grilled paneer/tofu with sautéed vegetables', calories: 420, protein: 22, carbs: 18, fats: 25 }
-            ],
-            groceryList: [
-              { item: 'Oats', quantity: '1.5kg', category: 'Grains', price: 180 },
-              { item: 'Bananas', quantity: '2 Dozen', category: 'Fruits', price: 120 },
-              { item: 'Skimmed Milk', quantity: '7 Liters', category: 'Dairy', price: 420 },
-              { item: 'Peanuts', quantity: '1kg', category: 'Nuts', price: 200 },
-              { item: 'Wheat Flour', quantity: '5kg', category: 'Grains', price: 250 },
-              { item: 'Dal (Lentils)', quantity: '2kg', category: 'Grains', price: 300 },
-              { item: 'Paneer / Tofu', quantity: '1.5kg', category: 'Protein', price: 450 }
-            ],
-            extraFoods: [newFood]
-          };
-          plan = localDb.create('dietPlans', dietPlanData);
-        } else {
-          const extraFoods = plan.extraFoods || [];
-          extraFoods.push(newFood);
-          plan = localDb.findByIdAndUpdate('dietPlans', plan._id, { extraFoods });
+        if (plan) {
+          const foodLogs = plan.foodLogs || [];
+          foodLogs.push(newLog);
+          plan = localDb.findByIdAndUpdate('dietPlans', plan._id, { foodLogs, extraFoods: [...(plan.extraFoods||[]), newLog] });
         }
       } else {
-        plan = await DietPlan.findOne({ userId: req.user._id });
-        if (!plan) {
-          // Auto-create plan
-          const profile = await HealthProfile.findOne({ userId: req.user._id });
-          const needs = profile ? calculateCalorieNeeds(profile) : { dailyCalories: 2000, protein: 100, carbs: 250, fats: 65 };
-          const dietPlanData = {
-            userId: req.user._id,
-            goal: profile ? profile.healthGoal : 'Maintenance',
-            currentWeight: profile ? profile.weight : 70,
-            targetWeight: profile ? (profile.healthGoal === 'Weight Loss' ? profile.weight - 5 : profile.healthGoal === 'Weight Gain' ? profile.weight + 5 : profile.weight) : 70,
-            dailyCalories: needs.dailyCalories,
-            protein: needs.protein,
-            carbs: needs.carbs,
-            fats: needs.fats,
-            waterGoal: profile ? (profile.waterIntake || 3.5) : 3,
-            mealPlan: [
-              { mealType: 'Breakfast', foodItems: 'Oatmeal with sliced banana and skimmed milk', calories: 350, protein: 12, carbs: 55, fats: 6 },
-              { mealType: 'Morning Snack', foodItems: 'A handful of peanuts or a green apple', calories: 150, protein: 4, carbs: 22, fats: 5 },
-              { mealType: 'Lunch', foodItems: '2 Rotis with dal tadka and cucumber salad', calories: 500, protein: 18, carbs: 75, fats: 12 },
-              { mealType: 'Evening Snack', foodItems: 'Boiled chana salad (chickpeas)', calories: 180, protein: 8, carbs: 28, fats: 3 },
-              { mealType: 'Dinner', foodItems: 'Grilled paneer/tofu with sautéed vegetables', calories: 420, protein: 22, carbs: 18, fats: 25 }
-            ],
-            groceryList: [
-              { item: 'Oats', quantity: '1.5kg', category: 'Grains', price: 180 },
-              { item: 'Bananas', quantity: '2 Dozen', category: 'Fruits', price: 120 },
-              { item: 'Skimmed Milk', quantity: '7 Liters', category: 'Dairy', price: 420 },
-              { item: 'Peanuts', quantity: '1kg', category: 'Nuts', price: 200 },
-              { item: 'Wheat Flour', quantity: '5kg', category: 'Grains', price: 250 },
-              { item: 'Dal (Lentils)', quantity: '2kg', category: 'Grains', price: 300 },
-              { item: 'Paneer / Tofu', quantity: '1.5kg', category: 'Protein', price: 450 }
-            ],
-            extraFoods: [newFood]
-          };
-          plan = await DietPlan.create(dietPlanData);
-        } else {
-          plan = await DietPlan.findOneAndUpdate(
-            { userId: req.user._id },
-            { $push: { extraFoods: newFood } },
-            { new: true }
-          );
-        }
+        plan = await DietPlan.findOneAndUpdate(
+          { userId: req.user._id },
+          { $push: { foodLogs: newLog, extraFoods: newLog } },
+          { new: true }
+        );
       }
 
       res.status(201).json(plan);

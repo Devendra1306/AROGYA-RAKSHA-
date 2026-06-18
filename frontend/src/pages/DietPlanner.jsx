@@ -42,8 +42,8 @@ export default function DietPlanner() {
   // Grocery checked items
   const [checkedGroceries, setCheckedGroceries] = useState([]);
 
-  // Extra food log items
-  const [extraFoods, setExtraFoods] = useState([]);
+  // Food log items
+  const [foodLogs, setFoodLogs] = useState([]);
   const [foodQuery, setFoodQuery] = useState('');
   const [foodLoading, setFoodLoading] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
@@ -58,7 +58,7 @@ export default function DietPlanner() {
       const res = await api.get('/diet/current');
       setDietPlan(res.data);
       setWaterIntake(res.data.waterGoal - 1.4);
-      setExtraFoods(res.data.extraFoods || []);
+      setFoodLogs(res.data.foodLogs || []);
     } catch (err) {
       console.warn('No active diet plan found.');
     } finally {
@@ -74,7 +74,7 @@ export default function DietPlanner() {
       setDietPlan(res.data);
       setWaterIntake(res.data.waterGoal - 1.4);
       setConsumedMeals([1]); // default checked lunch
-      setExtraFoods([]); 
+      setFoodLogs([]); 
       setSearchResult(null);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to generate meal plan. Try again.');
@@ -144,7 +144,7 @@ export default function DietPlanner() {
     if (!searchResult) return;
     try {
       const res = await api.post('/diet/add-extra-food', searchResult);
-      setExtraFoods(res.data.extraFoods || []);
+      setFoodLogs(res.data.foodLogs || []);
       setDietPlan(res.data);
       setSearchResult(null);
       setFoodQuery('');
@@ -157,7 +157,7 @@ export default function DietPlanner() {
   const handleClearExtraFoods = async () => {
     try {
       const res = await api.post('/diet/clear-extra-foods');
-      setExtraFoods([]);
+      setFoodLogs([]);
       setDietPlan(res.data);
       setSearchResult(null);
     } catch (err) {
@@ -231,21 +231,21 @@ export default function DietPlanner() {
   const baseCals = activePlan.mealPlan.reduce((acc, meal, idx) => {
     return acc + (consumedMeals.includes(idx) ? meal.calories : 0);
   }, 0);
-  const extraCals = extraFoods.reduce((acc, food) => acc + food.calories, 0);
+  const extraCals = foodLogs.reduce((acc, food) => acc + food.calories, 0);
   const consumedCals = baseCals + extraCals;
   const progressPercent = Math.min(1, consumedCals / targetCals);
 
   const consumedProtein = activePlan.mealPlan.reduce((acc, meal, idx) => {
     return acc + (consumedMeals.includes(idx) ? meal.protein : 0);
-  }, 0) + extraFoods.reduce((acc, f) => acc + f.protein, 0);
+  }, 0) + foodLogs.reduce((acc, f) => acc + f.protein, 0);
 
   const consumedCarbs = activePlan.mealPlan.reduce((acc, meal, idx) => {
     return acc + (consumedMeals.includes(idx) ? meal.carbs : 0);
-  }, 0) + extraFoods.reduce((acc, f) => acc + f.carbs, 0);
+  }, 0) + foodLogs.reduce((acc, f) => acc + f.carbs, 0);
 
   const consumedFats = activePlan.mealPlan.reduce((acc, meal, idx) => {
     return acc + (consumedMeals.includes(idx) ? meal.fats : 0);
-  }, 0) + extraFoods.reduce((acc, f) => acc + f.fats, 0);
+  }, 0) + foodLogs.reduce((acc, f) => acc + f.fats, 0);
 
   const proteinPercent = Math.min(100, Math.round((consumedProtein / activePlan.protein) * 100));
   const carbsPercent = Math.min(100, Math.round((consumedCarbs / activePlan.carbs) * 100));
@@ -533,7 +533,7 @@ export default function DietPlanner() {
             <section className="glass-card rounded-2xl p-5 bg-slate-900 text-white dark:bg-slate-950 border border-slate-800 shadow-md space-y-4">
               <div className="flex justify-between items-center">
                 <span className="bg-secondary text-slate-900 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider">AI Recipe log</span>
-                {extraFoods.length > 0 && (
+                {foodLogs.length > 0 && (
                   <button onClick={handleClearExtraFoods} className="text-[10px] text-slate-300 underline">
                     Clear All
                   </button>
@@ -581,9 +581,9 @@ export default function DietPlanner() {
               )}
 
               {/* Display custom logs */}
-              {extraFoods.length > 0 && (
+              {foodLogs.length > 0 && (
                 <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
-                  {extraFoods.map((food, idx) => (
+                  {foodLogs.map((food, idx) => (
                     <div key={idx} className="bg-white/5 p-2 rounded-lg text-[10px] flex justify-between items-center">
                       <div>
                         <span className="font-semibold text-white">{food.foodName}</span> ({food.quantity})
@@ -621,6 +621,33 @@ export default function DietPlanner() {
             </section>
 
           </div>
+
+          {/* Smart Recipes Section */}
+          {activePlan.smartRecipes && activePlan.smartRecipes.length > 0 && (
+            <div className="lg:col-span-12 mt-4 space-y-4">
+              <h3 className="font-extrabold text-lg text-primary dark:text-secondary border-b pb-2">Smart Recipe Suggestions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {activePlan.smartRecipes.map((recipe, idx) => (
+                  <div key={idx} className="glass-card rounded-2xl overflow-hidden shadow-sm flex flex-col bg-white dark:bg-slate-800">
+                    {recipe.image && (
+                      <img src={recipe.image} alt={recipe.title} className="w-full h-32 object-cover" />
+                    )}
+                    <div className="p-4 flex flex-col flex-grow">
+                      <h4 className="font-bold text-sm mb-1">{recipe.title}</h4>
+                      <div className="text-[10px] text-slate-500 font-semibold mb-2 flex items-center gap-2">
+                        <span><span className="material-symbols-outlined text-[10px]">schedule</span> {recipe.readyInMinutes} mins</span>
+                        <span><span className="material-symbols-outlined text-[10px]">local_fire_department</span> {recipe.calories} kcal</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-semibold mb-2">
+                        P: {recipe.protein}g | C: {recipe.carbs}g | F: {recipe.fats}g
+                      </div>
+                      <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-auto line-clamp-3" dangerouslySetInnerHTML={{ __html: recipe.instructions }}></p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>
       )}

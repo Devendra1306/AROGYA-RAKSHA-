@@ -32,6 +32,29 @@ const dietPlanSchema = new mongoose.Schema({
     carbs: { type: Number },
     fats: { type: Number },
     description: { type: String }
+  }],
+  foodLogs: [{
+    foodName: { type: String, required: true },
+    quantity: { type: String },
+    calories: { type: Number, required: true },
+    protein: { type: Number },
+    carbs: { type: Number },
+    fats: { type: Number },
+    fiber: { type: Number },
+    loggedAt: { type: Date, default: Date.now }
+  }],
+  smartRecipes: [{
+    id: { type: Number },
+    title: { type: String },
+    image: { type: String },
+    readyInMinutes: { type: Number },
+    servings: { type: Number },
+    instructions: { type: String },
+    calories: { type: Number },
+    protein: { type: Number },
+    carbs: { type: Number },
+    fats: { type: Number },
+    ingredients: [{ type: String }]
   }]
 }, {
   timestamps: true
