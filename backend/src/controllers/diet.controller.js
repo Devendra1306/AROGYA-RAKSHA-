@@ -201,6 +201,20 @@ Return ONLY JSON.`;
       }
 
       if (!plan) return res.status(404).json({ error: 'No active diet plans found. Please generate one.' });
+
+      // Self-healing: if smartRecipes were previously wiped out by an API timeout, try to restore them
+      if (!plan.smartRecipes || plan.smartRecipes.length === 0) {
+        const newRecipes = await spoonacularService.getSmartRecipes(plan.goal || 'maintenance');
+        if (newRecipes && newRecipes.length > 0) {
+          plan.smartRecipes = newRecipes;
+          if (isMock) {
+            localDb.findByIdAndUpdate('dietPlans', plan._id, { smartRecipes: newRecipes });
+          } else {
+            await plan.save();
+          }
+        }
+      }
+
       res.json(plan);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -275,15 +289,22 @@ Return ONLY JSON.`;
       
       if (isMock) {
         plan = localDb.findOne('dietPlans', { userId: req.user._id });
-        if (plan && plan.foodLogs) {
-          plan.foodLogs.splice(logIndex, 1);
-          localDb.findByIdAndUpdate('dietPlans', plan._id, { foodLogs: plan.foodLogs });
+        if (plan) {
+          if (plan.foodLogs) plan.foodLogs.splice(logIndex, 1);
+          if (plan.extraFoods) plan.extraFoods.splice(logIndex, 1);
+          localDb.findByIdAndUpdate('dietPlans', plan._id, { foodLogs: plan.foodLogs, extraFoods: plan.extraFoods });
         }
       } else {
         plan = await DietPlan.findOne({ userId: req.user._id });
-        if (plan && plan.foodLogs) {
-          plan.foodLogs.splice(logIndex, 1);
-          plan.markModified('foodLogs');
+        if (plan) {
+          if (plan.foodLogs) {
+            plan.foodLogs.splice(logIndex, 1);
+            plan.markModified('foodLogs');
+          }
+          if (plan.extraFoods) {
+            plan.extraFoods.splice(logIndex, 1);
+            plan.markModified('extraFoods');
+          }
           await plan.save();
         }
       }
@@ -307,6 +328,10 @@ Return ONLY JSON.`;
       if (!plan) return res.status(404).json({ error: 'No plan found' });
       
       const newRecipes = await spoonacularService.getSmartRecipes(plan.goal);
+      if (!newRecipes || newRecipes.length === 0) {
+        return res.status(503).json({ error: 'Spoonacular API unavailable or no recipes found. Please try again.' });
+      }
+
       plan.smartRecipes = newRecipes;
       
       if (isMock) {
@@ -421,11 +446,11 @@ Return ONLY JSON.`;
       if (isMock) {
         plan = localDb.findOne('dietPlans', { userId: req.user._id });
         if (!plan) return res.status(404).json({ error: 'No active diet plan found.' });
-        plan = localDb.findByIdAndUpdate('dietPlans', plan._id, { extraFoods: [] });
+        plan = localDb.findByIdAndUpdate('dietPlans', plan._id, { extraFoods: [], foodLogs: [] });
       } else {
         plan = await DietPlan.findOneAndUpdate(
           { userId: req.user._id },
-          { $set: { extraFoods: [] } },
+          { $set: { extraFoods: [], foodLogs: [] } },
           { new: true }
         );
         if (!plan) return res.status(404).json({ error: 'No active diet plan found.' });
