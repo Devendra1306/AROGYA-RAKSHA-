@@ -251,7 +251,7 @@ export default function DietPlanner() {
   const targetWeight = profile?.weight ? profile.weight - 5 : 70;
   const weightToGo = Math.max(0, currentWeight - targetWeight);
 
-  const activeMealIndex = activePlan.mealPlan.findIndex(m => m.mealType.toLowerCase() === activeMealTab.toLowerCase());
+  const activeMealIndex = activePlan.mealPlan.findIndex(m => m.mealType.toLowerCase().includes(activeMealTab.toLowerCase()));
   const activeMealObj = activeMealIndex !== -1 ? activePlan.mealPlan[activeMealIndex] : null;
   const isActiveMealChecked = activeMealIndex !== -1 && consumedMeals.includes(activeMealIndex);
 
@@ -491,6 +491,67 @@ export default function DietPlanner() {
                       <CheckCircle2 className="w-5 h-5" />
                     </motion.button>
                   </form>
+                </div>
+              </div>
+            </section>
+
+            {/* Water Tracker Redesign */}
+            <section className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-slate-200/60 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none mt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-black text-xl text-slate-800 dark:text-white flex items-center gap-2">
+                    <Droplet className="w-5 h-5 text-blue-500" /> Hydration Level
+                  </h3>
+                  <button 
+                    onClick={handleResetWater}
+                    className="text-[10px] text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 font-bold uppercase tracking-wider transition-colors"
+                  >
+                    Reset
+                  </button>
+                </div>
+                
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6">
+                  Stay hydrated to maximize your metabolic rate and nutrient absorption.
+                </p>
+
+                <div className="flex gap-3">
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleLogWater(0.25)} 
+                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 dark:text-blue-400 py-3 rounded-2xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> 250ml
+                  </motion.button>
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleLogWater(0.5)} 
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/30 py-3 rounded-2xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Droplet className="w-4 h-4" /> 500ml
+                  </motion.button>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 relative w-32 h-32 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="64" cy="64" fill="transparent" r="54" stroke="currentColor" strokeWidth="8" className="text-slate-100 dark:text-slate-800"></circle>
+                  <motion.circle 
+                    initial={{ strokeDashoffset: 340 }}
+                    animate={{ strokeDashoffset: 340 * (1 - Math.min(1, waterIntake / (activePlan.waterGoal || 3.5))) }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    cx="64" cy="64" fill="transparent" r="54" 
+                    stroke="#3b82f6" 
+                    strokeDasharray="340" 
+                    strokeWidth="8" 
+                    strokeLinecap="round"
+                    className="drop-shadow-lg"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <p className="text-2xl font-black text-blue-500">{waterIntake.toFixed(1)}<span className="text-sm">L</span></p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">/ {activePlan.waterGoal || 3.5}L</p>
                 </div>
               </div>
             </section>
