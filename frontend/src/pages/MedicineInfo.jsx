@@ -454,7 +454,7 @@ export default function MedicineInfo() {
                 {chatLoading && <p className="text-slate-400 italic text-[10px] mt-1.5 animate-pulse">Consulting clinical manuals...</p>}
                 {chatAnswer && (
                   <div className="mt-3 p-3.5 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs border border-slate-100 dark:border-slate-800 leading-relaxed font-medium">
-                    {chatAnswer}
+                    {renderCompareMarkdown(chatAnswer)}
                   </div>
                 )}
               </div>

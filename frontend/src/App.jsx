@@ -20,6 +20,8 @@ import HomeRemedies from './pages/HomeRemedies';
 import AdminDashboard from './pages/AdminDashboard';
 import HealthcareDirectory from './pages/HealthcareDirectory';
 import ProfilePage from './pages/ProfilePage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import License from './pages/License';
 import { startNotificationScheduler } from './utils/notificationManager';
 
 // ─── Protected Route ─────────────────────────────────────────────────────────
@@ -547,7 +549,7 @@ const GlobalLayout = ({ children }) => {
 
           <div className="col-span-1 flex flex-col gap-2">
             <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Legal & Info</h4>
-            <a href="/about" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">About Us</a>
+            <a href="https://denami.vercel.app/" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">About Us</a>
             <a href="/policy" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">Privacy Policy</a>
             <a href="/license" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">License</a>
           </div>
@@ -560,14 +562,14 @@ const GlobalLayout = ({ children }) => {
           </div>
 
           <div className="col-span-1 flex flex-col gap-2">
-            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Developer Connect</h4>
+            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Developer</h4>
             <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">code</span> GitHub
+              <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" className="w-4 h-4 invert opacity-70" /> GitHub
             </a>
-            <a href="https://linkedin.com/in/devendrasagar" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">work</span> LinkedIn
+            <a href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
+              <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" className="w-4 h-4 opacity-70" /> LinkedIn
             </a>
-            <a href="mailto:devendra@example.com" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
+            <a href="mailto:devendrasagar0988@gmail.com" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
               <span className="material-symbols-outlined text-[16px]">mail</span> Email
             </a>
           </div>
@@ -613,6 +615,8 @@ function AppWithRouter() {
           <Route path="/signup"            element={<SignupPage />} />
           <Route path="/forgot-password"   element={<ForgotPasswordPage />} />
           <Route path="/reset-password"    element={<ResetPasswordPage />} />
+          <Route path="/policy"            element={<PrivacyPolicy />} />
+          <Route path="/license"           element={<License />} />
           <Route path="/dashboard"         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/profile-setup"     element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
           <Route path="/profile"           element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

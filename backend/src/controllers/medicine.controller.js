@@ -418,12 +418,12 @@ Keep your answer clear, clinical, objective, and outline precautions.`;
         }
       }
 
-      const aiResponse = await aiGateway.generateResponse(prompt, healthProfile);
+      const aiResponseText = await aiGateway.generateRaw(null, prompt);
       res.json({
         medicineName,
         question,
-        answer: aiResponse.response,
-        disclaimer: aiResponse.disclaimer
+        answer: aiResponseText,
+        disclaimer: "Consult a healthcare professional for specific medical advice."
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
