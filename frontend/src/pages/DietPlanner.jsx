@@ -197,7 +197,7 @@ export default function DietPlanner() {
           return { ...prev, mealPlan: updatedPlan };
         });
       } else {
-        alert(`Alternative generated: ${res.data.foodItems}`);
+        // removed alert
       }
     } catch (err) {
       alert('Failed to generate dynamic alternative meal option.');
