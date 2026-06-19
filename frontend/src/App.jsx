@@ -482,10 +482,11 @@ const GlobalLayout = ({ children }) => {
       {/* ── Emergency SOS FAB ──────────────────────────────────────────────── */}
       <motion.div 
         drag
-        dragConstraints={{ left: -window.innerWidth + 100, right: 100, top: -window.innerHeight + 100, bottom: 100 }}
+        dragConstraints={{ left: -window.innerWidth + 100, right: 100, top: -window.innerHeight + 100, bottom: 0 }}
         dragElastic={0.1}
-        className="fixed bottom-32 right-4 lg:bottom-12 lg:left-12 z-50 flex flex-col items-end lg:items-start"
+        className="fixed bottom-32 right-4 lg:bottom-36 lg:left-12 z-40 flex flex-col items-end lg:items-start pointer-events-none"
       >
+        <div className="pointer-events-auto flex flex-col items-end lg:items-start">
         <AnimatePresence>
           {sosOpen && (
             <motion.div
@@ -526,10 +527,11 @@ const GlobalLayout = ({ children }) => {
             <span className="text-[11px] font-black tracking-widest">SOS</span>
           )}
         </motion.button>
+        </div>
       </motion.div>
 
       {/* ── Global Footer (desktop only) ──────────────────────────────────── */}
-      <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-14 border-t border-slate-800">
+      <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-14 border-t border-slate-800 relative z-50">
         <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 flex flex-col gap-3">
             <div className="flex items-center gap-3">
