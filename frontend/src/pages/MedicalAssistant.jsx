@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Send, Volume2, Plus, Menu, X, MessageSquare, Activity, AlertCircle } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, VolumeX, Plus, Menu, X, MessageSquare, Activity, AlertCircle } from 'lucide-react';
 import AIDoctorAvatar from '../components/AIDoctorAvatar';
 import SEO from '../components/SEO';
 
@@ -48,6 +48,7 @@ export default function MedicalAssistant() {
   const [avatarMode, setAvatarMode] = useState('physician'); // physician, nutrition, medicine, emergency, remedy
   const [speechSupported, setSpeechSupported] = useState(false);
   const [ttsSupported, setTtsSupported] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(false);
   const recognitionRef = useRef(null);
 
   useEffect(() => {
@@ -196,8 +197,8 @@ export default function MedicalAssistant() {
       setMessages(prev => [...prev, assistantMsg]);
       setAvatarState('idle');
       
-      // Auto-speak if it was a voice query
-      if (typeof textToSend === 'string' && ttsSupported) {
+      // Auto-speak if it was a voice query or if AutoSpeak is globally enabled
+      if (autoSpeak && ttsSupported) {
         speakResponse(res.data.response);
       }
 
@@ -235,6 +236,11 @@ export default function MedicalAssistant() {
     utterance.onend = () => setAvatarState('idle');
     utterance.onerror = () => setAvatarState('idle');
     window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setAvatarState('idle');
   };
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -320,9 +326,20 @@ export default function MedicalAssistant() {
               </p>
             </div>
           </div>
-          <button onClick={() => navigate('/emergency')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
-            <AlertCircle className="w-3.5 h-3.5" /> Emergency
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 mr-2">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hidden sm:inline">Auto-Speak</span>
+              <button 
+                onClick={() => setAutoSpeak(!autoSpeak)}
+                className={`w-10 h-5 rounded-full relative transition-colors ${autoSpeak ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${autoSpeak ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+            <button onClick={() => navigate('/emergency')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
+              <AlertCircle className="w-3.5 h-3.5" /> Emergency
+            </button>
+          </div>
         </header>
 
         {/* Chat Scroll Area */}
@@ -363,10 +380,18 @@ export default function MedicalAssistant() {
                       </span>
                       {!isUser && ttsSupported && (
                         <button 
-                          onClick={() => speakResponse(msg.content)}
-                          className="flex items-center gap-1 text-[10px] font-bold text-violet-500 hover:text-violet-600 uppercase tracking-wider bg-violet-50 dark:bg-violet-500/10 px-2 py-0.5 rounded-full transition-colors"
+                          onClick={() => avatarState === 'speaking' ? stopSpeaking() : speakResponse(msg.content)}
+                          className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                            avatarState === 'speaking'
+                              ? 'text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-500/10'
+                              : 'text-violet-500 hover:text-violet-600 bg-violet-50 dark:bg-violet-500/10'
+                          }`}
                         >
-                          <Volume2 className="w-3 h-3" /> Read Aloud
+                          {avatarState === 'speaking' ? (
+                            <><VolumeX className="w-3 h-3" /> Stop Reading</>
+                          ) : (
+                            <><Volume2 className="w-3 h-3" /> Read Aloud</>
+                          )}
                         </button>
                       )}
                     </div>
