@@ -151,7 +151,7 @@ export default function SignupPage() {
         title="Create Account | Arogya Raksha"
         description="Sign up for Arogya Raksha to get a free personal health dashboard, AI medical assistant, and personalized diet plans."
         keywords="sign up, create account, register, Arogya Raksha, health portal"
-        canonical="https://arogyaraksha.com/signup"
+        canonical="https://arogyarakshaa.vercel.app/signup"
       />
       
       {/* Ambient background glow elements */}

@@ -164,12 +164,12 @@ export default function HomeRemedies() {
         title="Natural Home Remedies | Wellness Tips | Arogya Raksha"
         description="Discover natural home remedies for common ailments using kitchen ingredients. Learn traditional healing methods and wellness tips with Arogya Raksha."
         keywords="Home Remedies, Natural Healing, Ayurveda, Wellness Tips, Traditional Medicine, Arogya Raksha"
-        canonical="https://arogyaraksha.com/home-remedies"
+        canonical="https://arogyarakshaa.vercel.app/home-remedies"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Natural Home Remedies",
-          "url": "https://arogyaraksha.com/home-remedies"
+          "url": "https://arogyarakshaa.vercel.app/home-remedies"
         }}
       />
       

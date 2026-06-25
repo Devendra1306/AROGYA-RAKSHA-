@@ -730,7 +730,7 @@ export default function ProfilePage() {
         title="User Profile | Arogya Raksha"
         description="Manage your medical profile and health records."
         robots="noindex, nofollow"
-        canonical="https://arogyaraksha.com/profile"
+        canonical="https://arogyarakshaa.vercel.app/profile"
       />
       <motion.div
         initial={{ opacity: 0, y: 12 }}

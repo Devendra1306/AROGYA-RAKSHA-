@@ -186,12 +186,12 @@ export default function HealthAssessment() {
           title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha"
           description="Calculate your BMI, track daily vitals, and get an AI health assessment to monitor your overall wellness with Arogya Raksha."
           keywords="Health Assessment, BMI Calculator, Wellness Analysis, Track Vitals, Health Score, Daily Health Tracker, AI Healthcare"
-          canonical="https://arogyaraksha.com/health-assessment"
+          canonical="https://arogyarakshaa.vercel.app/health-assessment"
           schema={{
             "@context": "https://schema.org",
             "@type": "WebPage",
             "name": "Health Assessment & Daily Vitals",
-            "url": "https://arogyaraksha.com/health-assessment"
+            "url": "https://arogyarakshaa.vercel.app/health-assessment"
           }}
         />
         
@@ -440,12 +440,12 @@ export default function HealthAssessment() {
         title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha"
         description="Calculate your BMI, track daily vitals, and get an AI health assessment to monitor your overall wellness with Arogya Raksha."
         keywords="Health Assessment, BMI Calculator, Wellness Analysis, Track Vitals, Health Score, Daily Health Tracker, AI Healthcare"
-        canonical="https://arogyaraksha.com/health-assessment"
+        canonical="https://arogyarakshaa.vercel.app/health-assessment"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Health Assessment & Daily Vitals",
-          "url": "https://arogyaraksha.com/health-assessment"
+          "url": "https://arogyarakshaa.vercel.app/health-assessment"
         }}
       />
       

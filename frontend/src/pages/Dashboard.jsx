@@ -99,7 +99,7 @@ export default function Dashboard() {
         title="Health Dashboard | Arogya Raksha"
         description="View your personalized health dashboard, vitals, daily goals, and medical history with Arogya Raksha."
         keywords="health dashboard, medical profile, patient portal, health tracker, Arogya Raksha"
-        canonical="https://arogyaraksha.com/dashboard"
+        canonical="https://arogyarakshaa.vercel.app/dashboard"
         robots="noindex, nofollow"
       />
       

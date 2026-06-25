@@ -18,7 +18,7 @@ const Breadcrumbs = () => {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://arogyaraksha.com/"
+        "item": "https://arogyarakshaa.vercel.app/"
       },
       ...pathnames.map((value, index) => {
         const to = `/${pathnames.slice(0, index + 1).join('/')}`;
@@ -32,7 +32,7 @@ const Breadcrumbs = () => {
           "@type": "ListItem",
           "position": index + 2,
           "name": name,
-          "item": `https://arogyaraksha.com${to}`
+          "item": `https://arogyarakshaa.vercel.app${to}`
         };
       })
     ]

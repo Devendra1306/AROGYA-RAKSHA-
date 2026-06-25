@@ -203,12 +203,12 @@ export default function MedicineInfo() {
         title="Medicine Information | Dosage | Uses | Side Effects | Arogya Raksha"
         description="Search for medicines to check dosages, uses, side effects, and drug interactions using our comprehensive medical database."
         keywords="Medicine Search, Drug Database, Pharmacy, Side Effects, Drug Interactions, Arogya Raksha"
-        canonical="https://arogyaraksha.com/medicine-info"
+        canonical="https://arogyarakshaa.vercel.app/medicine-info"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Medicine Information & Drug Database",
-          "url": "https://arogyaraksha.com/medicine-info"
+          "url": "https://arogyarakshaa.vercel.app/medicine-info"
         }}
       />
       

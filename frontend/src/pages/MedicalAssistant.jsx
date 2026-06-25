@@ -245,7 +245,7 @@ export default function MedicalAssistant() {
         title="AI Medical Assistant | Smart Healthcare Guidance | Arogya Raksha"
         description="Engage with our AI Medical Assistant for smart healthcare guidance, symptom analysis, and instant medical insights customized for you."
         keywords="Medical Assistant, AI Doctor, Symptom Checker, Healthcare AI, Smart Health"
-        canonical="https://arogyaraksha.com/medical-assistant"
+        canonical="https://arogyarakshaa.vercel.app/medical-assistant"
         schema={{
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",

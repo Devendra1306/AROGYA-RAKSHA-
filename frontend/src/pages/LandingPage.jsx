@@ -235,15 +235,15 @@ export default function LandingPage() {
         title="Arogya Raksha | AI Healthcare Platform | Medical Assistant | Diet Planner"
         description="Discover Arogya Raksha, the ultimate AI healthcare platform. Access an intelligent medical assistant, personalized diet planner, and health assessment tools."
         keywords="AI Healthcare, Medical Assistant, Health Assessment, Diet Planner, Medicine Search, Health Tips, Emergency Guide, Healthcare AI"
-        canonical="https://arogyaraksha.com/"
+        canonical="https://arogyarakshaa.vercel.app/"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "Arogya Raksha",
-          "url": "https://arogyaraksha.com",
+          "url": "https://arogyarakshaa.vercel.app",
           "potentialAction": {
             "@type": "SearchAction",
-            "target": "https://arogyaraksha.com/medicine-info?q={search_term_string}",
+            "target": "https://arogyarakshaa.vercel.app/medicine-info?q={search_term_string}",
             "query-input": "required name=search_term_string"
           }
         }}

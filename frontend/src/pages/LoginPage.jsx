@@ -140,7 +140,7 @@ export default function LoginPage() {
         title="Login | Arogya Raksha"
         description="Login to your Arogya Raksha account to access your personal health dashboard, medical records, and AI healthcare tools."
         keywords="login, sign in, Arogya Raksha login, health account, patient portal"
-        canonical="https://arogyaraksha.com/login"
+        canonical="https://arogyarakshaa.vercel.app/login"
       />
       
       {/* Ambient background glow elements */}

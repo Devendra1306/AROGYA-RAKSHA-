@@ -266,12 +266,12 @@ export default function EmergencyHelp() {
           title="Emergency Healthcare Guide | First Aid | Arogya Raksha"
           description="Access critical emergency healthcare guides, first aid instructions, and immediate medical protocols to handle urgent situations effectively."
           keywords="Emergency Guide, First Aid, Urgent Care, Emergency Protocols, CPR, Health Emergency, Arogya Raksha"
-          canonical="https://arogyaraksha.com/emergency"
+          canonical="https://arogyarakshaa.vercel.app/emergency"
           schema={{
             "@context": "https://schema.org",
             "@type": "WebPage",
             "name": "Emergency Healthcare Guide & First Aid",
-            "url": "https://arogyaraksha.com/emergency"
+            "url": "https://arogyarakshaa.vercel.app/emergency"
           }}
         />
         {/* Search Header */}
@@ -585,12 +585,12 @@ export default function EmergencyHelp() {
         title="Emergency Healthcare Guide | First Aid | Arogya Raksha"
         description="Access critical emergency healthcare guides, first aid instructions, and immediate medical protocols to handle urgent situations effectively."
         keywords="Emergency Guide, First Aid, Urgent Care, Emergency Protocols, CPR, Health Emergency, Arogya Raksha"
-        canonical="https://arogyaraksha.com/emergency"
+        canonical="https://arogyarakshaa.vercel.app/emergency"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Emergency Healthcare Guide & First Aid",
-          "url": "https://arogyaraksha.com/emergency"
+          "url": "https://arogyarakshaa.vercel.app/emergency"
         }}
       />
       

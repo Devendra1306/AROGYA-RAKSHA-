@@ -296,12 +296,12 @@ export default function DietPlanner() {
         title="AI Diet Planner | Personalized Nutrition Plans | Arogya Raksha"
         description="Experience a premium, AI-driven diet and personalized nutrition tracker. Build healthy eating habits and achieve your fitness goals with Arogya Raksha."
         keywords="Diet Planner, Nutrition Planner, AI Diet, Personalized Diet, Healthy Eating, Calories Tracking, Health Goals"
-        canonical="https://arogyaraksha.com/diet-planner"
+        canonical="https://arogyarakshaa.vercel.app/diet-planner"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "AI Diet Planner & Nutrition Tracker",
-          "url": "https://arogyaraksha.com/diet-planner"
+          "url": "https://arogyarakshaa.vercel.app/diet-planner"
         }}
       />
       

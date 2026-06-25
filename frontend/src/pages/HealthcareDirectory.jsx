@@ -82,7 +82,7 @@ export default function HealthcareDirectory() {
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "Nearby Healthcare Directory",
-          "url": "https://arogyaraksha.com/nearby"
+          "url": "https://arogyarakshaa.vercel.app/nearby"
         }}
       />
       
