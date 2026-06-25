@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth, api } from '../context/AuthContext';
 import { auth } from '../config/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/SEO';
 
 // ─── Animated SVG Health Ring ───────────────────────────────────────────────
 const HealthRing = ({ score, color }) => (
@@ -725,6 +726,12 @@ export default function ProfilePage() {
   // ── MAIN RENDER ────────────────────────────────────────────────────────────
   return (
     <>
+      <SEO 
+        title="User Profile | Arogya Raksha"
+        description="Manage your medical profile and health records."
+        robots="noindex, nofollow"
+        canonical="https://arogyaraksha.com/profile"
+      />
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

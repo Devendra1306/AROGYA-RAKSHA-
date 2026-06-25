@@ -263,13 +263,14 @@ export default function EmergencyHelp() {
     return (
       <div className="bg-background text-on-surface px-margin-mobile pb-40 font-body-md">
         <SEO 
-          title="Emergency Help & First-Aid | Arogya Raksha"
-          description="Get immediate first-aid instructions, emergency guides, and find nearby medical help instantly."
-          keywords="emergency help, first aid, CPR, medical emergency, hospital finder"
+          title="Emergency Healthcare Guide | First Aid | Arogya Raksha"
+          description="Access critical emergency healthcare guides, first aid instructions, and immediate medical protocols to handle urgent situations effectively."
+          keywords="Emergency Guide, First Aid, Urgent Care, Emergency Protocols, CPR, Health Emergency, Arogya Raksha"
+          canonical="https://arogyaraksha.com/emergency"
           schema={{
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Emergency Help & First-Aid",
+            "name": "Emergency Healthcare Guide & First Aid",
             "url": "https://arogyaraksha.com/emergency"
           }}
         />
@@ -542,7 +543,7 @@ export default function EmergencyHelp() {
                 <ol className="space-y-2">
                   {selectedGuide.steps?.map((step, idx) => (
                     <li key={idx} className="flex gap-2.5 items-start p-3 bg-emerald-50/20 dark:bg-emerald-950/10 border-l-4 border-emerald-500 rounded-r-2xl text-xs">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{idx + 1}.</span>
+                      <span className="font-bold text-emerald-600 dark:bg-emerald-400 shrink-0">{idx + 1}.</span>
                       <span className="text-slate-750 dark:text-slate-250 leading-relaxed">{step}</span>
                     </li>
                   ))}
@@ -581,13 +582,14 @@ export default function EmergencyHelp() {
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
       <SEO 
-        title="Emergency Help & First-Aid | Arogya Raksha"
-        description="Get immediate first-aid instructions, emergency guides, and find nearby medical help instantly."
-        keywords="emergency help, first aid, CPR, medical emergency, hospital finder"
+        title="Emergency Healthcare Guide | First Aid | Arogya Raksha"
+        description="Access critical emergency healthcare guides, first aid instructions, and immediate medical protocols to handle urgent situations effectively."
+        keywords="Emergency Guide, First Aid, Urgent Care, Emergency Protocols, CPR, Health Emergency, Arogya Raksha"
+        canonical="https://arogyaraksha.com/emergency"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "Emergency Help & First-Aid",
+          "name": "Emergency Healthcare Guide & First Aid",
           "url": "https://arogyaraksha.com/emergency"
         }}
       />

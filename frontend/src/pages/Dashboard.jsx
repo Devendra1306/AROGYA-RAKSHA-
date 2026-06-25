@@ -1,495 +1,468 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
+import SEO from '../components/SEO';
+import { 
+  Activity, Droplets, Moon, Flame, Pill, 
+  Utensils, HeartPulse, LayoutDashboard, 
+  LineChart as LineChartIcon, History, Settings, Menu, X, 
+  ChevronRight, Sparkles, Scale, Bell, Target, Award, ArrowUpRight
+} from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState('overview');
   const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const [kpis, setKpis] = useState({
-    healthScore: profile?.healthScore || 78,
-    bmi: 22.4,
-    dietGoal: profile?.healthGoal || 'Healthy Lifestyle',
-    waterGoal: profile?.waterIntake || 3,
-    sleepGoal: profile?.sleepDuration || 7.5,
-    heartRate: 72,
-    bloodPressure: '118/76',
-    steps: 8432
-  });
+  // Health Data Defaults
+  const healthData = {
+    healthScore: profile?.healthScore || 85,
+    bmi: profile?.weight && profile?.height ? (profile.weight / Math.pow(profile.height / 100, 2)).toFixed(1) : 22.4,
+    calories: 1850,
+    water: profile?.waterIntake || 3.5, // Liters
+    sleep: profile?.sleepDuration || 7.2, // Hours
+    activity: 8432, // Steps
+    reminders: 2
+  };
 
-  const healthScoreRef = useRef(null);
-  const stepsRef = useRef(null);
-
-  useEffect(() => {
-    if (profile) {
-      const heightM = profile.height / 100;
-      const bmi = Number((profile.weight / (heightM * heightM)).toFixed(1));
-      const score = profile.healthScore || 78;
-      
-      setKpis(prev => ({
-        ...prev,
-        healthScore: score,
-        bmi,
-        dietGoal: profile.healthGoal || 'Healthy Lifestyle',
-        waterGoal: profile.waterIntake || 3,
-        sleepGoal: profile.sleepDuration || 7.5
-      }));
-    }
-  }, [profile]);
-
-  useEffect(() => {
-    // GSAP count up for health score
-    const scoreVal = { score: 0 };
-    gsap.to(scoreVal, {
-      score: kpis.healthScore,
-      duration: 1.5,
-      ease: "power2.out",
-      onUpdate: () => {
-        if (healthScoreRef.current) {
-          healthScoreRef.current.innerText = Math.round(scoreVal.score);
-        }
-      }
-    });
-
-    // GSAP count up for steps
-    const stepsVal = { steps: 0 };
-    gsap.to(stepsVal, {
-      steps: kpis.steps,
-      duration: 2,
-      ease: "power3.out",
-      onUpdate: () => {
-        if (stepsRef.current) {
-          stepsRef.current.innerText = Math.round(stepsVal.steps).toLocaleString();
-        }
-      }
-    });
-  }, [kpis.healthScore, kpis.steps]);
-
-  const quickActions = [
-    { name: 'Medical Assistant', desc: 'AI Symptom checker & chat', icon: 'smart_toy', path: '/medical-assistant', color: 'border-l-primary', iconColor: 'text-primary', bg: 'bg-primary/5 hover:bg-primary/10' },
-    { name: 'Health Assessment', desc: 'Wellness check & reports', icon: 'analytics', path: '/health-assessment', color: 'border-l-secondary', iconColor: 'text-secondary', bg: 'bg-secondary/5 hover:bg-secondary/10' },
-    { name: 'Diet Planner', desc: 'Daily calories & meals', icon: 'restaurant', path: '/diet-planner', color: 'border-l-emerald-500', iconColor: 'text-emerald-500', bg: 'bg-emerald-500/5 hover:bg-emerald-500/10' },
-    { name: 'Search Medicine', desc: 'Interactions & warnings', icon: 'pill', path: '/medicine-info', color: 'border-l-indigo-500', iconColor: 'text-indigo-500', bg: 'bg-indigo-500/5 hover:bg-indigo-500/10' },
-    { name: 'Home Remedies', desc: 'Kitchen remedies finder', icon: 'eco', path: '/home-remedies', color: 'border-l-orange-500', iconColor: 'text-orange-500', bg: 'bg-orange-500/5 hover:bg-orange-500/10' }
+  const tabs = [
+    { id: 'overview', name: 'Overview', icon: LayoutDashboard },
+    { id: 'analytics', name: 'Analytics', icon: LineChart },
+    { id: 'history', name: 'History', icon: History },
+    { id: 'settings', name: 'Settings', icon: Settings },
   ];
 
-  if (isMobile) {
-    return (
-      <div className="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen pb-16 font-body-md relative overflow-x-hidden">
-        
-        {/* Decorative background gradients */}
-        <div className="absolute top-[-5%] left-[-15%] w-72 h-72 bg-primary/10 rounded-full blur-[80px] pointer-events-none"></div>
-        <div className="absolute top-[30%] right-[-15%] w-72 h-72 bg-secondary/10 rounded-full blur-[80px] pointer-events-none"></div>
+  const quickActions = [
+    { name: 'Ask AI', icon: Sparkles, color: 'text-violet-500', bg: 'bg-violet-500/10', path: '/medical-assistant' },
+    { name: 'Medicine', icon: Pill, color: 'text-sky-500', bg: 'bg-sky-500/10', path: '/medicine-info' },
+    { name: 'Diet Plan', icon: Utensils, color: 'text-emerald-500', bg: 'bg-emerald-500/10', path: '/diet-planner' },
+    { name: 'Vitals', icon: HeartPulse, color: 'text-rose-500', bg: 'bg-rose-500/10', path: '/health-assessment' },
+  ];
 
-        {/* Welcome Section */}
-        <section className="px-4 pt-6 pb-2 relative z-10 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-black text-slate-800 dark:text-white leading-tight">Hello, {user?.firstName} 👋</h2>
-            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mt-1">YOUR HEALTH ROADMAP</p>
-          </div>
-          <button
-            onClick={() => navigate('/profile-setup')}
-            className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-xs active:scale-95 transition-all"
-            title="Edit Profile"
-          >
-            <span className="material-symbols-outlined text-lg text-slate-550 dark:text-slate-350">settings</span>
-          </button>
-        </section>
+  const chartData = [
+    { name: 'Mon', score: 82, water: 2.5, sleep: 6.5, steps: 6000 },
+    { name: 'Tue', score: 84, water: 3.0, sleep: 7.0, steps: 7200 },
+    { name: 'Wed', score: 83, water: 2.8, sleep: 6.8, steps: 6800 },
+    { name: 'Thu', score: 86, water: 3.2, sleep: 7.5, steps: 8100 },
+    { name: 'Fri', score: 85, water: 3.5, sleep: 7.2, steps: 8432 },
+    { name: 'Sat', score: 88, water: 3.8, sleep: 8.0, steps: 10200 },
+    { name: 'Sun', score: 89, water: 3.5, sleep: 7.8, steps: 9500 },
+  ];
 
-        {/* Start Assessment CTA */}
-        <div className="px-4 mb-6 relative z-10">
-          <motion.button 
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/health-assessment')}
-            className="w-full py-4 bg-gradient-to-r from-primary to-indigo-650 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg hover:shadow-primary/20 transition-all uppercase tracking-wider"
-          >
-            <span className="material-symbols-outlined text-sm">play_arrow</span> Start Daily Vitals Check
-          </motion.button>
-        </div>
+  const timelineData = [
+    { id: 1, date: 'Today, 9:00 AM', title: 'Daily Health Assessment', desc: 'Score improved to 85. Keep hydrating.', icon: HeartPulse, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { id: 2, date: 'Yesterday, 8:30 PM', title: 'Diet Plan Updated', desc: 'Switched to High Protein, Low Carb.', icon: Utensils, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { id: 3, date: 'Yesterday, 2:15 PM', title: 'AI Consultation', desc: 'Asked about persistent headaches. Recommended hydration.', icon: Sparkles, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+    { id: 4, date: 'Oct 12, 10:00 AM', title: 'Medicine Reminder Set', desc: 'Added Vitamin D (1x Daily).', icon: Pill, color: 'text-sky-500', bg: 'bg-sky-500/10' },
+  ];
 
-        {/* Content Layout */}
-        <div className="px-4 space-y-6 relative z-10">
-          
-          {/* Daily Health Score Card */}
-          <div className="glass-card rounded-[2rem] bg-white/80 dark:bg-slate-900/80 p-5 border border-slate-200/50 dark:border-slate-800/80 shadow-sm flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md">
-            <h3 className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider self-start">DAILY HEALTH SCORE</h3>
-            
-            <div className="relative w-36 h-36 flex items-center justify-center mt-3">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle cx="72" cy="72" r="62" stroke="#e2e8f0" strokeWidth="8" fill="transparent" className="dark:stroke-slate-800" />
-                <circle cx="72" cy="72" r="62" stroke="url(#dashHealthScoreGrad)" strokeWidth="8" fill="transparent" strokeDasharray={389} strokeDashoffset={389 - (389 * kpis.healthScore) / 100} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
-                <defs>
-                  <linearGradient id="dashHealthScoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#0052cc" />
-                    <stop offset="100%" stopColor="#10b981" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center">
-                <span ref={healthScoreRef} className="text-4xl font-black text-slate-800 dark:text-white">0</span>
-                <span className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Optimal</span>
-              </div>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-3 w-full text-xs">
-              <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl text-center border border-slate-100 dark:border-slate-800">
-                <p className="text-slate-400 font-bold text-[9px] uppercase">Yesterday</p>
-                <p className="text-primary dark:text-secondary font-extrabold mt-0.5">72</p>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl text-center border border-l-2 border-primary border-slate-100 dark:border-slate-800">
-                <p className="text-slate-400 font-bold text-[9px] uppercase">Goal</p>
-                <p className="text-primary dark:text-secondary font-extrabold mt-0.5">85</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Health Actions Slider */}
-          <section className="space-y-3">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Quick Actions</h3>
-            <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin hide-scrollbar -mx-4 px-4">
-              {quickActions.map((act) => (
-                <div 
-                  key={act.name}
-                  onClick={() => navigate(act.path)}
-                  className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800 shadow-xs flex items-center gap-3 shrink-0 w-48 cursor-pointer active:scale-95 transition-all"
-                >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${act.bg} ${act.iconColor}`}>
-                    <span className="material-symbols-outlined text-lg">{act.icon}</span>
-                  </div>
-                  <div className="overflow-hidden">
-                    <h4 className="font-extrabold text-[11px] text-slate-800 dark:text-white truncate">{act.name}</h4>
-                    <p className="text-[9px] text-slate-400 truncate mt-0.5">{act.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Vitals Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            
-            {/* Heart Rate */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Heart Rate</span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-black text-rose-500">{kpis.heartRate}</span>
-                  <span className="text-[9px] text-slate-400 font-bold">BPM</span>
-                </div>
-              </div>
-              <div className="mt-3 h-10 w-full opacity-85">
-                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
-                  <path d="M0,30 L10,30 L18,30 L22,10 L27,38 L32,25 L35,30 L40,30 L48,30 L52,5 L57,35 L62,20 L65,30 L75,30 L85,30 L100,30" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-                </svg>
-              </div>
-            </div>
-
-            {/* Blood Pressure */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Blood Pressure</span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-black text-blue-500">{kpis.bloodPressure}</span>
-                  <span className="text-[9px] text-slate-400 font-bold">mmHg</span>
-                </div>
-              </div>
-              <div className="mt-3 h-10 w-full opacity-85">
-                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
-                  <path d="M0,20 L15,22 L30,17 L45,21 L60,18 L75,22 L90,16 L100,19" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"></path>
-                </svg>
-              </div>
-            </div>
-
-            {/* Sleep Quality */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Sleep Quality</span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-2xl font-black text-indigo-500">{kpis.sleepGoal}</span>
-                  <span className="text-[9px] text-slate-400 font-bold">Hours</span>
-                </div>
-              </div>
-              <div className="mt-4 flex gap-1 h-6 items-end">
-                <div className="flex-1 bg-indigo-500/40 h-[40%] rounded-sm"></div>
-                <div className="flex-1 bg-indigo-500/60 h-[60%] rounded-sm"></div>
-                <div className="flex-1 bg-indigo-500/80 h-[80%] rounded-sm"></div>
-                <div className="flex-1 bg-indigo-500/50 h-[30%] rounded-sm"></div>
-                <div className="flex-1 bg-indigo-500/90 h-[95%] rounded-sm"></div>
-                <div className="flex-1 bg-indigo-500 h-[100%] rounded-sm"></div>
-              </div>
-            </div>
-
-            {/* Steps */}
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-              <div>
-                <span className="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Daily Steps</span>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span ref={stepsRef} className="text-2xl font-black text-emerald-500">0</span>
-                  <span className="text-[9px] text-slate-400 font-bold">Steps</span>
-                </div>
-              </div>
-              <div className="mt-4 w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-[84%] rounded-full"></div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Weekly Vital Trends */}
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800 shadow-xs space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Weekly Vital Trends</h3>
-              <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500 dark:text-slate-400 font-bold">Stable</span>
-            </div>
-            <div className="h-32 w-full relative pt-2">
-              <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
-                <line stroke="#f1f5f9" strokeWidth="1.5" x1="0" x2="800" y1="50" y2="50" className="dark:stroke-slate-800" />
-                <line stroke="#f1f5f9" strokeWidth="1.5" x1="0" x2="800" y1="100" y2="100" className="dark:stroke-slate-800" />
-                <line stroke="#f1f5f9" strokeWidth="1.5" x1="0" x2="800" y1="150" y2="150" className="dark:stroke-slate-800" />
-                <path d="M0,150 L114,130 L228,160 L342,110 L456,85 L570,120 L684,75 L800,60" fill="none" stroke="url(#dashGraphGrad)" strokeLinecap="round" strokeWidth="4"></path>
-                <path d="M0,150 L114,130 L228,160 L342,110 L456,85 L570,120 L684,75 L800,60 V200 H0 Z" fill="url(#dashGraphAreaGrad)" opacity="0.15"></path>
-                <defs>
-                  <linearGradient id="dashGraphGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#0052cc" />
-                    <stop offset="100%" stopColor="#10b981" />
-                  </linearGradient>
-                  <linearGradient id="dashGraphAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#0052cc" />
-                    <stop offset="100%" stopColor="#0052cc" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="flex justify-between mt-3 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Health Recommendation Card */}
-          <div className="bg-gradient-to-r from-violet-500/10 to-indigo-500/10 dark:from-violet-500/5 dark:to-indigo-500/5 p-4 rounded-3xl border border-violet-500/20 flex gap-4 items-center">
-            <div className="w-12 h-12 bg-indigo-500/20 text-indigo-500 rounded-2xl flex items-center justify-center shrink-0 text-xl shadow-xs">
-              <span className="material-symbols-outlined">self_improvement</span>
-            </div>
-            <div className="overflow-hidden">
-              <span className="bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-widest">Active Advice</span>
-              <h4 className="font-extrabold text-[11px] text-slate-800 dark:text-white mt-1.5">Evening Stretching Session</h4>
-              <p className="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400 mt-0.5">Stretching relieves tension spikes observed in your profiles today.</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop View
-  return (
-    <div className="max-w-[1400px] mx-auto px-margin-mobile lg:px-margin-desktop py-10 text-slate-800 dark:text-slate-100 transition-colors relative">
+  const MetricCard = ({ title, value, unit, icon: Icon, colorClass, delay }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.5, ease: 'easeOut' }}
+      className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all group cursor-pointer relative overflow-hidden"
+    >
+      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${colorClass.split('text-')[1] ? `from-${colorClass.split('text-')[1].split('-')[0]}-500/10 to-transparent` : 'from-slate-500/5'} rounded-bl-full -z-10 transition-transform group-hover:scale-110`} />
       
-      {/* Background blobs */}
-      <div className="absolute top-[-5%] left-[-10%] w-[30%] h-[30%] bg-primary/10 rounded-full blur-[90px] pointer-events-none z-0"></div>
-      <div className="absolute top-[20%] right-[-10%] w-[35%] h-[35%] bg-secondary/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
-
-      {/* Header */}
-      <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
-        <div>
-          <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">Hello, {user?.firstName} 👋</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Welcome to your unified clinical health command center.</p>
+      <div className="flex justify-between items-start mb-4">
+        <div className={`w-12 h-12 rounded-2xl ${colorClass.replace('text-', 'bg-').replace('-500', '-500/10')} flex items-center justify-center`}>
+          <Icon className={`w-6 h-6 ${colorClass}`} />
         </div>
-        <button 
-          onClick={() => navigate('/profile-setup')}
-          className="border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 px-5 py-2.5 rounded-2xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-xs bg-white dark:bg-slate-900 active:scale-95"
-        >
-          <span className="material-symbols-outlined text-base">edit</span> Setup Health Profile
-        </button>
-      </header>
-
-      {/* KPI Overview Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 relative z-10">
-        {/* Health Score */}
-        <div className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Health Score</span>
-              <h2 className="text-4xl font-black text-primary dark:text-secondary mt-2">
-                <span ref={healthScoreRef}>0</span>/100
-              </h2>
-            </div>
-            <span className="material-symbols-outlined text-primary text-2xl">insights</span>
-          </div>
-          <div className="mt-5 w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-primary to-indigo-500 rounded-full transition-all duration-1000" style={{ width: `${kpis.healthScore}%` }}></div>
-          </div>
-        </div>
-
-        {/* BMI */}
-        <div className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Body Mass Index</span>
-              <h2 className="text-4xl font-black mt-2">{kpis.bmi}</h2>
-            </div>
-            <span className="material-symbols-outlined text-emerald-500 text-2xl">scale</span>
-          </div>
-          <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-500 mt-4 block">
-            {kpis.bmi < 18.5 ? 'Underweight Range' : kpis.bmi > 25 ? 'Overweight Range' : 'Optimal Weight Range'}
-          </span>
-        </div>
-
-        {/* Diet & Goals */}
-        <div className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800/80 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Primary Goal</span>
-              <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white mt-2 truncate max-w-[180px]">{kpis.dietGoal}</h2>
-            </div>
-            <span className="material-symbols-outlined text-violet-500 text-2xl">emoji_events</span>
-          </div>
-          <span className="text-xs text-slate-400 mt-4 block">Duration: {profile?.targetDuration || '3 Months Active'}</span>
-        </div>
-
-        {/* SOS Emergency Help */}
-        <div 
-          onClick={() => navigate('/emergency')}
-          className="glass-card rounded-3xl p-6 bg-red-500/5 dark:bg-red-950/10 border border-red-500/20 hover:border-red-500 shadow-sm hover:shadow-red-500/5 flex flex-col justify-between cursor-pointer hover:scale-[1.02] transition-all"
-        >
-          <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] uppercase tracking-widest text-red-500 font-extrabold">SOS Access</span>
-              <p className="text-xs text-slate-500 dark:text-red-300/85 mt-2 leading-relaxed">Immediate emergency guide procedures and coordinate tracker.</p>
-            </div>
-            <span className="material-symbols-outlined text-red-500 text-2xl animate-pulse">emergency</span>
-          </div>
-          <span className="text-red-500 font-extrabold text-xs uppercase tracking-wider mt-4 flex items-center gap-1.5">
-            Launch SOS Dashboard
-            <span className="material-symbols-outlined text-xs select-none">arrow_forward</span>
-          </span>
+        <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 transition-colors" />
+      </div>
+      
+      <div>
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{title}</p>
+        <div className="flex items-baseline gap-1.5">
+          <h3 className="text-3xl font-black text-slate-800 dark:text-white">{value}</h3>
+          <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{unit}</span>
         </div>
       </div>
+    </motion.div>
+  );
 
-      {/* Quick Actions Grid */}
-      <div className="relative z-10 mb-10">
-        <h3 className="text-lg font-black mb-5 uppercase tracking-widest text-slate-400">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {quickActions.map((act) => (
-            <motion.div 
-              whileHover={{ y: -5, shadow: "0px 10px 20px rgba(0,0,0,0.05)" }}
-              key={act.name} 
-              onClick={() => navigate(act.path)}
-              className={`glass-card rounded-2xl p-5 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800 border-l-4 ${act.color} cursor-pointer transition-all flex flex-col justify-between min-h-[140px]`}
-            >
-              <div className="flex justify-between items-start w-full">
-                <span className={`material-symbols-outlined text-2xl ${act.iconColor}`}>{act.icon}</span>
-              </div>
-              <div className="mt-4">
-                <h4 className="font-extrabold text-sm text-slate-800 dark:text-white">{act.name}</h4>
-                <p className="text-[10px] text-slate-400 mt-1 leading-normal">{act.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+  return (
+    <div className="min-h-screen bg-[#f8f9fc] dark:bg-slate-950 flex font-sans">
+      <SEO 
+        title="Health Dashboard | Arogya Raksha"
+        description="View your personalized health dashboard, vitals, daily goals, and medical history with Arogya Raksha."
+        keywords="health dashboard, medical profile, patient portal, health tracker, Arogya Raksha"
+        canonical="https://arogyaraksha.com/dashboard"
+        robots="noindex, nofollow"
+      />
+      
+      {/* ── Sidebar (Desktop) ────────────────────────────────────────────── */}
+      {!isMobile && (
+        <aside className="w-[280px] fixed inset-y-0 left-0 bg-white dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800/50 p-6 flex flex-col z-40 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center gap-3 mb-12 cursor-pointer" onClick={() => navigate('/')}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+              <HeartPulse className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Arogya</span>
+          </div>
 
-      {/* Health Vitals Summary Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+          <nav className="flex-1 space-y-2">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold transition-all ${
+                  activeTab === tab.id 
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md' 
+                    : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+
+          <div className="mt-auto bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center font-black uppercase shadow-sm">
+                {user?.firstName?.[0] || 'U'}
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user?.firstName || 'User'}</p>
+                <p className="text-[10px] text-slate-500 truncate cursor-pointer hover:underline" onClick={() => navigate('/profile-setup')}>View Profile</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* ── Main Content Area ────────────────────────────────────────────── */}
+      <main className={`flex-1 ${!isMobile ? 'ml-[280px]' : ''} min-h-screen relative overflow-hidden`}>
         
-        {/* Hydration & Sleep info */}
-        <div className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-base font-black mb-4 uppercase tracking-widest text-slate-400">Daily Wellness Log</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="flex items-center text-xs"><span className="material-symbols-outlined text-base text-blue-500 mr-2">water_drop</span> Water Intake Target</span>
-                <span className="font-extrabold text-sm">{kpis.waterGoal} Liters</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="flex items-center text-xs"><span className="material-symbols-outlined text-base text-indigo-500 mr-2">bedtime</span> Sleep Target</span>
-                <span className="font-extrabold text-sm">{kpis.sleepGoal} Hours</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="flex items-center text-xs"><span className="material-symbols-outlined text-base text-orange-500 mr-2">psychology</span> Stress Profile</span>
-                <span className="font-extrabold text-sm">{profile?.stressLevel || 'Moderate'}</span>
-              </div>
-            </div>
-          </div>
-          <button 
-            onClick={() => navigate('/health-assessment')}
-            className="w-full mt-6 py-2.5 bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold rounded-xl border border-slate-150 dark:border-slate-800/80 transition-all text-primary dark:text-secondary uppercase tracking-wider"
-          >
-            Update Logs
-          </button>
-        </div>
+        {/* Background Blobs for Premium Feel */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Existing condition card info */}
-        <div className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-base font-black mb-1.5 uppercase tracking-widest text-slate-400">Medical Summary</h3>
-            <p className="text-[10px] text-slate-400 mb-5">Automatically synced with the AI Assistant for guidance.</p>
-            
-            <div className="flex flex-wrap gap-2.5 max-h-[120px] overflow-y-auto pr-1">
-              {profile?.medicalConditions?.length > 0 && profile.medicalConditions[0] !== 'None' ? (
-                profile.medicalConditions.map(c => (
-                  <span key={c} className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-3.5 py-1.5 rounded-2xl text-xs font-extrabold border border-primary/10">
-                    {c}
-                  </span>
-                ))
-              ) : (
-                <span className="text-slate-450 dark:text-slate-400 text-xs italic">No pre-existing chronic conditions logged.</span>
-              )}
-            </div>
-          </div>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-8 py-8 lg:py-12 pb-32 lg:pb-12">
           
-          <span 
-            onClick={() => navigate('/profile-setup')}
-            className="text-primary hover:underline text-xs font-bold cursor-pointer mt-6 inline-flex items-center gap-1"
-          >
-            Configure Clinical History
-            <span className="material-symbols-outlined text-xs select-none">arrow_forward</span>
-          </span>
-        </div>
+          {/* Header */}
+          <header className="flex justify-between items-end mb-10">
+            <div>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+              <h1 className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                Summary
+              </h1>
+            </div>
+            <button className="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-center relative hover:shadow-md transition-all">
+              <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              {healthData.reminders > 0 && (
+                <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-800" />
+              )}
+            </button>
+          </header>
 
-        {/* SVG Graph Card */}
-        <div className="glass-card rounded-3xl p-6 bg-white/70 dark:bg-slate-900/70 border border-slate-200/50 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-black uppercase tracking-widest text-slate-400">Vitals History</h3>
-            <span className="text-[10px] text-emerald-500 font-extrabold uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Optimal</span>
-          </div>
-          <div className="h-32 w-full relative">
-            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
-              <line stroke="#f1f5f9" strokeWidth="1.5" x1="0" x2="800" y1="50" y2="50" className="dark:stroke-slate-800" />
-              <line stroke="#f1f5f9" strokeWidth="1.5" x1="0" x2="800" y1="100" y2="100" className="dark:stroke-slate-800" />
-              <line stroke="#f1f5f9" strokeWidth="1.5" x1="0" x2="800" y1="150" y2="150" className="dark:stroke-slate-800" />
-              <path d="M0,150 L114,130 L228,160 L342,110 L456,85 L570,120 L684,75 L800,60" fill="none" stroke="url(#dashDGraphGrad)" strokeLinecap="round" strokeWidth="4"></path>
-              <path d="M0,150 L114,130 L228,160 L342,110 L456,85 L570,120 L684,75 L800,60 V200 H0 Z" fill="url(#dashDGraphAreaGrad)" opacity="0.15"></path>
-              <defs>
-                <linearGradient id="dashDGraphGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#0052cc" />
-                  <stop offset="100%" stopColor="#10b981" />
-                </linearGradient>
-                <linearGradient id="dashDGraphAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#0052cc" />
-                  <stop offset="100%" stopColor="#0052cc" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <div className="flex justify-between mt-3 text-[9px] text-slate-400 font-bold uppercase tracking-wider">
-            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-          </div>
+          {/* Tab Content */}
+          <AnimatePresence mode="wait">
+            {activeTab === 'overview' && (
+              <motion.div
+                key="overview"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Highlights (Top Row) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
+                  {/* Health Score Large Card */}
+                  <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+                    <div className="relative z-10 flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Health Score</span>
+                        <div className="flex items-end gap-2 mt-2">
+                          <h2 className="text-5xl sm:text-6xl font-black tracking-tight">{healthData.healthScore}</h2>
+                          <span className="text-lg font-bold text-slate-400 mb-2">/100</span>
+                        </div>
+                      </div>
+                      <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                        <Activity className="w-6 h-6 text-emerald-400" />
+                      </div>
+                    </div>
+                    <div className="relative z-10 mt-6 pt-6 border-t border-white/10">
+                      <p className="text-sm text-slate-300 font-medium">Your overall health is trending upwards. Keep maintaining your hydration goals.</p>
+                    </div>
+                  </div>
+
+                  {/* AI Quick Actions Panel */}
+                  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm flex flex-col">
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Quick Actions</h3>
+                    <div className="grid grid-cols-2 gap-3 flex-1">
+                      {quickActions.map((action) => (
+                        <button
+                          key={action.name}
+                          onClick={() => navigate(action.path)}
+                          className="flex flex-col items-center justify-center gap-3 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 transition-all hover:scale-[1.02] active:scale-95"
+                        >
+                          <div className={`w-10 h-10 rounded-xl ${action.bg} flex items-center justify-center`}>
+                            <action.icon className={`w-5 h-5 ${action.color}`} />
+                          </div>
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{action.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metrics Grid */}
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 tracking-tight">Today's Metrics</h3>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <MetricCard title="Activity" value={healthData.activity} unit="steps" icon={Flame} colorClass="text-orange-500" delay={0.1} />
+                  <MetricCard title="Calories" value={healthData.calories} unit="kcal" icon={Utensils} colorClass="text-emerald-500" delay={0.2} />
+                  <MetricCard title="Water" value={healthData.water} unit="L" icon={Droplets} colorClass="text-blue-500" delay={0.3} />
+                  <MetricCard title="Sleep" value={healthData.sleep} unit="hrs" icon={Moon} colorClass="text-indigo-500" delay={0.4} />
+                  <MetricCard title="BMI" value={healthData.bmi} unit="" icon={Scale} colorClass="text-violet-500" delay={0.5} />
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── Gamification & Goals (Overview) ───────────────────────────────── */}
+            {activeTab === 'overview' && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+                className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6"
+              >
+                {/* Streaks */}
+                <div className="bg-gradient-to-r from-orange-500 to-rose-500 rounded-3xl p-6 text-white shadow-lg flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold opacity-90 uppercase tracking-widest mb-1">Current Streak</h4>
+                    <div className="flex items-end gap-2">
+                      <span className="text-4xl font-black">14</span>
+                      <span className="text-sm font-bold opacity-90 mb-1">Days</span>
+                    </div>
+                  </div>
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
+                    <Flame className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                
+                {/* Badges/Goals */}
+                <div className="md:col-span-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Health Goals</h4>
+                    <p className="text-lg font-bold text-slate-800 dark:text-white">Maintain optimal hydration & sleep</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20" title="Hydration Master">
+                      <Droplets className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20" title="Sleep Champion">
+                      <Moon className="w-6 h-6 text-indigo-500" />
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                      <Target className="w-6 h-6 text-slate-400" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── Analytics Tab ────────────────────────────────────────────────── */}
+            {activeTab === 'analytics' && (
+              <motion.div
+                key="analytics"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm">
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">AI Health Report</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Comprehensive analysis of your vitals, diet, and AI insights.</p>
+                  </div>
+                  <button className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-xl font-bold hover:shadow-lg transition-all active:scale-95">
+                    Download PDF <ArrowUpRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Health Score Trend</h3>
+                    <select className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none">
+                      <option>Last 7 Days</option>
+                      <option>Last 30 Days</option>
+                    </select>
+                  </div>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#1e293b', borderRadius: '12px', border: 'none', color: '#fff' }}
+                          itemStyle={{ color: '#fff', fontWeight: 'bold' }}
+                        />
+                        <Area type="monotone" dataKey="score" stroke="#8b5cf6" strokeWidth={4} fillOpacity={1} fill="url(#colorScore)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-6">Daily Activity</h3>
+                    <div className="h-[250px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                          <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                          <Bar dataKey="steps" fill="#10b981" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-6">Hydration & Sleep</h3>
+                    <div className="h-[250px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                          <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                          <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                          <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                          <Line yAxisId="left" type="monotone" dataKey="water" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                          <Line yAxisId="right" type="monotone" dataKey="sleep" stroke="#6366f1" strokeWidth={3} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── History Tab ────────────────────────────────────────────────── */}
+            {activeTab === 'history' && (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 sm:p-8 shadow-sm"
+              >
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-8">AI Health Timeline</h3>
+                
+                <div className="relative border-l-2 border-slate-100 dark:border-slate-800 ml-4 space-y-8">
+                  {timelineData.map((item, index) => (
+                    <div key={item.id} className="relative pl-8">
+                      <div className={`absolute -left-[21px] top-0 w-10 h-10 rounded-full ${item.bg} border-4 border-white dark:border-slate-900 flex items-center justify-center`}>
+                        <item.icon className={`w-4 h-4 ${item.color}`} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{item.date}</span>
+                        <h4 className="text-base font-bold text-slate-800 dark:text-white mt-1">{item.title}</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── Settings Tab ───────────────────────────────────── */}
+            {activeTab === 'settings' && (
+              <motion.div
+                key="settings"
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 sm:p-8 shadow-sm">
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-6">Security & Privacy</h3>
+                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-800/50 flex items-center justify-center shrink-0">
+                      <Award className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 dark:text-white">HIPAA Compliant Infrastructure</h4>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">Your health data is encrypted end-to-end. Arogya Raksha utilizes secure authentication and never shares personal medical information with third parties.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 sm:p-8 shadow-sm">
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-6">AI Preferences</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white">Smart Notifications</h4>
+                        <p className="text-sm text-slate-500">Receive AI-driven alerts for water, sleep, and medicine.</p>
+                      </div>
+                      <div className="w-12 h-6 bg-violet-500 rounded-full relative cursor-pointer">
+                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white">AI Doctor Memory</h4>
+                        <p className="text-sm text-slate-500">Allow AI to remember past consultations for better context.</p>
+                      </div>
+                      <div className="w-12 h-6 bg-violet-500 rounded-full relative cursor-pointer">
+                        <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-sm"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
         </div>
-      </div>
+      </main>
+
+      {/* ── Mobile Bottom Navigation ─────────────────────────────────────── */}
+      {isMobile && (
+        <nav className="fixed bottom-0 inset-x-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-800/50 px-6 py-4 flex justify-between items-center z-50 pb-safe">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-col items-center gap-1.5 transition-all ${
+                activeTab === tab.id 
+                  ? 'text-violet-600 dark:text-violet-400' 
+                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              <div className={`p-1.5 rounded-xl transition-all ${activeTab === tab.id ? 'bg-violet-100 dark:bg-violet-900/30' : 'bg-transparent'}`}>
+                <tab.icon className="w-6 h-6" />
+              </div>
+              <span className={`text-[10px] font-bold ${activeTab === tab.id ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>{tab.name}</span>
+            </button>
+          ))}
+        </nav>
+      )}
 
     </div>
   );

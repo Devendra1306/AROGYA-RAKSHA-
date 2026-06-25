@@ -1,28 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import ProfileSetup from './pages/ProfileSetup';
-import Dashboard from './pages/Dashboard';
-import EmergencyHelp from './pages/EmergencyHelp';
-import MedicalAssistant from './pages/MedicalAssistant';
-import HealthAssessment from './pages/HealthAssessment';
-import DietPlanner from './pages/DietPlanner';
-import MedicineInfo from './pages/MedicineInfo';
-import HomeRemedies from './pages/HomeRemedies';
-import AdminDashboard from './pages/AdminDashboard';
-import HealthcareDirectory from './pages/HealthcareDirectory';
-import ProfilePage from './pages/ProfilePage';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import License from './pages/License';
+import Breadcrumbs from './components/Breadcrumbs';
+
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const ProfileSetup = lazy(() => import('./pages/ProfileSetup'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const EmergencyHelp = lazy(() => import('./pages/EmergencyHelp'));
+const MedicalAssistant = lazy(() => import('./pages/MedicalAssistant'));
+const HealthAssessment = lazy(() => import('./pages/HealthAssessment'));
+const DietPlanner = lazy(() => import('./pages/DietPlanner'));
+const MedicineInfo = lazy(() => import('./pages/MedicineInfo'));
+const HomeRemedies = lazy(() => import('./pages/HomeRemedies'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const HealthcareDirectory = lazy(() => import('./pages/HealthcareDirectory'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const License = lazy(() => import('./pages/License'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import { startNotificationScheduler } from './utils/notificationManager';
+
+// ─── Scroll To Top on every route change ─────────────────────────────────────
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+};
+
 
 // ─── Protected Route ─────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
@@ -452,8 +465,12 @@ const GlobalLayout = ({ children }) => {
 
       {/* ── Main Content ────────────────────────────────────────────────────── */}
       <main className="flex-grow pt-[67px] pb-20 lg:pb-0">
+        <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop">
+          <Breadcrumbs />
+        </div>
         {children}
       </main>
+
 
       {/* ── Bottom Mobile Nav ────────────────────────────────────────────────── */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/80 shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.4)]">
@@ -610,28 +627,31 @@ function AppWithRouter() {
 
   return (
     <Router>
+      <ScrollToTop />
       <GlobalLayout>
-        <Routes>
-          <Route path="/"                  element={<LandingPage />} />
-          <Route path="/login"             element={<LoginPage />} />
-          <Route path="/signup"            element={<SignupPage />} />
-          <Route path="/forgot-password"   element={<ForgotPasswordPage />} />
-          <Route path="/reset-password"    element={<ResetPasswordPage />} />
-          <Route path="/policy"            element={<PrivacyPolicy />} />
-          <Route path="/license"           element={<License />} />
-          <Route path="/dashboard"         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/profile-setup"     element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-          <Route path="/profile"           element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/emergency"         element={<EmergencyHelp />} />
-          <Route path="/medical-assistant" element={<ProtectedRoute><MedicalAssistant /></ProtectedRoute>} />
-          <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
-          <Route path="/diet-planner"      element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
-          <Route path="/medicine-info"     element={<MedicineInfo />} />
-          <Route path="/home-remedies"     element={<HomeRemedies />} />
-          <Route path="/nearby"            element={<HealthcareDirectory />} />
-          <Route path="/admin"             element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-          <Route path="*"                  element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+          <Routes>
+            <Route path="/"                  element={<LandingPage />} />
+            <Route path="/login"             element={<LoginPage />} />
+            <Route path="/signup"            element={<SignupPage />} />
+            <Route path="/forgot-password"   element={<ForgotPasswordPage />} />
+            <Route path="/reset-password"    element={<ResetPasswordPage />} />
+            <Route path="/policy"            element={<PrivacyPolicy />} />
+            <Route path="/license"           element={<License />} />
+            <Route path="/dashboard"         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/profile-setup"     element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
+            <Route path="/profile"           element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/emergency"         element={<EmergencyHelp />} />
+            <Route path="/medical-assistant" element={<ProtectedRoute><MedicalAssistant /></ProtectedRoute>} />
+            <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
+            <Route path="/diet-planner"      element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
+            <Route path="/medicine-info"     element={<MedicineInfo />} />
+            <Route path="/home-remedies"     element={<HomeRemedies />} />
+            <Route path="/nearby"            element={<HealthcareDirectory />} />
+            <Route path="/admin"             element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="*"                  element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
       </GlobalLayout>
     </Router>
   );

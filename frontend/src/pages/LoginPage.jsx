@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
+import SEO from '../components/SEO';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -135,6 +136,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-margin-mobile relative overflow-hidden">
+      <SEO 
+        title="Login | Arogya Raksha"
+        description="Login to your Arogya Raksha account to access your personal health dashboard, medical records, and AI healthcare tools."
+        keywords="login, sign in, Arogya Raksha login, health account, patient portal"
+        canonical="https://arogyaraksha.com/login"
+      />
       
       {/* Ambient background glow elements */}
       <div className="ambient-circle-1 absolute top-[20%] left-[25%] w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>

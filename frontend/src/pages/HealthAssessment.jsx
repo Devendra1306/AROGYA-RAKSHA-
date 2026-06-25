@@ -183,9 +183,10 @@ export default function HealthAssessment() {
     return (
       <div className="max-w-[1280px] mx-auto px-margin-mobile py-6 text-slate-800 dark:text-slate-100 font-body-md">
         <SEO 
-          title="Health Assessment & Daily Vitals | Arogya Raksha"
-          description="Assess your daily health score based on sleep, hydration, and nutrition. Track your vitals with our comprehensive AI assessment tool."
-          keywords="health assessment, track vitals, health score, daily health tracker"
+          title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha"
+          description="Calculate your BMI, track daily vitals, and get an AI health assessment to monitor your overall wellness with Arogya Raksha."
+          keywords="Health Assessment, BMI Calculator, Wellness Analysis, Track Vitals, Health Score, Daily Health Tracker, AI Healthcare"
+          canonical="https://arogyaraksha.com/health-assessment"
           schema={{
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -436,9 +437,10 @@ export default function HealthAssessment() {
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
       <SEO 
-        title="Health Assessment & Daily Vitals | Arogya Raksha"
-        description="Assess your daily health score based on sleep, hydration, and nutrition. Track your vitals with our comprehensive AI assessment tool."
-        keywords="health assessment, track vitals, health score, daily health tracker"
+        title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha"
+        description="Calculate your BMI, track daily vitals, and get an AI health assessment to monitor your overall wellness with Arogya Raksha."
+        keywords="Health Assessment, BMI Calculator, Wellness Analysis, Track Vitals, Health Score, Daily Health Tracker, AI Healthcare"
+        canonical="https://arogyaraksha.com/health-assessment"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",

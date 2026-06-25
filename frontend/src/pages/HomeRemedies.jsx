@@ -161,9 +161,10 @@ export default function HomeRemedies() {
   return (
     <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-6 text-slate-800 dark:text-slate-100 transition-colors animate-fade-in">
       <SEO 
-        title="Natural Home Remedies | Arogya Raksha"
-        description="Discover natural home remedies for common ailments using kitchen ingredients and traditional healing methods."
-        keywords="home remedies, natural healing, Ayurveda, natural cures, traditional medicine"
+        title="Natural Home Remedies | Wellness Tips | Arogya Raksha"
+        description="Discover natural home remedies for common ailments using kitchen ingredients. Learn traditional healing methods and wellness tips with Arogya Raksha."
+        keywords="Home Remedies, Natural Healing, Ayurveda, Wellness Tips, Traditional Medicine, Arogya Raksha"
+        canonical="https://arogyaraksha.com/home-remedies"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",

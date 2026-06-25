@@ -5,6 +5,7 @@ import { auth, googleProvider } from '../config/firebase';
 import { useAuth } from '../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import SEO from '../components/SEO';
 import { gsap } from 'gsap';
 
 export default function SignupPage() {
@@ -146,6 +147,12 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-margin-mobile relative overflow-hidden">
+      <SEO 
+        title="Create Account | Arogya Raksha"
+        description="Sign up for Arogya Raksha to get a free personal health dashboard, AI medical assistant, and personalized diet plans."
+        keywords="sign up, create account, register, Arogya Raksha, health portal"
+        canonical="https://arogyaraksha.com/signup"
+      />
       
       {/* Ambient background glow elements */}
       <div className="ambient-circle-1 absolute top-[15%] left-[20%] w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>

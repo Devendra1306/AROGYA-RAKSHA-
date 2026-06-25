@@ -200,9 +200,10 @@ export default function MedicineInfo() {
   return (
     <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
       <SEO 
-        title="Medicine Information & Drug Database | Arogya Raksha"
-        description="Search for medicines, check dosages, side effects, and drug interactions using our comprehensive medical database."
-        keywords="medicine info, drug database, side effects, drug interactions, pharmacy"
+        title="Medicine Information | Dosage | Uses | Side Effects | Arogya Raksha"
+        description="Search for medicines to check dosages, uses, side effects, and drug interactions using our comprehensive medical database."
+        keywords="Medicine Search, Drug Database, Pharmacy, Side Effects, Drug Interactions, Arogya Raksha"
+        canonical="https://arogyaraksha.com/medicine-info"
         schema={{
           "@context": "https://schema.org",
           "@type": "WebPage",

@@ -151,10 +151,18 @@ export const AuthProvider = ({ children }) => {
     return !!savedToken && !isTokenExpired(savedToken);
   });
 
+  // Start as false immediately — guests see the page instantly.
+  // Only set to true when Firebase confirms there IS a session to sync.
   const [loading, setLoading] = useState(() => {
     const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    return !(savedToken && savedUser && !isTokenExpired(savedToken));
+    const savedUser  = localStorage.getItem('user');
+    // If we already have both a valid token AND cached user in localStorage,
+    // we can render immediately without waiting for backend.
+    if (savedToken && savedUser && !isTokenExpired(savedToken)) return false;
+    // If no token at all, user is definitely a guest — show page immediately.
+    if (!savedToken) return false;
+    // Token exists but user data missing — needs backend sync (rare)
+    return true;
   });
 
   const [profile, setProfile] = useState(() => {
@@ -172,20 +180,26 @@ export const AuthProvider = ({ children }) => {
 
   // Listen to Firebase Auth state change to persist sessions across page refreshes
   useEffect(() => {
+    // Hard timeout: never block the UI for more than 2 seconds
+    const loadingTimeout = setTimeout(() => setLoading(false), 2000);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
           const idToken = await firebaseUser.getIdToken();
           localStorage.setItem('token', idToken);
           setToken(idToken);
-          
-          // Sync with the backend MongoDB database
-          const res = await api.get('/auth/profile', {
-            headers: {
-              'Authorization': `Bearer ${idToken}`
-            }
+
+          // Race backend call against a 3-second timeout
+          const fetchProfile = api.get('/auth/profile', {
+            headers: { 'Authorization': `Bearer ${idToken}` }
           });
-          
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
+          );
+
+          const res = await Promise.race([fetchProfile, timeoutPromise]);
+
           if (res.data && typeof res.data === 'object' && res.data.user) {
             const syncedUser = {
               ...res.data.user,
@@ -201,11 +215,11 @@ export const AuthProvider = ({ children }) => {
             }
             setIsAuthenticated(true);
           } else {
-            console.error("Failed to sync auth session: Invalid response structure from backend.");
+            console.error('Failed to sync auth session: Invalid response structure from backend.');
             handleForceLogout();
           }
         } catch (err) {
-          console.error("Error syncing auth session with backend on refresh:", err.message);
+          console.error('Error syncing auth session with backend on refresh:', err.message);
           // Load local user details as a temporary fallback if backend is unreachable
           const savedUser = localStorage.getItem('user');
           if (savedUser) {
@@ -222,10 +236,14 @@ export const AuthProvider = ({ children }) => {
       } else {
         handleForceLogout();
       }
+      clearTimeout(loadingTimeout);
       setLoading(false);
     });
-    
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      clearTimeout(loadingTimeout);
+    };
   }, []);
 
   const handleForceLogout = () => {
