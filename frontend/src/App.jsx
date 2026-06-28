@@ -488,7 +488,7 @@ const GlobalLayout = ({ children }) => {
       </AnimatePresence>
 
       {/* ── Main Content ────────────────────────────────────────────────────── */}
-      <main className="flex-grow pt-[67px] pb-20 lg:pb-0">
+      <main className="flex-grow pt-[67px] pb-28 lg:pb-0">
         <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop">
           <Breadcrumbs />
         </div>
@@ -497,11 +497,10 @@ const GlobalLayout = ({ children }) => {
 
 
       {/* ── Bottom Mobile Nav ────────────────────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/80 shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center justify-around h-16 px-1">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800/80 shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom)]">
+        <div className="flex items-center justify-around h-16 px-2">
           {[
             { path: '/',                  label: 'Home',      icon: 'home'       },
-            { path: '/emergency',         label: 'Emergency', icon: 'emergency'  },
             { path: '/medical-assistant', label: 'AI',        icon: 'smart_toy'  },
             { path: '/medicine-info',     label: 'Medicines', icon: 'pill'       },
             { path: '/nearby',            label: 'Nearby',    icon: 'location_on'},

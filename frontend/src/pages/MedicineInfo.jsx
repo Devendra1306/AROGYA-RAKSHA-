@@ -234,7 +234,7 @@ export default function MedicineInfo() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-5 pl-14 rounded-2xl glass-card dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm outline-none text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 transition-all premium-hover"
+              className="w-full p-5 pl-14 rounded-2xl glass-card dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm outline-none text-base md:text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 transition-all premium-hover"
               placeholder="Search medicines (e.g. Paracetamol, Cetirizine)..."
             />
             <span className="absolute left-5 top-5 text-[22px] text-slate-400 select-none material-symbols-outlined group-focus-within:text-[#0052CC] dark:group-focus-within:text-[#10B981] transition-colors">search</span>
@@ -458,7 +458,7 @@ export default function MedicineInfo() {
                     type="text" 
                     value={chatQuestion}
                     onChange={(e) => setChatQuestion(e.target.value)}
-                    className="flex-grow p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 outline-none text-xs" 
+                    className="flex-grow p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 outline-none text-base md:text-xs" 
                     placeholder={`e.g. Can I take ${selectedMed.medicineName} with milk?`}
                   />
                   <button type="submit" className="bg-primary hover:opacity-95 text-white font-bold px-4 rounded-xl text-xs">
@@ -546,7 +546,7 @@ export default function MedicineInfo() {
                   type="text" 
                   value={med1}
                   onChange={(e) => setMed1(e.target.value)}
-                  className="w-full p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm font-medium focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-4 focus:ring-[#0052CC]/10 outline-none transition-all"
+                  className="w-full p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-base md:text-sm font-medium focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-4 focus:ring-[#0052CC]/10 outline-none transition-all"
                   placeholder="Paracetamol"
                   required
                 />
@@ -557,7 +557,7 @@ export default function MedicineInfo() {
                   type="text" 
                   value={med2}
                   onChange={(e) => setMed2(e.target.value)}
-                  className="w-full p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm font-medium focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-4 focus:ring-[#0052CC]/10 outline-none transition-all"
+                  className="w-full p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-base md:text-sm font-medium focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-4 focus:ring-[#0052CC]/10 outline-none transition-all"
                   placeholder="Cetirizine"
                   required
                 />

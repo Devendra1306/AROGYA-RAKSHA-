@@ -128,11 +128,11 @@ export default function ProfileSetup() {
               <div className="grid grid-cols-2 gap-5">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Age</label>
-                  <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="25" />
+                  <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full p-3.5 min-h-[48px] rounded-2xl text-base md:text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="25" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Gender</label>
-                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover">
+                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full p-3.5 min-h-[48px] rounded-2xl text-base md:text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover">
                     <option>Male</option>
                     <option>Female</option>
                     <option>Other</option>
@@ -142,15 +142,15 @@ export default function ProfileSetup() {
               <div className="grid grid-cols-3 gap-5">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Height (cm)</label>
-                  <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="175" />
+                  <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-3.5 min-h-[48px] rounded-2xl text-base md:text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="175" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Weight (kg)</label>
-                  <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="70" />
+                  <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full p-3.5 min-h-[48px] rounded-2xl text-base md:text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="70" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Blood Group</label>
-                  <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover">
+                  <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className="w-full p-3.5 min-h-[48px] rounded-2xl text-base md:text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover">
                     <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
                     <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
                   </select>
@@ -165,7 +165,7 @@ export default function ProfileSetup() {
               <h3 className="text-lg font-bold border-b border-outline-variant/30 pb-2">Lifestyle Information</h3>
               <div>
                 <label className="block text-label-md font-medium mb-1">Activity Level</label>
-                <select value={activityLevel} onChange={(e) => setActivityLevel(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                <select value={activityLevel} onChange={(e) => setActivityLevel(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900">
                   <option>Sedentary</option>
                   <option>Lightly Active</option>
                   <option>Moderately Active</option>
@@ -175,16 +175,16 @@ export default function ProfileSetup() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-label-md font-medium mb-1">Water Intake (Liters/day)</label>
-                  <input type="number" step="0.5" value={waterIntake} onChange={(e) => setWaterIntake(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" />
+                  <input type="number" step="0.5" value={waterIntake} onChange={(e) => setWaterIntake(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900" />
                 </div>
                 <div>
                   <label className="block text-label-md font-medium mb-1">Sleep Duration (Hours/night)</label>
-                  <input type="number" value={sleepDuration} onChange={(e) => setSleepDuration(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" />
+                  <input type="number" value={sleepDuration} onChange={(e) => setSleepDuration(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900" />
                 </div>
               </div>
               <div>
                 <label className="block text-label-md font-medium mb-1">Stress Level</label>
-                <select value={stressLevel} onChange={(e) => setStressLevel(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                <select value={stressLevel} onChange={(e) => setStressLevel(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900">
                   <option>Low</option>
                   <option>Moderate</option>
                   <option>High</option>
@@ -218,11 +218,11 @@ export default function ProfileSetup() {
               </div>
               <div>
                 <label className="block text-label-md font-medium mb-1">Allergies (comma separated)</label>
-                <input type="text" value={allergies} onChange={(e) => setAllergies(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="Aspirin, Peanuts, Gluten" />
+                <input type="text" value={allergies} onChange={(e) => setAllergies(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="Aspirin, Peanuts, Gluten" />
               </div>
               <div>
                 <label className="block text-label-md font-medium mb-1">Current Medications (comma separated)</label>
-                <input type="text" value={medications} onChange={(e) => setMedications(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="Metformin 500mg, Cetirizine 10mg" />
+                <input type="text" value={medications} onChange={(e) => setMedications(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="Metformin 500mg, Cetirizine 10mg" />
               </div>
             </div>
           )}
@@ -234,7 +234,7 @@ export default function ProfileSetup() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-label-md font-medium mb-1">Food Preference</label>
-                  <select value={dietPreference} onChange={(e) => setDietPreference(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                  <select value={dietPreference} onChange={(e) => setDietPreference(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900">
                     <option>Vegetarian</option>
                     <option>Non-Vegetarian</option>
                     <option>Vegan</option>
@@ -243,7 +243,7 @@ export default function ProfileSetup() {
                 </div>
                 <div>
                   <label className="block text-label-md font-medium mb-1">Monthly Meal Budget</label>
-                  <select value={budgetPreference} onChange={(e) => setBudgetPreference(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                  <select value={budgetPreference} onChange={(e) => setBudgetPreference(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900">
                     <option>Low Budget</option>
                     <option>Medium Budget</option>
                     <option>Premium</option>
@@ -278,7 +278,7 @@ export default function ProfileSetup() {
               <h3 className="text-lg font-bold border-b border-outline-variant/30 pb-2">Health Goals</h3>
               <div>
                 <label className="block text-label-md font-medium mb-1">Primary Health Goal</label>
-                <select value={healthGoal} onChange={(e) => setHealthGoal(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                <select value={healthGoal} onChange={(e) => setHealthGoal(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900">
                   <option>Weight Loss</option>
                   <option>Weight Gain</option>
                   <option>Muscle Gain</option>
@@ -288,7 +288,7 @@ export default function ProfileSetup() {
               </div>
               <div>
                 <label className="block text-label-md font-medium mb-1">Target Timeline</label>
-                <select value={targetDuration} onChange={(e) => setTargetDuration(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                <select value={targetDuration} onChange={(e) => setTargetDuration(e.target.value)} className="w-full p-3 min-h-[48px] rounded-xl text-base md:text-sm border border-outline-variant bg-slate-50 dark:bg-slate-900">
                   <option>1 Month</option>
                   <option>3 Months</option>
                   <option>6 Months</option>

@@ -110,7 +110,7 @@ export default function HealthcareDirectory() {
             placeholder="Search by location, hospital name, clinic type, or doctor specialization (e.g. Tadepalligudem, Cardiologist)..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-12 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-primary text-xs shadow-sm text-slate-800 dark:text-white transition-all outline-none"
+            className="w-full h-12 pl-12 pr-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-primary text-base md:text-sm shadow-sm text-slate-800 dark:text-white transition-all outline-none"
           />
         </div>
 
