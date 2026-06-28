@@ -571,6 +571,7 @@ const GlobalLayout = ({ children }) => {
       </motion.div>
 
       {/* ── Global Footer (desktop & mobile) ──────────────────────────────────── */}
+      {location.pathname === '/' && (
       <footer className="bg-slate-900 text-slate-300 pt-20 pb-24 lg:pb-12 px-6 lg:px-14 border-t border-slate-800 relative z-50 overflow-hidden">
         {/* Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-gradient-to-b from-[#10B981]/5 to-transparent rounded-full blur-[100px] pointer-events-none" />
@@ -666,6 +667,7 @@ const GlobalLayout = ({ children }) => {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 };
