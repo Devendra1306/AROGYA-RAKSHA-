@@ -45,6 +45,7 @@ export default function MedicineInfo() {
   const [med1, setMed1] = useState('');
   const [med2, setMed2] = useState('');
   const [comparison, setComparison] = useState(null);
+  const [compareError, setCompareError] = useState('');
 
   // AI Chat state
   const [chatQuestion, setChatQuestion] = useState('');
@@ -140,12 +141,13 @@ export default function MedicineInfo() {
     e.preventDefault();
     if (!med1 || !med2) return;
     setLoading(true);
+    setCompareError('');
     setSelectedMed(null);
     try {
       const res = await api.post('/medicine/compare', { med1, med2 });
       setComparison(res.data);
     } catch (err) {
-      alert('Failed to compare medicines.');
+      setCompareError(err.response?.data?.error || 'Failed to compare medicines. The AI service may be timing out. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -529,6 +531,14 @@ export default function MedicineInfo() {
           {/* Comparison Tool Form Card */}
           <div className="glass-card rounded-3xl p-6 bg-white/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm premium-hover">
             <h3 className="text-[15px] font-black mb-5 text-slate-800 dark:text-white">Compare Medications</h3>
+            
+            {compareError && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl flex items-start gap-2">
+                <span className="material-symbols-outlined text-red-500 text-sm mt-0.5">error</span>
+                <p className="text-xs text-red-650 dark:text-red-400 font-medium leading-relaxed">{compareError}</p>
+              </div>
+            )}
+
             <form onSubmit={handleCompareSubmit} className="space-y-4">
               <div>
                 <label className="block text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1.5 pl-1">First Medicine Name</label>
