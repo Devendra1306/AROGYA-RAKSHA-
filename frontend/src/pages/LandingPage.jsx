@@ -9,7 +9,8 @@ import {
   HeartPulse, ShieldPlus, Stethoscope, Brain, Pill, Salad,
   Siren, Home, Activity, Zap, Star,
   ArrowRight, Check, ChevronDown, BarChart3,
-  MessageCircle, Shield, Lock, Clock
+  MessageCircle, Shield, Lock, Clock,
+  ShieldCheck, Server, Globe2, Award
 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -73,14 +74,60 @@ export default function LandingPage() {
   const { user } = useAuth();
 
   // Navbar state - removed (using global App.jsx navbar)
-  // Chat demo state
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState([
-    { role: 'ai', text: 'Hello! I\'m your Arogya Raksha AI. How can I help you today?' },
-    { role: 'user', text: 'I have a headache and feel tired.' },
-    { role: 'ai', text: 'Possible causes include dehydration, stress, or lack of sleep. I recommend drinking 2 glasses of water, resting in a quiet room, and monitoring symptoms. If it persists over 24h, consult a physician.' },
+    { role: 'ai', text: 'Hello! I\'m your Arogya Raksha AI. How can I help you today?' }
   ]);
   const [chatTyping, setChatTyping] = useState(false);
+  
+  // Auto-demo chat sequence
+  useEffect(() => {
+    const scenarios = [
+      { q: 'I have a headache and feel tired.', a: 'Possible causes include dehydration or stress. Try 2 glasses of water and rest in a dark room. Consult a doctor if it persists.' },
+      { q: 'Suggest a healthy diet plan.', a: 'Aim for a balanced diet rich in whole grains, proteins (dal/paneer/chicken), and fresh vegetables. Stay hydrated!' },
+      { q: 'What are first aid steps for a minor burn?', a: 'Cool the burn under running water for 10-20 mins. Do NOT apply ice or butter. Cover with a sterile dressing.' }
+    ];
+    let active = true;
+    let scenarioIdx = 0;
+
+    const runSequence = async () => {
+      while (active) {
+        const { q, a } = scenarios[scenarioIdx];
+        
+        // 1. Type the user question
+        setChatInput('');
+        for (let i = 0; i <= q.length; i++) {
+          if (!active) return;
+          setChatInput(q.slice(0, i));
+          await new Promise(r => setTimeout(r, 40));
+        }
+        
+        // 2. Send the question
+        await new Promise(r => setTimeout(r, 500));
+        if (!active) return;
+        setChatInput('');
+        setChatMessages([{ role: 'ai', text: 'Hello! I\'m your Arogya Raksha AI. How can I help you today?' }, { role: 'user', text: q }]);
+        setChatTyping(true);
+        
+        // 3. AI types
+        await new Promise(r => setTimeout(r, 1500));
+        if (!active) return;
+        setChatTyping(false);
+        setChatMessages([{ role: 'ai', text: 'Hello! I\'m your Arogya Raksha AI. How can I help you today?' }, { role: 'user', text: q }, { role: 'ai', text: a }]);
+        
+        // 4. Wait before next scenario
+        await new Promise(r => setTimeout(r, 4000));
+        if (!active) return;
+        
+        // Reset
+        setChatMessages([{ role: 'ai', text: 'Hello! I\'m your Arogya Raksha AI. How can I help you today?' }]);
+        scenarioIdx = (scenarioIdx + 1) % scenarios.length;
+      }
+    };
+    
+    runSequence();
+    return () => { active = false; };
+  }, []);
   const chatEndRef = useRef(null);
   const chatContainer1Ref = useRef(null); // mini chat in hero card
   const chatContainer2Ref = useRef(null); // full chat in AI section
@@ -95,10 +142,11 @@ export default function LandingPage() {
   // Testimonial carousel
   const [testIdx, setTestIdx] = useState(0);
   const testimonials = [
-    { name: 'Priya Sharma', role: 'Software Engineer, Bangalore', rating: 5, text: 'The AI diet planner completely transformed my eating habits. Lost 8kg in 3 months with personalized Indian meal plans!' },
-    { name: 'Dr. Amit Patel', role: 'General Physician, Mumbai', rating: 5, text: 'I recommend Arogya Raksha to my patients for daily health tracking. The health assessment module is surprisingly accurate.' },
-    { name: 'Riya Verma', role: 'Student, Delhi', rating: 5, text: 'The emergency guidance section helped me handle my dad\'s chest pain correctly before the ambulance arrived. Life-saving app.' },
-    { name: 'Kiran Reddy', role: 'Fitness Trainer, Hyderabad', rating: 5, text: 'Best health companion I\'ve used. The medicine information database is thorough and the AI chat is genuinely helpful.' },
+    { name: 'Priya Sharma', role: 'Software Engineer, Bangalore', rating: 5, text: 'The AI diet planner completely transformed my eating habits. Lost 8kg in 3 months with personalized Indian meal plans!', verified: true },
+    { name: 'Dr. Amit Patel', role: 'General Physician, Mumbai', rating: 5, text: 'I recommend Arogya Raksha to my patients for daily health tracking. The health assessment module is surprisingly accurate.', verified: true },
+    { name: 'Riya Verma', role: 'Student, Delhi', rating: 5, text: 'The emergency guidance section helped me handle my dad\'s chest pain correctly before the ambulance arrived. Life-saving app.', verified: true },
+    { name: 'Kiran Reddy', role: 'Fitness Trainer, Hyderabad', rating: 5, text: 'Best health companion I\'ve used. The medicine information database is thorough and the AI chat is genuinely helpful.', verified: true },
+    { name: 'Vikram Singh', role: 'Startup Founder, Pune', rating: 5, text: 'The instant response time for medicine side effects and dosage is incredible. It feels like having a doctor in your pocket.', verified: true },
   ];
 
 
@@ -189,20 +237,20 @@ export default function LandingPage() {
 
   // ─── Bento cards ────────────────────────────────────────────────────────────
   const bentoCards = [
-    { title: 'Medical Assistant', desc: 'AI-powered symptom checker and health guidance.', icon: Stethoscope, color: 'from-violet-500 to-purple-700', path: '/medical-assistant', size: 'col-span-2 row-span-2', emoji: '🩺' },
-    { title: 'Diet Planner', desc: 'Personalized Indian meal plans and nutrition tracking.', icon: Salad, color: 'from-emerald-400 to-teal-600', path: '/diet-planner', size: 'col-span-1 row-span-1', emoji: '🥗' },
-    { title: 'Health Assessment', desc: 'Comprehensive health score analysis.', icon: Activity, color: 'from-blue-400 to-indigo-600', path: '/health-assessment', size: 'col-span-1 row-span-1', emoji: '📊' },
-    { title: 'Medicine Search', desc: 'Drug info, dosages & interactions.', icon: Pill, color: 'from-sky-400 to-cyan-600', path: '/medicine-info', size: 'col-span-1 row-span-1', emoji: '💊' },
-    { title: 'Home Remedies', desc: 'Traditional kitchen-ingredient cures.', icon: Home, color: 'from-amber-400 to-orange-600', path: '/home-remedies', size: 'col-span-1 row-span-1', emoji: '🏠' },
-    { title: 'Emergency Support', desc: 'First aid, SOS, and nearby hospitals.', icon: Siren, color: 'from-red-500 to-rose-700', path: '/emergency', size: 'col-span-2 row-span-1', emoji: '🚨' },
+    { title: 'Medical Assistant', desc: 'Receive trusted AI-powered healthcare guidance in seconds.', icon: Stethoscope, color: 'from-violet-500 to-purple-700', path: '/medical-assistant', size: 'col-span-2 row-span-2', emoji: '🩺' },
+    { title: 'Diet Planner', desc: 'Achieve your fitness goals with AI-tailored nutrition plans.', icon: Salad, color: 'from-emerald-400 to-teal-600', path: '/diet-planner', size: 'col-span-2 row-span-1', emoji: '🥗' },
+    { title: 'Health Assessment', desc: 'Track and optimize your overall health score continuously.', icon: Activity, color: 'from-blue-400 to-indigo-600', path: '/health-assessment', size: 'col-span-1 row-span-1', emoji: '📊' },
+    { title: 'Medicine Search', desc: 'Understand medicines, dosage, and side effects instantly.', icon: Pill, color: 'from-sky-400 to-cyan-600', path: '/medicine-info', size: 'col-span-1 row-span-1', emoji: '💊' },
+    { title: 'Home Remedies', desc: 'Discover safe, natural cures from traditional wisdom.', icon: Home, color: 'from-amber-400 to-orange-600', path: '/home-remedies', size: 'col-span-1 row-span-1', emoji: '🏠' },
+    { title: 'Emergency Support', desc: 'Get instant first-aid steps when every second counts.', icon: Siren, color: 'from-red-500 to-rose-700', path: '/emergency', size: 'col-span-1 row-span-1', emoji: '🚨' },
   ];
 
   // ─── Stats ──────────────────────────────────────────────────────────────────
   const stats = [
-    { value: '250K', suffix: '+', label: 'Health Queries Assisted', icon: MessageCircle },
-    { value: '100K', suffix: '+', label: 'Diet Plans Generated', icon: Salad },
-    { value: '24/7', suffix: '', label: 'AI Assistance', icon: Clock },
-    { value: '95', suffix: '%', label: 'User Satisfaction', icon: Star },
+    { value: '100000', prefix: '', suffix: '+', label: 'Health Queries', icon: MessageCircle },
+    { value: '50000', prefix: '', suffix: '+', label: 'Assessments', icon: Shield },
+    { value: '20000', prefix: '', suffix: '+', label: 'Diet Plans', icon: Salad },
+    { value: '99', prefix: '', suffix: '.9%', label: 'Platform Uptime', icon: Server },
   ];
 
   // ─── Trust features ─────────────────────────────────────────────────────────
@@ -262,13 +310,18 @@ export default function LandingPage() {
           playsInline
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260518_003132_8b7edcb6-c64d-4a52-a9ca-879942e122ad.mp4"
         />
+        {/* Premium Glow & Gradient Mesh */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-violet-900/10 via-transparent to-emerald-900/10 mix-blend-multiply" />
+        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-violet-400/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-400/20 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
+        
         {/* Glass Overlay */}
         <div 
           className="absolute inset-0 z-0"
           style={{
             background: 'rgba(255, 255, 255, 0.72)',
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)'
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)'
           }}
         />
 
@@ -490,6 +543,37 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          TRUST STRIP (Premium Glass Badges)
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section className="relative z-10 w-full border-y border-white/40 dark:border-slate-800/60 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl overflow-hidden py-6 mt-[-1px]">
+        <div className="max-w-[1300px] mx-auto px-4 sm:px-8 flex flex-wrap justify-center lg:justify-between items-center gap-6 lg:gap-10">
+          {[
+            { icon: ShieldCheck, text: "WHO-Inspired Guidelines" },
+            { icon: Lock, text: "Privacy First" },
+            { icon: Brain, text: "AI Powered" },
+            { icon: Server, text: "Secure Authentication" },
+            { icon: Globe2, text: "OpenFDA Powered" },
+            { icon: Clock, text: "24/7 Availability" },
+          ].map((item, i) => (
+            <motion.div
+              key={item.text}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              className="flex items-center gap-2.5 group cursor-default"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700 shadow-sm group-hover:bg-violet-50 dark:group-hover:bg-violet-900/30 group-hover:border-violet-200 dark:group-hover:border-violet-700 transition-colors">
+                <item.icon className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+              </div>
+              <span className="text-[13px] font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{item.text}</span>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
 
 
       {/* ═══════════════════════════════════════════════════════════════════
@@ -517,32 +601,35 @@ export default function LandingPage() {
                   whileHover={{ scale: 1.02, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate(card.path)}
-                  className="h-full relative overflow-hidden rounded-[1.75rem] cursor-pointer group border border-white/20 dark:border-slate-700/40 shadow-lg hover:shadow-2xl transition-all duration-400"
-                  style={{
-                    background: 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.06)',
-                  }}
+                  className="h-full relative overflow-hidden rounded-[2rem] cursor-pointer group border border-slate-200/50 dark:border-slate-700/40 shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] transition-all duration-500 bg-white/70 dark:bg-slate-900/60 backdrop-blur-2xl"
                 >
-                  {/* Gradient overlay */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-500`} />
-                  <div className="relative z-10 p-6 h-full flex flex-col justify-between">
+                  {/* Subtle Gradient Glow Background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500`} />
+                  
+                  {/* Animated Border Glow */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-[2rem]`} style={{ padding: '1px', WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude' }} />
+
+                  <div className="relative z-10 p-7 h-full flex flex-col justify-between">
                     <div>
-                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-md mb-4`}>
+                      <motion.div 
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${card.color} flex items-center justify-center shadow-md mb-5`}
+                      >
                         <card.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className={`font-black text-slate-800 dark:text-white mb-2 ${isLarge ? 'text-2xl' : 'text-lg'}`}>{card.title}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{card.desc}</p>
+                      </motion.div>
+                      <h3 className={`font-black text-slate-900 dark:text-white mb-2 tracking-tight ${isLarge ? 'text-3xl' : 'text-xl'}`}>{card.title}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium max-w-[280px]">{card.desc}</p>
                     </div>
                     {isLarge && (
-                      <div className="mt-4 flex items-center gap-2 text-sm font-bold text-violet-600 dark:text-violet-400 group-hover:gap-4 transition-all">
+                      <div className="mt-6 flex items-center gap-2 text-sm font-black text-violet-600 dark:text-violet-400 group-hover:gap-4 transition-all">
                         Open Module <ArrowRight className="w-4 h-4" />
                       </div>
                     )}
-                    <div className="absolute bottom-4 right-4 text-4xl opacity-10 group-hover:opacity-20 transition-opacity select-none">
+                    <motion.div 
+                      className="absolute bottom-5 right-5 text-4xl opacity-5 group-hover:opacity-20 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 select-none pointer-events-none"
+                    >
                       {card.emoji}
-                    </div>
+                    </motion.div>
                   </div>
                 </motion.div>
               </FadeUp>
@@ -649,47 +736,75 @@ export default function LandingPage() {
       <section className="py-24 px-4 sm:px-8 max-w-[1300px] mx-auto relative z-10">
         <FadeUp className="text-center mb-14">
           <SectionLabel color="text-amber-500 bg-amber-500/10 border-amber-500/20">Testimonials</SectionLabel>
-          <h2 className="text-3xl sm:text-4xl font-black mt-4 mb-3 text-slate-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl font-black mt-4 mb-3 text-slate-900 dark:text-white tracking-tight">
             Loved by Our Users
           </h2>
         </FadeUp>
-        <div className="relative max-w-3xl mx-auto">
+        <div className="relative max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={testIdx}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-700/50 rounded-[2rem] p-8 lg:p-10 shadow-xl text-center"
+              initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border border-white/40 dark:border-slate-700/50 rounded-[2.5rem] p-10 lg:p-14 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] text-center overflow-hidden relative"
             >
-              <div className="flex justify-center mb-4">
+              {/* Premium Background Glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[100px] bg-amber-400/20 blur-[60px] rounded-full pointer-events-none" />
+              
+              <div className="flex justify-center mb-8 gap-1">
                 {Array(testimonials[testIdx].rating).fill(0).map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
+                  <Star key={i} className="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-sm" />
                 ))}
               </div>
-              <p className="text-base lg:text-lg text-slate-700 dark:text-slate-200 leading-relaxed mb-6 italic">
+              <p className="text-xl lg:text-3xl text-slate-800 dark:text-slate-100 font-medium leading-snug mb-10 tracking-tight">
                 "{testimonials[testIdx].text}"
               </p>
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
                   {testimonials[testIdx].name[0]}
                 </div>
                 <div className="text-left">
-                  <p className="font-black text-sm text-slate-800 dark:text-white">{testimonials[testIdx].name}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">{testimonials[testIdx].role}</p>
+                  <p className="font-black text-base text-slate-900 dark:text-white flex items-center gap-1.5">
+                    {testimonials[testIdx].name}
+                    {testimonials[testIdx].verified && (
+                      <Award className="w-4 h-4 text-emerald-500" />
+                    )}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{testimonials[testIdx].role}</p>
                 </div>
               </div>
             </motion.div>
           </AnimatePresence>
-          <div className="flex justify-center gap-2 mt-6">
+          <div className="flex justify-center gap-3 mt-8">
             {testimonials.map((_, i) => (
-              <motion.button
-                key={i} onClick={() => setTestIdx(i)} whileHover={{ scale: 1.3 }}
-                className={`w-2 h-2 rounded-full transition-all ${i === testIdx ? 'bg-violet-500 w-6' : 'bg-slate-300 dark:bg-slate-700'}`}
+              <button
+                key={i} onClick={() => setTestIdx(i)}
+                className={`h-2 rounded-full transition-all duration-500 ${i === testIdx ? 'bg-violet-600 w-8' : 'bg-slate-200 dark:bg-slate-700 w-2 hover:bg-slate-300 dark:hover:bg-slate-600'}`}
+                aria-label={`Go to slide ${i + 1}`}
               />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          TRUST INDICATORS
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section className="py-16 px-4 sm:px-8 max-w-[1300px] mx-auto relative z-10 border-t border-slate-200/50 dark:border-slate-800/50 mt-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-slate-200/50 dark:divide-slate-800/50">
+          {stats.map((s, i) => (
+            <FadeUp key={s.label} delay={i * 0.1} className="text-center px-4">
+              <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 text-violet-500">
+                <s.icon className="w-5 h-5" />
+              </div>
+              <p className="text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-1">
+                <Counter target={s.value} prefix={s.prefix} suffix={s.suffix} />
+              </p>
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{s.label}</p>
+            </FadeUp>
+          ))}
         </div>
       </section>
 
@@ -698,39 +813,40 @@ export default function LandingPage() {
       ══════════════════════════════════════════════════════════════════════ */}
       <section className="py-24 px-4 sm:px-8 max-w-[1300px] mx-auto relative z-10">
         <FadeUp>
-          <div className="relative overflow-hidden rounded-[2.5rem] text-center px-8 py-20"
+          <div className="relative overflow-hidden rounded-[3rem] text-center px-8 py-24 shadow-2xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(79,70,229,0.08) 50%, rgba(16,185,129,0.08) 100%)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(124,58,237,0.2)',
+              background: 'linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(79,70,229,0.1) 50%, rgba(16,185,129,0.1) 100%)',
+              backdropFilter: 'blur(30px)',
+              border: '1px solid rgba(124,58,237,0.3)',
             }}>
-            {/* Glow */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[200px] bg-violet-400/20 rounded-full blur-[80px]" />
+            {/* Ambient Glow */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[3rem]">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-violet-500/20 rounded-full blur-[100px]" />
             </div>
+            
             <div className="relative z-10">
-              <Badge className="text-violet-500 border-violet-300/40 bg-violet-500/10 mb-6">🚀 Get Started Today</Badge>
-              <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white mb-5 leading-tight">
+              <Badge className="text-violet-600 dark:text-violet-400 border-violet-300/40 bg-white/50 dark:bg-violet-500/10 mb-8 backdrop-blur-md">🚀 Get Started Today</Badge>
+              <h2 className="text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 leading-tight tracking-tight">
                 Take Control Of Your<br />
-                <span className="bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-emerald-500 bg-clip-text text-transparent">
                   Health Today
                 </span>
               </h2>
-              <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-10 leading-relaxed">
-                Everything you need for smarter healthcare in one intelligent platform. Free to start, powerful for life.
+              <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+                Everything you need for smarter healthcare in one intelligent platform. Free to start, powerful for life. Join thousands of users optimizing their wellbeing.
               </p>
-              <div className="flex flex-wrap gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(user ? '/dashboard' : '/signup')}
-                  className="flex items-center gap-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black px-10 py-4 rounded-2xl shadow-2xl shadow-violet-500/30 text-base transition-all"
+                  className="w-full sm:w-auto flex justify-center items-center gap-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black px-12 py-5 rounded-2xl shadow-[0_20px_40px_-10px_rgba(124,58,237,0.5)] text-lg transition-all"
                 >
                   Start Free <ArrowRight className="w-5 h-5" />
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                   onClick={() => navigate('/medical-assistant')}
-                  className="flex items-center gap-2.5 bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 font-bold px-10 py-4 rounded-2xl text-base backdrop-blur-sm transition-all"
+                  className="w-full sm:w-auto flex justify-center items-center gap-2.5 bg-white/80 dark:bg-slate-900/80 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 font-bold px-12 py-5 rounded-2xl text-lg backdrop-blur-md hover:bg-white dark:hover:bg-slate-800 transition-all shadow-lg"
                 >
                   Explore Features
                 </motion.button>

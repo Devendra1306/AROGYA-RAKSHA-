@@ -345,11 +345,9 @@ export default function MedicalAssistant() {
         {/* Chat Scroll Area */}
         <div className="flex-1 overflow-y-auto px-4 py-6 scrollbar-hide flex flex-col gap-6 relative">
           
-          {/* AI Doctor Avatar (Fixed visually at top of chat stream or absolute center if empty, but let's keep it embedded in flow or sticky) */}
-          <div className="sticky top-0 z-10 w-full flex justify-center pb-4 pt-2 -mt-6 bg-gradient-to-b from-slate-50 via-slate-50/80 to-transparent dark:from-slate-950 dark:via-slate-950/80 pointer-events-none">
-            <div className="pointer-events-auto">
-              <AIDoctorAvatar state={avatarState} mode={avatarMode} />
-            </div>
+          {/* AI Doctor Avatar */}
+          <div className="w-full flex justify-center pb-6 pt-2">
+            <AIDoctorAvatar state={avatarState} mode={avatarMode} />
           </div>
 
           <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full pb-32">
