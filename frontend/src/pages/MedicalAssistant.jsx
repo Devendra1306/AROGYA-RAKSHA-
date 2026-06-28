@@ -262,10 +262,10 @@ export default function MedicalAssistant() {
       />
       
       {/* ── Sidebar ────────────────────────────────────────────────────── */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transform transition-transform duration-300 shadow-2xl lg:shadow-none ${sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass-card dark:bg-slate-900/90 border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transform transition-transform duration-300 shadow-2xl lg:shadow-none ${sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-5 border-b border-slate-200/50 dark:border-slate-800/50 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer magnetic-button" onClick={() => navigate('/')}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0052CC] to-blue-700 flex items-center justify-center shadow-lg shadow-[#0052CC]/20">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0052CC] to-blue-700 flex items-center justify-center shadow-[0_4px_12px_rgba(0,82,204,0.3)] dark:shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col">
@@ -363,7 +363,7 @@ export default function MedicalAssistant() {
                     <div className={`p-5 rounded-3xl ${
                       isUser 
                         ? 'bg-gradient-to-br from-[#0052CC] to-blue-700 text-white rounded-br-sm shadow-[0_8px_20px_rgba(0,82,204,0.2)]' 
-                        : 'glass-card dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700/50 rounded-tl-sm shadow-sm'
+                        : 'glass-card dark:bg-slate-800/80 rounded-tl-sm shadow-sm premium-hover'
                     }`}>
                       {isUser ? (
                         <p className="text-[14px] font-medium">{msg.content}</p>
@@ -407,44 +407,57 @@ export default function MedicalAssistant() {
 
         {/* Input Area */}
         <div className="absolute bottom-0 inset-x-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-t border-slate-200/50 dark:border-slate-800/50 p-4 pb-safe">
-          <div className="max-w-3xl mx-auto flex items-end gap-3">
+          <div className="max-w-3xl mx-auto flex flex-col gap-3">
             
-            <button 
-              onClick={toggleListening}
-              className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center shrink-0 transition-all magnetic-button ${
-                avatarState === 'listening' 
-                  ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 animate-pulse' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              {avatarState === 'listening' ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-            </button>
+            {/* Quick Action Chips */}
+            {messages.length <= 1 && (
+              <div className="flex flex-wrap gap-2 mb-1 pl-1">
+                {['My throat hurts', 'Diet for diabetes', 'Check my meds', 'I need a doctor'].map(chip => (
+                  <button key={chip} onClick={() => setInputText(chip)} className="px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:bg-[#0052CC] hover:text-white dark:hover:bg-[#10B981] transition-colors border border-slate-200 dark:border-slate-700 magnetic-button">
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            <form 
-              onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-              className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-[24px] p-2 flex items-end shadow-sm focus-within:border-[#0052CC] dark:focus-within:border-[#10B981] focus-within:ring-4 focus-within:ring-[#0052CC]/10 dark:focus-within:ring-[#10B981]/10 transition-all"
-            >
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                     e.preventDefault();
-                     handleSend();
-                  }
-                }}
-                placeholder={avatarState === 'listening' ? "Listening..." : "Type your symptoms or health query..."}
-                className="flex-1 bg-transparent border-none outline-none resize-none max-h-32 min-h-[44px] py-3 px-4 text-[14px] font-medium text-slate-800 dark:text-white placeholder:text-slate-400"
-                rows={1}
-              />
+            <div className="flex items-end gap-3 w-full">
               <button 
-                type="submit"
-                disabled={!inputText.trim() || avatarState === 'typing'}
-                className="w-10 h-10 rounded-full bg-[#0052CC] dark:bg-[#10B981] hover:scale-105 disabled:opacity-50 text-white flex items-center justify-center shrink-0 mb-0.5 mr-0.5 transition-all shadow-md magnetic-button"
+                onClick={toggleListening}
+                className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center shrink-0 transition-all magnetic-button ${
+                  avatarState === 'listening' 
+                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 animate-pulse' 
+                    : 'glass-card dark:bg-slate-800 text-slate-500 hover:text-[#0052CC] dark:hover:text-[#10B981]'
+                }`}
               >
-                <Send className="w-4 h-4 ml-0.5" />
+                {avatarState === 'listening' ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
               </button>
-            </form>
+
+              <form 
+                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+                className="flex-1 glass-card dark:bg-slate-950/80 rounded-[24px] p-2 flex items-end focus-within:border-[#0052CC]/50 dark:focus-within:border-[#10B981]/50 focus-within:ring-4 focus-within:ring-[#0052CC]/10 dark:focus-within:ring-[#10B981]/10 transition-all shadow-sm"
+              >
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                       e.preventDefault();
+                       handleSend();
+                    }
+                  }}
+                  placeholder={avatarState === 'listening' ? "Listening..." : "Type your symptoms or health query..."}
+                  className="flex-1 bg-transparent border-none outline-none resize-none max-h-32 min-h-[44px] py-3 px-4 text-[14px] font-medium text-slate-800 dark:text-white placeholder:text-slate-400"
+                  rows={1}
+                />
+                <button 
+                  type="submit"
+                  disabled={!inputText.trim() || avatarState === 'typing'}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0052CC] to-blue-700 dark:from-[#10B981] dark:to-emerald-600 hover:scale-105 disabled:opacity-50 text-white flex items-center justify-center shrink-0 mb-0.5 mr-0.5 transition-all shadow-[0_4px_12px_rgba(0,82,204,0.3)] dark:shadow-[0_4px_12px_rgba(16,185,129,0.3)] magnetic-button"
+                >
+                  <Send className="w-4 h-4 ml-0.5" />
+                </button>
+              </form>
+            </div>
 
           </div>
         </div>

@@ -40,6 +40,7 @@ export default function EmergencyHelp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const [contacts, setContacts] = useState([]);
   const [showAddContact, setShowAddContact] = useState(false);
@@ -48,7 +49,18 @@ export default function EmergencyHelp() {
   useEffect(() => {
     fetchCategories();
     fetchContacts();
+    const interval = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   const fetchCategories = async () => {
     try {
@@ -131,13 +143,19 @@ export default function EmergencyHelp() {
           <div>
             <h1 className="font-black text-slate-900 dark:text-white text-[16px] leading-tight">Emergency</h1>
             <p className="text-[10px] font-bold text-red-500 uppercase tracking-[0.2em] flex items-center gap-1.5 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" /> Immediate Response
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" /> Active Response Mode
             </p>
           </div>
         </div>
-        <button onClick={() => navigate('/medical-assistant')} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-[12px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors magnetic-button">
-          Exit SOS
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time Elapsed</span>
+            <span className="text-[14px] font-black text-red-500 tabular-nums">{formatTime(elapsedTime)}</span>
+          </div>
+          <button onClick={() => navigate('/medical-assistant')} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-[12px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors magnetic-button shadow-sm">
+            Exit SOS
+          </button>
+        </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 mt-6 md:mt-10 space-y-8">

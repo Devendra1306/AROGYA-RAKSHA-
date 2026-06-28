@@ -156,29 +156,33 @@ const GlobalLayout = ({ children }) => {
           </button>
 
           {/* ── PILL NAV (desktop) ─────────────────────────────────────────── */}
-          <div className="hidden lg:flex items-center bg-slate-100/80 dark:bg-slate-800/60 rounded-2xl px-1.5 py-1.5 gap-0.5 border border-slate-200/50 dark:border-slate-700/40">
+          <div className="hidden lg:flex items-center bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur-md rounded-2xl px-1.5 py-1.5 gap-1 border border-slate-200/50 dark:border-slate-700/40 shadow-sm relative">
             {NAV_LINKS.map(({ path, label, icon }) => {
               const active = isActive(path);
               return (
                 <Link
                   key={path}
                   to={path}
-                  className={`relative flex items-center gap-1.5 px-3.5 py-[7px] rounded-xl text-[12.5px] font-semibold transition-all duration-200 select-none ${
+                  className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors duration-300 select-none z-10 ${
                     active
-                      ? 'bg-white dark:bg-slate-700 text-[#0052CC] dark:text-[#10B981] shadow-md shadow-slate-200/60 dark:shadow-slate-900/60'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-700/50'
+                      ? 'text-[#0052CC] dark:text-[#10B981]'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
+                  {active && (
+                    <motion.div
+                      layoutId="activeNavTab"
+                      className="absolute inset-0 bg-white dark:bg-slate-700 rounded-xl shadow-md shadow-slate-200/60 dark:shadow-slate-900/60 z-[-1]"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
                   <span
-                    className={`material-symbols-outlined text-[14px] ${active ? 'text-[#0052CC] dark:text-[#10B981]' : 'text-slate-400 dark:text-slate-500'}`}
+                    className={`material-symbols-outlined text-[15px] transition-colors duration-300 ${active ? 'text-[#0052CC] dark:text-[#10B981]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600'}`}
                     style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}
                   >
                     {icon}
                   </span>
-                  {label}
-                  {active && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#0052CC] dark:bg-[#10B981]" />
-                  )}
+                  <span className="relative z-10">{label}</span>
                 </Link>
               );
             })}
@@ -393,7 +397,7 @@ const GlobalLayout = ({ children }) => {
               )}
 
               {/* Nav links */}
-              <div className="flex-1 p-3 pt-3 space-y-0.5 overflow-y-auto">
+              <div className="flex-1 p-3 pt-3 space-y-1 overflow-y-auto">
                 <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 px-3 py-2">Navigation</p>
                 {DRAWER_LINKS.map(({ path, label, icon }) => {
                   const active = isActive(path);
@@ -401,15 +405,35 @@ const GlobalLayout = ({ children }) => {
                     <button
                       key={path}
                       onClick={() => { setMobileMenuOpen(false); navigate(path); }}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-150 text-left ${
+                      className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-bold transition-all duration-300 text-left overflow-hidden group ${
                         active
-                          ? 'bg-[#0052CC]/10 dark:bg-[#10B981]/15 text-[#0052CC] dark:text-[#10B981]'
-                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          ? 'text-[#0052CC] dark:text-[#10B981]'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
-                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}>{icon}</span>
-                      {label}
-                      {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#0052CC] dark:bg-[#10B981]" />}
+                      {/* Active Background Glow */}
+                      {active && (
+                        <motion.div
+                          layoutId="drawerActiveBg"
+                          className="absolute inset-0 bg-[#0052CC]/10 dark:bg-[#10B981]/15 rounded-xl border border-[#0052CC]/20 dark:border-[#10B981]/20"
+                          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      
+                      {/* Hover Indicator */}
+                      {!active && (
+                        <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800/80 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      )}
+
+                      <span className={`material-symbols-outlined text-[20px] relative z-10 transition-colors duration-300 ${active ? 'text-[#0052CC] dark:text-[#10B981]' : 'text-slate-400 group-hover:text-[#0052CC] dark:group-hover:text-[#10B981]'}`} style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}>{icon}</span>
+                      <span className="relative z-10">{label}</span>
+                      {active && (
+                        <motion.span 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="ml-auto w-1.5 h-1.5 rounded-full bg-[#0052CC] dark:bg-[#10B981] relative z-10 shadow-[0_0_8px_rgba(16,185,129,0.8)]" 
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -547,49 +571,98 @@ const GlobalLayout = ({ children }) => {
         </div>
       </motion.div>
 
-      {/* ── Global Footer (desktop only) ──────────────────────────────────── */}
-      <footer className="hidden lg:block bg-slate-900 text-slate-300 py-12 px-14 border-t border-slate-800 relative z-50">
-        <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 flex flex-col gap-3">
+      {/* ── Global Footer (desktop & mobile) ──────────────────────────────────── */}
+      <footer className="bg-slate-900 text-slate-300 pt-20 pb-24 lg:pb-12 px-6 lg:px-14 border-t border-slate-800 relative z-50 overflow-hidden">
+        {/* Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-gradient-to-b from-[#10B981]/5 to-transparent rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="max-w-[1280px] mx-auto relative z-10 grid grid-cols-2 md:grid-cols-6 gap-x-8 gap-y-12">
+          
+          {/* Brand & Newsletter */}
+          <div className="col-span-2 flex flex-col gap-5">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-[#0052CC]/30">
+              <div className="w-10 h-10 rounded-2xl overflow-hidden ring-2 ring-[#0052CC]/40">
                 <img src="/logo.jpg" alt="Arogya Raksha" className="w-full h-full object-cover" />
               </div>
               <div>
-                <p className="font-black text-white text-[14px]">Arogya Raksha</p>
+                <p className="font-black text-white text-[16px]">Arogya Raksha</p>
                 <p className="text-[10px] text-slate-500 tracking-widest uppercase">Health · Safety · Care</p>
               </div>
             </div>
-            <p className="text-[11px] text-slate-500 mt-2">
-              © {new Date().getFullYear()} Arogya Raksha · For informational purposes only.<br />
-              Not a substitute for professional medical advice.
+            <p className="text-[12px] text-slate-400 leading-relaxed max-w-sm">
+              The intelligent healthcare platform designed to empower your well-being. AI-driven insights, emergency support, and comprehensive medical knowledge.
             </p>
+            <div className="mt-2">
+              <p className="text-[11px] font-bold text-white uppercase tracking-wider mb-3">Subscribe to Newsletter</p>
+              <div className="flex bg-slate-800/80 rounded-xl p-1 border border-slate-700/50 max-w-sm focus-within:border-[#10B981]/50 focus-within:ring-2 focus-within:ring-[#10B981]/20 transition-all">
+                <input type="email" placeholder="Enter your email" className="bg-transparent border-none focus:outline-none text-[12px] px-3 w-full text-white placeholder:text-slate-500" />
+                <button className="bg-gradient-to-r from-[#10B981] to-[#059669] text-white font-bold text-[11px] px-4 py-2 rounded-lg hover:shadow-lg hover:shadow-[#10B981]/20 transition-all">
+                  Subscribe
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="col-span-1 flex flex-col gap-2">
-            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Legal & Info</h4>
-            <a href="https://denami.vercel.app/" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">About Us</a>
-            <a href="/policy" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">Privacy Policy</a>
-            <a href="/license" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors">License</a>
+          {/* Links 1: Platform */}
+          <div className="col-span-1 flex flex-col gap-3">
+            <h4 className="text-[11px] font-black text-white uppercase tracking-widest mb-3 text-[#0052CC] dark:text-[#10B981]">Platform</h4>
+            <Link to="/medical-assistant" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">AI Assistant</Link>
+            <Link to="/dashboard" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Dashboard</Link>
+            <Link to="/health-assessment" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Health Assessment</Link>
+            <Link to="/diet-planner" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Diet Planner</Link>
+            <Link to="/emergency" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Emergency Center</Link>
+            <Link to="/nearby" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Nearby Hospitals</Link>
           </div>
 
-          <div className="col-span-1 flex flex-col gap-2">
-            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Data Partners</h4>
-            <a href="https://open.fda.gov/" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">verified</span> OpenFDA Approved
-            </a>
+          {/* Links 2: Resources */}
+          <div className="col-span-1 flex flex-col gap-3">
+            <h4 className="text-[11px] font-black text-white uppercase tracking-widest mb-3 text-[#0052CC] dark:text-[#10B981]">Resources</h4>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Blog</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Documentation</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Developers & API</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">System Status</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">OpenFDA Data</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Medical Schema</a>
           </div>
 
-          <div className="col-span-1 flex flex-col gap-2">
-            <h4 className="text-[12px] font-bold text-white uppercase tracking-wider mb-2">Developer</h4>
-            <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
-              <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" className="w-4 h-4 invert opacity-70" /> GitHub
+          {/* Links 3: Company */}
+          <div className="col-span-1 flex flex-col gap-3">
+            <h4 className="text-[11px] font-black text-white uppercase tracking-widest mb-3 text-[#0052CC] dark:text-[#10B981]">Company</h4>
+            <a href="https://denami.vercel.app/" target="_blank" rel="noreferrer" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">About Us</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Careers</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Press</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Contact</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Support</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">FAQ</a>
+          </div>
+
+          {/* Links 4: Legal */}
+          <div className="col-span-1 flex flex-col gap-3">
+            <h4 className="text-[11px] font-black text-white uppercase tracking-widest mb-3 text-[#0052CC] dark:text-[#10B981]">Legal</h4>
+            <Link to="/policy" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Privacy Policy</Link>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Terms of Service</a>
+            <Link to="/license" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">License</Link>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Cookies</a>
+            <a href="#" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Accessibility</a>
+          </div>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="max-w-[1280px] mx-auto relative z-10 mt-16 pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-[12px] text-slate-500 font-medium text-center md:text-left">
+            © {new Date().getFullYear()} Arogya Raksha. All rights reserved.<br className="md:hidden" />
+            <span className="hidden md:inline"> · </span>Not a substitute for professional medical advice.
+          </p>
+          
+          <div className="flex items-center gap-4">
+            <a href="https://github.com/Devendra1306" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#10B981] hover:text-white transition-all hover:scale-110">
+              <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" className="w-5 h-5 invert" />
             </a>
-            <a href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" target="_blank" rel="noreferrer" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
-              <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" className="w-4 h-4 opacity-70" /> LinkedIn
+            <a href="https://www.linkedin.com/in/ibba-devendra-sagar-22917b353/" target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#0052CC] hover:text-white transition-all hover:scale-110">
+              <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" className="w-4 h-4" />
             </a>
-            <a href="mailto:devendrasagar0988@gmail.com" className="text-[12px] text-slate-400 hover:text-[#10B981] transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px]">mail</span> Email
+            <a href="mailto:devendrasagar0988@gmail.com" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-rose-500 hover:text-white transition-all hover:scale-110">
+              <span className="material-symbols-outlined text-[18px]">mail</span>
             </a>
           </div>
         </div>
