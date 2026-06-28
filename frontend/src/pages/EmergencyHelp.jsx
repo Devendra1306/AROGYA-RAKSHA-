@@ -123,20 +123,20 @@ export default function EmergencyHelp() {
       <SEO title="Emergency Help | Arogya Raksha" />
       
       {/* ── Top Header ── */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/30">
-            <AlertTriangle className="w-6 h-6 text-white" />
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-slate-200/50 dark:border-slate-800/50 px-6 h-[72px] flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-500/30">
+            <AlertTriangle className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-black text-slate-900 dark:text-white text-lg leading-tight">Emergency</h1>
-            <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> Immediate Response
+            <h1 className="font-black text-slate-900 dark:text-white text-[16px] leading-tight">Emergency</h1>
+            <p className="text-[10px] font-bold text-red-500 uppercase tracking-[0.2em] flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse" /> Immediate Response
             </p>
           </div>
         </div>
-        <button onClick={() => navigate('/medical-assistant')} className="text-sm font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
-          Exit
+        <button onClick={() => navigate('/medical-assistant')} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-[12px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors magnetic-button">
+          Exit SOS
         </button>
       </header>
 
@@ -170,20 +170,20 @@ export default function EmergencyHelp() {
         {/* ── AI Symptom Search ── */}
         <section>
           <form onSubmit={handleSearch} className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
               <Search className="w-5 h-5 text-slate-400 group-focus-within:text-red-500 transition-colors" />
             </div>
             <input
               type="text"
               placeholder="Search symptoms (e.g. severe chest pain, deep cut...)"
-              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 pl-12 pr-32 text-slate-900 dark:text-white font-medium shadow-sm outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all"
+              className="w-full glass-card dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/50 rounded-2xl py-4 pl-14 pr-32 text-[14px] text-slate-900 dark:text-white font-medium shadow-sm outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all premium-hover"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button 
               type="submit"
               disabled={loading || !searchQuery.trim()}
-              className="absolute inset-y-1.5 right-1.5 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-bold px-6 rounded-xl transition-colors flex items-center gap-2"
+              className="absolute inset-y-1.5 right-1.5 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-bold px-6 rounded-xl transition-colors flex items-center gap-2 magnetic-button shadow-md"
             >
               {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Analyze'}
             </button>
@@ -195,7 +195,7 @@ export default function EmergencyHelp() {
           {(aiResult || selectedGuide) && (
             <motion.section
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-red-200/50 dark:border-red-900/30 rounded-3xl p-6 md:p-8 shadow-xl shadow-red-500/5"
+              className="glass-card dark:bg-slate-900/80 rounded-3xl p-6 md:p-8 premium-hover border-red-200/50 dark:border-red-900/30 shadow-xl shadow-red-500/5"
             >
               <div className="flex justify-between items-start mb-6">
                 <div>
@@ -296,19 +296,19 @@ export default function EmergencyHelp() {
         {/* ── Category Grid ── */}
         {!aiResult && !selectedGuide && (
           <section>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">Emergency Guides</h3>
+            <h3 className="text-[13px] font-black text-slate-400 uppercase tracking-[0.15em] mb-4">Emergency Guides</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredCategories.map(cat => (
                 <button
                   key={cat._id}
                   onClick={() => handleSelectGuide(cat._id)}
-                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl flex flex-col items-center justify-center text-center gap-3 hover:shadow-lg hover:border-red-300 dark:hover:border-red-500/50 transition-all hover:-translate-y-1 group"
+                  className="glass-card dark:bg-slate-900/80 p-5 rounded-3xl flex flex-col items-center justify-center text-center gap-3 transition-all hover:border-red-300 dark:hover:border-red-500/50 hover:-translate-y-1 group premium-hover"
                 >
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border ${getCategoryColor(cat.title)} group-hover:scale-110 transition-transform`}>
                     {getCategoryIcon(cat.title)}
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm">{cat.title}</h4>
+                    <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[14px]">{cat.title}</h4>
                     <div className="mt-2">{getSeverityBadge(cat.severity)}</div>
                   </div>
                 </button>
@@ -318,12 +318,12 @@ export default function EmergencyHelp() {
         )}
 
         {/* ── Emergency Contacts ── */}
-        <section className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 md:p-8 shadow-sm">
+        <section className="glass-card dark:bg-slate-900/80 rounded-3xl p-6 md:p-8 premium-hover">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">My Emergency Contacts</h3>
+            <h3 className="text-[13px] font-black text-slate-400 uppercase tracking-[0.15em]">My Emergency Contacts</h3>
             <button 
               onClick={() => setShowAddContact(!showAddContact)}
-              className="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 rounded-full flex items-center justify-center hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+              className="w-10 h-10 bg-[#0052CC]/10 dark:bg-[#0052CC]/20 text-[#0052CC] dark:text-blue-400 rounded-full flex items-center justify-center hover:bg-[#0052CC]/20 transition-colors magnetic-button"
             >
               {showAddContact ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
             </button>
@@ -336,10 +336,10 @@ export default function EmergencyHelp() {
                 onSubmit={handleAddContact}
                 className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 overflow-hidden"
               >
-                <input type="text" placeholder="Name" required value={newContact.name} onChange={e => setNewContact({...newContact, name: e.target.value})} className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500 text-sm font-medium" />
-                <input type="tel" placeholder="Phone Number" required value={newContact.phone} onChange={e => setNewContact({...newContact, phone: e.target.value})} className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500 text-sm font-medium" />
-                <input type="text" placeholder="Relation (e.g. Brother)" value={newContact.relationship} onChange={e => setNewContact({...newContact, relationship: e.target.value})} className="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500 text-sm font-medium" />
-                <button type="submit" className="sm:col-span-3 bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
+                <input type="text" placeholder="Name" required value={newContact.name} onChange={e => setNewContact({...newContact, name: e.target.value})} className="bg-slate-50 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0052CC]/30 focus:border-[#0052CC] text-[14px] font-medium" />
+                <input type="tel" placeholder="Phone Number" required value={newContact.phone} onChange={e => setNewContact({...newContact, phone: e.target.value})} className="bg-slate-50 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0052CC]/30 focus:border-[#0052CC] text-[14px] font-medium" />
+                <input type="text" placeholder="Relation (e.g. Brother)" value={newContact.relationship} onChange={e => setNewContact({...newContact, relationship: e.target.value})} className="bg-slate-50 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#0052CC]/30 focus:border-[#0052CC] text-[14px] font-medium" />
+                <button type="submit" className="sm:col-span-3 bg-[#0052CC] hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md magnetic-button">
                   Save Contact
                 </button>
               </motion.form>
@@ -351,25 +351,25 @@ export default function EmergencyHelp() {
               <a 
                 key={idx}
                 href={`tel:${contact.phone}`}
-                className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 hover:border-violet-300 transition-colors group"
+                className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 hover:border-[#0052CC]/30 transition-colors group premium-hover"
               >
-                <div className="w-12 h-12 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-black flex items-center justify-center text-sm border border-violet-200 dark:border-violet-800/50 shrink-0">
+                <div className="w-12 h-12 rounded-full bg-[#0052CC]/10 text-[#0052CC] font-black flex items-center justify-center text-sm border border-[#0052CC]/20 shrink-0">
                   {contact.name.substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  <h4 className="font-bold text-slate-900 dark:text-white truncate">{contact.name}</h4>
-                  <p className="text-xs text-slate-500 truncate">{contact.relationship} • {contact.phone}</p>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-[14px] truncate">{contact.name}</h4>
+                  <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">{contact.relationship} • {contact.phone}</p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center shadow-sm text-green-500 group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center shadow-sm text-[#10B981] group-hover:scale-110 transition-transform">
                   <Phone className="w-4 h-4" />
                 </div>
               </a>
             ))}
             {contacts.length === 0 && !showAddContact && (
-              <div className="col-span-full py-8 text-center text-slate-500 dark:text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center">
+              <div className="col-span-full py-8 text-center text-slate-500 dark:text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800/50 rounded-3xl flex flex-col items-center">
                 <UserPlus className="w-8 h-8 mb-3 opacity-50" />
-                <p className="font-medium">No emergency contacts added.</p>
-                <button onClick={() => setShowAddContact(true)} className="mt-2 text-sm font-bold text-violet-500 hover:underline">Add one now</button>
+                <p className="font-medium text-[14px]">No emergency contacts added.</p>
+                <button onClick={() => setShowAddContact(true)} className="mt-2 text-[12px] font-bold text-[#0052CC] hover:underline">Add one now</button>
               </div>
             )}
           </div>

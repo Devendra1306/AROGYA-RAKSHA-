@@ -15,9 +15,9 @@ const renderMarkdown = (text) => {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
   
-  escaped = escaped.replace(/^### (.*?)$/gm, '<h4 class="text-base font-bold text-violet-600 dark:text-violet-400 mt-4 mb-2">$1</h4>');
-  escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
-  escaped = escaped.replace(/^\s*[\-\*]\s+(.*?)$/gm, '<div class="flex items-start gap-2 my-1.5"><span class="text-violet-500 mt-1">•</span><span class="flex-1">$1</span></div>');
+  escaped = escaped.replace(/^### (.*?)$/gm, '<h4 class="text-base font-black text-[#0052CC] dark:text-[#10B981] mt-5 mb-2">$1</h4>');
+  escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-900 dark:text-white">$1</strong>');
+  escaped = escaped.replace(/^\s*[\-\*]\s+(.*?)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-[#0052CC] dark:text-[#10B981] mt-1">•</span><span class="flex-1 text-[13px]">$1</span></div>');
   
   escaped = escaped.split('\n').map(line => {
     if (line.includes('flex items-start') || line.includes('h4') || line.trim() === '') {
@@ -26,7 +26,7 @@ const renderMarkdown = (text) => {
     return line + '<br />';
   }).join('\n');
   
-  return <div dangerouslySetInnerHTML={{ __html: escaped }} className="space-y-2 text-sm leading-relaxed" />;
+  return <div dangerouslySetInnerHTML={{ __html: escaped }} className="space-y-2 text-[14px] leading-relaxed" />;
 };
 
 export default function MedicalAssistant() {
@@ -262,17 +262,20 @@ export default function MedicalAssistant() {
       />
       
       {/* ── Sidebar ────────────────────────────────────────────────────── */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transform transition-transform duration-300 shadow-2xl lg:shadow-none ${sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 flex flex-col transform transition-transform duration-300 shadow-2xl lg:shadow-none ${sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-5 border-b border-slate-200/50 dark:border-slate-800/50 flex justify-between items-center">
+          <div className="flex items-center gap-3 cursor-pointer magnetic-button" onClick={() => navigate('/')}>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0052CC] to-blue-700 flex items-center justify-center shadow-lg shadow-[#0052CC]/20">
               <Activity className="w-5 h-5 text-white" />
             </div>
-            <span className="font-black text-slate-800 dark:text-white">Arogya AI</span>
+            <div className="flex flex-col">
+              <span className="font-black text-slate-800 dark:text-white leading-none">Arogya AI</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#0052CC] dark:text-[#10B981] mt-1">Medical Assistant</span>
+            </div>
           </div>
           {isMobile && (
-            <button onClick={() => setSidebarOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
-              <X className="w-5 h-5" />
+            <button onClick={() => setSidebarOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-lg dark:bg-slate-800">
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -280,25 +283,26 @@ export default function MedicalAssistant() {
         <div className="p-4">
           <button 
             onClick={startNewChat}
-            className="w-full flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95"
+            className="w-full flex items-center justify-center gap-2 bg-[#0052CC] text-white font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 magnetic-button"
           >
             <Plus className="w-4 h-4" /> New Session
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-2 space-y-1 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 scrollbar-thin">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3 px-2">Recent History</p>
           {conversations.map((convo) => (
             <button 
               key={convo._id}
               onClick={() => loadConversation(convo._id)}
               className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
                 currentConvoId === convo._id 
-                  ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 font-bold' 
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  ? 'bg-[#0052CC]/10 dark:bg-[#10B981]/15 text-[#0052CC] dark:text-[#10B981] font-bold border border-[#0052CC]/20 dark:border-[#10B981]/20' 
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent'
               }`}
             >
-              <MessageSquare className="w-4 h-4 shrink-0" />
-              <span className="text-sm truncate">{convo.conversationTitle}</span>
+              <MessageSquare className="w-[18px] h-[18px] shrink-0" />
+              <span className="text-[13px] truncate">{convo.conversationTitle}</span>
             </button>
           ))}
         </div>
@@ -312,32 +316,31 @@ export default function MedicalAssistant() {
       <main className="flex-1 flex flex-col relative h-full">
         
         {/* Header */}
-        <header className="h-16 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-4 z-10">
-          <div className="flex items-center gap-3">
+        <header className="h-16 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 z-10">
+          <div className="flex items-center gap-4">
             {isMobile && (
-              <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-slate-500">
+              <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-lg">
                 <Menu className="w-5 h-5" />
               </button>
             )}
             <div>
-              <h2 className="font-black text-slate-800 dark:text-white text-sm">Medical Assistant</h2>
-              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
+              <h2 className="font-black text-slate-800 dark:text-white text-[15px]">Medical Assistant</h2>
+              <p className="text-[10px] font-bold text-[#10B981] uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" /> Online
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 mr-2">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hidden sm:inline">Auto-Speak</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 mr-2 cursor-pointer group" onClick={() => setAutoSpeak(!autoSpeak)}>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] hidden sm:inline group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">Auto-Speak</span>
               <button 
-                onClick={() => setAutoSpeak(!autoSpeak)}
-                className={`w-10 h-5 rounded-full relative transition-colors ${autoSpeak ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                className={`w-10 h-5 rounded-full relative transition-colors shadow-inner ${autoSpeak ? 'bg-[#0052CC] dark:bg-[#10B981]' : 'bg-slate-300 dark:bg-slate-700'}`}
               >
-                <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform ${autoSpeak ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-transform shadow-sm ${autoSpeak ? 'translate-x-5' : 'translate-x-0.5'}`} />
               </button>
             </div>
-            <button onClick={() => navigate('/emergency')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
-              <AlertCircle className="w-3.5 h-3.5" /> Emergency
+            <button onClick={() => navigate('/emergency')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[11px] font-black uppercase tracking-wider border border-rose-200 dark:border-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors magnetic-button">
+              <AlertCircle className="w-4 h-4" /> SOS
             </button>
           </div>
         </header>
@@ -357,13 +360,13 @@ export default function MedicalAssistant() {
                 <div key={idx} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex flex-col max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
                     
-                    <div className={`p-4 rounded-3xl ${
+                    <div className={`p-5 rounded-3xl ${
                       isUser 
-                        ? 'bg-violet-600 text-white rounded-tr-sm shadow-md' 
-                        : 'bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-tl-sm shadow-sm'
+                        ? 'bg-gradient-to-br from-[#0052CC] to-blue-700 text-white rounded-br-sm shadow-[0_8px_20px_rgba(0,82,204,0.2)]' 
+                        : 'glass-card dark:bg-slate-900 border border-slate-200/50 dark:border-slate-700/50 rounded-tl-sm shadow-sm'
                     }`}>
                       {isUser ? (
-                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-[14px] font-medium">{msg.content}</p>
                       ) : (
                         <div className="text-slate-700 dark:text-slate-300">
                           {renderMarkdown(msg.content)}
@@ -372,23 +375,23 @@ export default function MedicalAssistant() {
                     </div>
 
                     {/* Actions / Metadata */}
-                    <div className="flex items-center gap-2 mt-1.5 px-2">
-                      <span className="text-[10px] font-medium text-slate-400">
+                    <div className="flex items-center gap-3 mt-2 px-2">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {!isUser && ttsSupported && (
                         <button 
                           onClick={() => avatarState === 'speaking' ? stopSpeaking() : speakResponse(msg.content)}
-                          className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                          className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md transition-colors ${
                             avatarState === 'speaking'
-                              ? 'text-red-500 hover:text-red-600 bg-red-50 dark:bg-red-500/10'
-                              : 'text-violet-500 hover:text-violet-600 bg-violet-50 dark:bg-violet-500/10'
+                              ? 'text-rose-500 hover:text-rose-600 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20'
+                              : 'text-[#0052CC] hover:text-blue-700 bg-[#0052CC]/5 dark:bg-[#10B981]/10 dark:text-[#10B981] border border-[#0052CC]/10 dark:border-[#10B981]/20'
                           }`}
                         >
                           {avatarState === 'speaking' ? (
-                            <><VolumeX className="w-3 h-3" /> Stop Reading</>
+                            <><VolumeX className="w-3.5 h-3.5" /> Stop Reading</>
                           ) : (
-                            <><Volume2 className="w-3 h-3" /> Read Aloud</>
+                            <><Volume2 className="w-3.5 h-3.5" /> Read Aloud</>
                           )}
                         </button>
                       )}
@@ -403,15 +406,15 @@ export default function MedicalAssistant() {
         </div>
 
         {/* Input Area */}
-        <div className="absolute bottom-0 inset-x-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-800/50 p-4">
-          <div className="max-w-3xl mx-auto flex items-end gap-2">
+        <div className="absolute bottom-0 inset-x-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-t border-slate-200/50 dark:border-slate-800/50 p-4 pb-safe">
+          <div className="max-w-3xl mx-auto flex items-end gap-3">
             
             <button 
               onClick={toggleListening}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
+              className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center shrink-0 transition-all magnetic-button ${
                 avatarState === 'listening' 
-                  ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 animate-pulse' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               {avatarState === 'listening' ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
@@ -419,25 +422,25 @@ export default function MedicalAssistant() {
 
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-              className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 flex items-end shadow-sm focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/20 transition-all"
+              className="flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700/50 rounded-[24px] p-2 flex items-end shadow-sm focus-within:border-[#0052CC] dark:focus-within:border-[#10B981] focus-within:ring-4 focus-within:ring-[#0052CC]/10 dark:focus-within:ring-[#10B981]/10 transition-all"
             >
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
+                     e.preventDefault();
+                     handleSend();
                   }
                 }}
                 placeholder={avatarState === 'listening' ? "Listening..." : "Type your symptoms or health query..."}
-                className="flex-1 bg-transparent border-none outline-none resize-none max-h-32 min-h-[44px] py-3 px-3 text-sm text-slate-800 dark:text-white placeholder:text-slate-400"
+                className="flex-1 bg-transparent border-none outline-none resize-none max-h-32 min-h-[44px] py-3 px-4 text-[14px] font-medium text-slate-800 dark:text-white placeholder:text-slate-400"
                 rows={1}
               />
               <button 
                 type="submit"
                 disabled={!inputText.trim() || avatarState === 'typing'}
-                className="w-10 h-10 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white flex items-center justify-center shrink-0 mb-0.5 mr-0.5 transition-all"
+                className="w-10 h-10 rounded-full bg-[#0052CC] dark:bg-[#10B981] hover:scale-105 disabled:opacity-50 text-white flex items-center justify-center shrink-0 mb-0.5 mr-0.5 transition-all shadow-md magnetic-button"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>
