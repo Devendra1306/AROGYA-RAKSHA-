@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../context/AuthContext';
 import SEO from '../components/SEO';
+import Skeleton from '../components/Skeleton';
 
 export default function HealthcareDirectory() {
   const [facilities, setFacilities] = useState([]);
@@ -140,9 +141,26 @@ export default function HealthcareDirectory() {
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary"></div>
-            <span className="text-xs font-bold text-outline">Querying Google Places Index...</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-300">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="glass-card bg-white dark:bg-slate-800/90 rounded-3xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-sm flex flex-col justify-between h-full">
+                <div>
+                  <Skeleton className="w-full h-44 rounded-2xl mb-4" />
+                  <div className="flex justify-between items-center mb-3">
+                    <Skeleton className="w-24 h-5 rounded-full" />
+                    <Skeleton className="w-16 h-4" />
+                  </div>
+                  <Skeleton className="w-3/4 h-6 mb-2" />
+                  <Skeleton className="w-1/4 h-4 mb-4" />
+                  <Skeleton className="w-full h-8 mb-4" />
+                  <div className="flex gap-2">
+                    <Skeleton className="w-16 h-5 rounded-full" />
+                    <Skeleton className="w-20 h-5 rounded-full" />
+                  </div>
+                </div>
+                <Skeleton className="w-full h-12 rounded-xl mt-6" />
+              </div>
+            ))}
           </div>
         ) : facilities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

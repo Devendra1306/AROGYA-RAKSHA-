@@ -227,38 +227,38 @@ export default function MedicineInfo() {
         <div className="lg:col-span-8 space-y-5">
           
           {/* Autocomplete Search Bar Container */}
-          <div className="relative">
+          <div className="relative group">
             <input 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-4 pl-11 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-md outline-none text-xs focus:border-primary transition-all"
+              className="w-full p-5 pl-14 rounded-2xl glass-card dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm outline-none text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 transition-all premium-hover"
               placeholder="Search medicines (e.g. Paracetamol, Cetirizine)..."
             />
-            <span className="absolute left-4 top-4 text-base text-slate-400 select-none material-symbols-outlined">search</span>
+            <span className="absolute left-5 top-5 text-[22px] text-slate-400 select-none material-symbols-outlined group-focus-within:text-[#0052CC] dark:group-focus-within:text-[#10B981] transition-colors">search</span>
             
             {/* Search autocomplete suggestion list */}
             {(suggestions.length > 0 || searchQuery.length > 1) && (
-              <div className="absolute top-14 left-0 w-full bg-white dark:bg-slate-800 border border-slate-150 dark:border-slate-700 rounded-2xl shadow-2xl z-30 overflow-hidden">
+              <div className="absolute top-[72px] left-0 w-full glass-card dark:bg-slate-900/95 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl shadow-2xl z-30 overflow-hidden backdrop-blur-xl animate-in fade-in slide-in-from-top-4 duration-200">
                 {suggestions.map((s) => (
                   <button 
                     key={s._id}
                     onClick={() => handleSelectMed(s._id, s.medicineName)}
-                    className="w-full text-left p-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/60 cursor-pointer border-b border-slate-100 dark:border-slate-800 text-xs flex justify-between items-center"
+                    className="w-full text-left p-4 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer border-b border-slate-100 dark:border-slate-800/50 text-sm flex justify-between items-center transition-colors"
                   >
                     <div>
-                      <span className="font-bold text-primary dark:text-secondary">{s.medicineName}</span>
-                      <span className="text-[10px] text-slate-400 ml-1.5 font-medium">({s.genericName})</span>
+                      <span className="font-bold text-slate-800 dark:text-white">{s.medicineName}</span>
+                      <span className="text-[11px] text-slate-500 ml-2 font-medium">({s.genericName})</span>
                     </div>
-                    <span className="text-[9px] bg-slate-100 dark:bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full font-bold">{s.category}</span>
+                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">{s.category}</span>
                   </button>
                 ))}
                 <button 
                   onClick={() => handleRagLookup(searchQuery)}
-                  className="w-full text-left p-4 hover:bg-blue-50 dark:hover:bg-slate-700/60 cursor-pointer text-primary dark:text-secondary font-bold text-xs flex items-center justify-between border-t border-slate-100 dark:border-slate-800 bg-blue-50/10"
+                  className="w-full text-left p-4 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/5 cursor-pointer text-[#0052CC] dark:text-[#10B981] font-bold text-sm flex items-center justify-between border-t border-slate-200/50 dark:border-slate-800/50 bg-[#0052CC]/[0.02] dark:bg-[#10B981]/[0.02] transition-colors"
                 >
-                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs">science</span> Run AI/RAG clinical lookup for "{searchQuery}"</span>
-                  <span className="text-[8px] bg-primary/10 text-primary dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded font-extrabold">Gemini RAG</span>
+                  <span className="flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">science</span> Ask AI about "{searchQuery}"</span>
+                  <span className="text-[9px] bg-[#0052CC] text-white dark:bg-[#10B981] px-2.5 py-1 rounded shadow-sm font-extrabold uppercase tracking-widest">Gemini</span>
                 </button>
               </div>
             )}
@@ -289,9 +289,20 @@ export default function MedicineInfo() {
           )}
 
           {loading && (
-            <div className="flex flex-col justify-center items-center py-20 gap-2">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Analyzing Drug Guidelines...</p>
+            <div className="flex flex-col justify-center items-center py-20 gap-3">
+              <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-800 border-t-[#0052CC] dark:border-t-[#10B981] rounded-full animate-spin"></div>
+              <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest animate-pulse">Analyzing Drug Guidelines...</p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!selectedMed && !loading && !comparison && (
+            <div className="glass-card dark:bg-slate-900/80 rounded-3xl p-12 text-center border-dashed border-2 border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center animate-in fade-in duration-500">
+              <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mb-5 text-[#0052CC] dark:text-[#10B981] shadow-inner">
+                <span className="material-symbols-outlined text-4xl">medical_information</span>
+              </div>
+              <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">Search our Medical Database</h3>
+              <p className="text-[14px] text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">Enter a medicine name above to check dosages, side effects, and potential drug interactions instantly.</p>
             </div>
           )}
 
@@ -516,32 +527,32 @@ export default function MedicineInfo() {
         <div className="lg:col-span-4 space-y-5">
           
           {/* Comparison Tool Form Card */}
-          <div className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-md">
-            <h3 className="text-sm font-extrabold mb-3">Compare Medications</h3>
-            <form onSubmit={handleCompareSubmit} className="space-y-3.5">
+          <div className="glass-card rounded-3xl p-6 bg-white/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm premium-hover">
+            <h3 className="text-[15px] font-black mb-5 text-slate-800 dark:text-white">Compare Medications</h3>
+            <form onSubmit={handleCompareSubmit} className="space-y-4">
               <div>
-                <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">First Medicine Name</label>
+                <label className="block text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1.5 pl-1">First Medicine Name</label>
                 <input 
                   type="text" 
                   value={med1}
                   onChange={(e) => setMed1(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-250 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  className="w-full p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm font-medium focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-4 focus:ring-[#0052CC]/10 outline-none transition-all"
                   placeholder="Paracetamol"
                   required
                 />
               </div>
               <div>
-                <label className="block text-[10px] text-slate-450 uppercase font-bold mb-1">Second Medicine Name</label>
+                <label className="block text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-1.5 pl-1">Second Medicine Name</label>
                 <input 
                   type="text" 
                   value={med2}
                   onChange={(e) => setMed2(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-250 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs"
+                  className="w-full p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-sm font-medium focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-4 focus:ring-[#0052CC]/10 outline-none transition-all"
                   placeholder="Cetirizine"
                   required
                 />
               </div>
-              <button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-xs transition-all shadow-sm">
+              <button type="submit" className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-3.5 rounded-2xl text-sm transition-all shadow-md magnetic-button hover:shadow-lg mt-2">
                 Run Comparison
               </button>
             </form>

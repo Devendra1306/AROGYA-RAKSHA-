@@ -125,32 +125,32 @@ export default function ProfileSetup() {
           {step === 1 && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold border-b border-outline-variant/30 pb-2">Vitals & Personal Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-label-md font-medium mb-1">Age</label>
-                  <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="25" />
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Age</label>
+                  <input type="number" value={age} onChange={(e) => setAge(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="25" />
                 </div>
                 <div>
-                  <label className="block text-label-md font-medium mb-1">Gender</label>
-                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Gender</label>
+                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover">
                     <option>Male</option>
                     <option>Female</option>
                     <option>Other</option>
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-label-md font-medium mb-1">Height (cm)</label>
-                  <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="175" />
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Height (cm)</label>
+                  <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="175" />
                 </div>
                 <div>
-                  <label className="block text-label-md font-medium mb-1">Weight (kg)</label>
-                  <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900" placeholder="70" />
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Weight (kg)</label>
+                  <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover" placeholder="70" />
                 </div>
                 <div>
-                  <label className="block text-label-md font-medium mb-1">Blood Group</label>
-                  <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className="w-full p-3 rounded-xl border border-outline-variant bg-slate-50 dark:bg-slate-900">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">Blood Group</label>
+                  <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className="w-full p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-sm font-medium focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 outline-none transition-all premium-hover">
                     <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
                     <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
                   </select>
