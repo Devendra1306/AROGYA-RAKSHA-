@@ -105,7 +105,15 @@ JSON schema:
     if (exists) {
       cached = exists;
     } else {
-      cached = await Medicine.create(aiResult);
+      try {
+        cached = await Medicine.create(aiResult);
+      } catch (err) {
+        if (err.code === 11000) {
+          cached = await Medicine.findOne({ medicineName: aiResult.medicineName }) || aiResult;
+        } else {
+          throw err;
+        }
+      }
     }
   }
 
@@ -252,7 +260,15 @@ const medicineController = {
           generatedData._id = 'mock_' + Date.now();
           cached = localDb.create('medicines', generatedData);
         } else {
-          cached = await Medicine.create(generatedData);
+          try {
+            cached = await Medicine.create(generatedData);
+          } catch (err) {
+            if (err.code === 11000) {
+              cached = await Medicine.findOne({ medicineName: generatedData.medicineName }) || generatedData;
+            } else {
+              throw err;
+            }
+          }
         }
         return res.json(cached || generatedData);
       }
@@ -312,7 +328,16 @@ const medicineController = {
               generatedData._id = 'mock_' + Date.now();
               med = localDb.create('medicines', generatedData);
             } else {
-              med = await Medicine.create(generatedData);
+              try {
+                med = await Medicine.create(generatedData);
+              } catch (err) {
+                if (err.code === 11000) {
+                  // If duplicate key race condition occurs, just use the generated data
+                  med = await Medicine.findOne({ medicineName: generatedData.medicineName }) || generatedData;
+                } else {
+                  throw err;
+                }
+              }
             }
           }
         }
