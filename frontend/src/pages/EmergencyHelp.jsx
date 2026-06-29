@@ -132,7 +132,7 @@ export default function EmergencyHelp() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-24 md:pb-8">
-      <SEO title="Emergency Help | Arogya Raksha" />
+      <SEO title="Emergency Help | Arogya Raksha AI" />
       
       {/* ── Top Header ── */}
       <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-slate-200/50 dark:border-slate-800/50 px-6 h-[72px] flex items-center justify-between shadow-sm">

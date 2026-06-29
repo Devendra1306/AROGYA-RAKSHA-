@@ -293,7 +293,7 @@ export default function DietPlanner() {
   return (
     <div className="max-w-[1280px] mx-auto px-margin-mobile lg:px-margin-desktop py-8 text-slate-800 dark:text-slate-100 transition-colors">
       <SEO 
-        title="AI Diet Planner | Personalized Nutrition Plans | Arogya Raksha"
+        title="AI Diet Planner | Personalized Nutrition Plans | Arogya Raksha AI"
         description="Experience a premium, AI-driven diet and personalized nutrition tracker. Build healthy eating habits and achieve your fitness goals with Arogya Raksha."
         keywords="Diet Planner, Nutrition Planner, AI Diet, Personalized Diet, Healthy Eating, Calories Tracking, Health Goals"
         canonical="https://arogyarakshaa.vercel.app/diet-planner"

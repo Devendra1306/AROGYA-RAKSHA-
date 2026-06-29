@@ -137,7 +137,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-margin-mobile relative overflow-hidden">
       <SEO 
-        title="Login | Arogya Raksha"
+        title="Login | Arogya Raksha AI"
         description="Login to your Arogya Raksha account to access your personal health dashboard, medical records, and AI healthcare tools."
         keywords="login, sign in, Arogya Raksha login, health account, patient portal"
         canonical="https://arogyarakshaa.vercel.app/login"

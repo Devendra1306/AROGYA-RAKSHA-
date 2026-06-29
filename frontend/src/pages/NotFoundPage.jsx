@@ -6,7 +6,7 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-6 text-center">
       <SEO 
-        title="Page Not Found | Arogya Raksha"
+        title="Page Not Found | Arogya Raksha AI"
         description="The page you are looking for does not exist or has been moved."
         robots="noindex, follow"
       />

@@ -727,7 +727,7 @@ export default function ProfilePage() {
   return (
     <>
       <SEO 
-        title="User Profile | Arogya Raksha"
+        title="User Profile | Arogya Raksha AI"
         description="Manage your medical profile and health records."
         robots="noindex, nofollow"
         canonical="https://arogyarakshaa.vercel.app/profile"

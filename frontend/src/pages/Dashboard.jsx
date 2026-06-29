@@ -96,7 +96,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#f8f9fc] dark:bg-slate-950 flex font-sans">
       <SEO 
-        title="Health Dashboard | Arogya Raksha"
+        title="Health Dashboard | Arogya Raksha AI"
         description="View your personalized health dashboard, vitals, daily goals, and medical history with Arogya Raksha."
         keywords="health dashboard, medical profile, patient portal, health tracker, Arogya Raksha"
         canonical="https://arogyarakshaa.vercel.app/dashboard"

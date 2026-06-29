@@ -248,7 +248,7 @@ export default function MedicalAssistant() {
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans overflow-hidden">
       <SEO
-        title="AI Medical Assistant | Smart Healthcare Guidance | Arogya Raksha"
+        title="AI Medical Assistant | Smart Healthcare Guidance | Arogya Raksha AI"
         description="Engage with our AI Medical Assistant for smart healthcare guidance, symptom analysis, and instant medical insights customized for you."
         keywords="Medical Assistant, AI Doctor, Symptom Checker, Healthcare AI, Smart Health"
         canonical="https://arogyarakshaa.vercel.app/medical-assistant"

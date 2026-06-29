@@ -183,7 +183,7 @@ export default function HealthAssessment() {
     return (
       <div className="max-w-[1280px] mx-auto px-margin-mobile py-6 text-slate-800 dark:text-slate-100 font-body-md">
         <SEO 
-          title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha"
+          title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha AI"
           description="Calculate your BMI, track daily vitals, and get an AI health assessment to monitor your overall wellness with Arogya Raksha."
           keywords="Health Assessment, BMI Calculator, Wellness Analysis, Track Vitals, Health Score, Daily Health Tracker, AI Healthcare"
           canonical="https://arogyarakshaa.vercel.app/health-assessment"
@@ -437,7 +437,7 @@ export default function HealthAssessment() {
   return (
     <div className="max-w-[1280px] mx-auto px-margin-desktop py-stack-md text-slate-800 dark:text-slate-100 transition-colors">
       <SEO 
-        title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha"
+        title="AI Health Assessment | BMI | Wellness Analysis | Arogya Raksha AI"
         description="Calculate your BMI, track daily vitals, and get an AI health assessment to monitor your overall wellness with Arogya Raksha."
         keywords="Health Assessment, BMI Calculator, Wellness Analysis, Track Vitals, Health Score, Daily Health Tracker, AI Healthcare"
         canonical="https://arogyarakshaa.vercel.app/health-assessment"

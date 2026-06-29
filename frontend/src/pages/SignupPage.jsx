@@ -148,7 +148,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-margin-mobile relative overflow-hidden">
       <SEO 
-        title="Create Account | Arogya Raksha"
+        title="Create Account | Arogya Raksha AI"
         description="Sign up for Arogya Raksha to get a free personal health dashboard, AI medical assistant, and personalized diet plans."
         keywords="sign up, create account, register, Arogya Raksha, health portal"
         canonical="https://arogyarakshaa.vercel.app/signup"

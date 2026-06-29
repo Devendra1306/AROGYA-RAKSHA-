@@ -4,7 +4,7 @@ import SEO from '../components/SEO';
 export default function License() {
   return (
     <div className="max-w-[1000px] mx-auto px-6 py-12 text-slate-800 dark:text-slate-100">
-      <SEO title="License | Arogya Raksha" />
+      <SEO title="License | Arogya Raksha AI" />
       <h1 className="text-3xl font-black text-primary dark:text-secondary mb-6">License Agreement</h1>
       <div className="space-y-6 text-sm leading-relaxed">
         <section>
