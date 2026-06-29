@@ -287,7 +287,8 @@ export default function LandingPage() {
         schema={{
           "@context": "https://schema.org",
           "@type": "WebSite",
-          "name": "Arogya Raksha",
+          "name": "Arogya Raksha AI",
+          "alternateName": ["ArogyaRaksha", "Arogya Raksha", "ArogyaRakshaa"],
           "url": "https://arogyarakshaa.vercel.app",
           "potentialAction": {
             "@type": "SearchAction",
