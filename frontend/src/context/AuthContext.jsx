@@ -180,27 +180,35 @@ export const AuthProvider = ({ children }) => {
 
   // Listen to Firebase Auth state change to persist sessions across page refreshes
   useEffect(() => {
-    // Hard timeout: never block the UI for more than 2 seconds
-    const loadingTimeout = setTimeout(() => setLoading(false), 2000);
+    // Hard timeout: never block the UI for more than 1 second
+    const loadingTimeout = setTimeout(() => setLoading(false), 1000);
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // 1. Immediately hydrate from localStorage for 0ms instant UI rendering
+        const savedUser = localStorage.getItem('user');
+        const savedProfile = localStorage.getItem('profile');
+        if (savedUser) {
+          try {
+            setUser(JSON.parse(savedUser));
+            if (savedProfile) setProfile(JSON.parse(savedProfile));
+            setIsAuthenticated(true);
+            setLoading(false); // UI unblocked instantly!
+          } catch (e) {}
+        }
+
         try {
           const idToken = await firebaseUser.getIdToken();
           localStorage.setItem('token', idToken);
           setToken(idToken);
 
-          // Race backend call against a 3-second timeout
-          const fetchProfile = api.get('/auth/profile', {
-            headers: { 'Authorization': `Bearer ${idToken}` }
-          });
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
-          );
+          // 2. Fetch/sync profile from backend in background
+          const res = await api.get('/auth/profile', {
+            headers: { 'Authorization': `Bearer ${idToken}` },
+            timeout: 3000
+          }).catch(() => null);
 
-          const res = await Promise.race([fetchProfile, timeoutPromise]);
-
-          if (res.data && typeof res.data === 'object' && res.data.user) {
+          if (res && res.data && res.data.user) {
             const syncedUser = {
               ...res.data.user,
               emailVerified: firebaseUser.emailVerified
@@ -210,28 +218,11 @@ export const AuthProvider = ({ children }) => {
             setProfile(res.data.profile);
             if (res.data.profile) {
               localStorage.setItem('profile', JSON.stringify(res.data.profile));
-            } else {
-              localStorage.removeItem('profile');
             }
             setIsAuthenticated(true);
-          } else {
-            console.error('Failed to sync auth session: Invalid response structure from backend.');
-            handleForceLogout();
           }
         } catch (err) {
-          console.error('Error syncing auth session with backend on refresh:', err.message);
-          // Load local user details as a temporary fallback if backend is unreachable
-          const savedUser = localStorage.getItem('user');
-          if (savedUser) {
-            try {
-              setUser(JSON.parse(savedUser));
-              setIsAuthenticated(true);
-            } catch (e) {
-              handleForceLogout();
-            }
-          } else {
-            handleForceLogout();
-          }
+          console.error('Error syncing auth session:', err.message);
         }
       } else {
         handleForceLogout();
@@ -264,12 +255,11 @@ export const AuthProvider = ({ children }) => {
     // 2. Obtain ID token
     const idToken = await firebaseUser.getIdToken();
     localStorage.setItem('token', idToken);
+    setToken(idToken);
     
-    // 3. Sync and fetch user profile details from backend MongoDB
+    // 3. Fast sync and fetch user profile details
     const res = await api.get('/auth/profile', {
-      headers: {
-        'Authorization': `Bearer ${idToken}`
-      }
+      headers: { 'Authorization': `Bearer ${idToken}` }
     });
     
     const syncedUser = {
@@ -277,7 +267,6 @@ export const AuthProvider = ({ children }) => {
       emailVerified: firebaseUser.emailVerified
     };
     
-    setToken(idToken);
     setUser(syncedUser);
     localStorage.setItem('user', JSON.stringify(syncedUser));
     setIsAuthenticated(true);
@@ -297,9 +286,7 @@ export const AuthProvider = ({ children }) => {
 
     // Sync with backend by getting profile (middleware auto-creates user if needed)
     const res = await api.get('/auth/profile', {
-      headers: {
-        'Authorization': `Bearer ${googleData.token}`
-      }
+      headers: { 'Authorization': `Bearer ${googleData.token}` }
     });
     
     const newUser = res.data.user;
@@ -313,18 +300,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('profile');
     }
     
-    // Store user data in Firestore for profile completion checks
+    // Non-blocking fire-and-forget background Firestore backup
     if (auth.currentUser) {
-      try {
-        await setDoc(doc(db, 'users', auth.currentUser.uid), {
-          uid: auth.currentUser.uid,
-          name: `${newUser.firstName} ${newUser.lastName}`,
-          email: newUser.email,
-          createdAt: new Date().toISOString()
-        }, { merge: true });
-      } catch (firestoreErr) {
-        console.warn('Could not store Google login details in Firestore:', firestoreErr.message);
-      }
+      setDoc(doc(db, 'users', auth.currentUser.uid), {
+        uid: auth.currentUser.uid,
+        name: `${newUser.firstName} ${newUser.lastName}`,
+        email: newUser.email,
+        createdAt: new Date().toISOString()
+      }, { merge: true }).catch(() => {});
     }
     
     return { token: googleData.token, user: newUser };
@@ -335,46 +318,35 @@ export const AuthProvider = ({ children }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const firebaseUser = userCredential.user;
 
-    // 2. Set user's name in Firebase Auth (displayName)
-    await updateFirebaseProfile(firebaseUser, {
-      displayName: `${firstName} ${lastName}`
-    });
+    // 2. Set user's name in Firebase Auth (displayName) & obtain ID Token
+    await updateFirebaseProfile(firebaseUser, { displayName: `${firstName} ${lastName}` });
+    const idToken = await firebaseUser.getIdToken();
+    localStorage.setItem('token', idToken);
 
-    // 3. Store additional user info in Firestore
-    await setDoc(doc(db, 'users', firebaseUser.uid), {
+    // 3. Background non-blocking tasks (email verification & Firestore backup)
+    // Running these asynchronously prevents delaying the registration UI!
+    sendEmailVerification(firebaseUser).catch(() => {});
+    setDoc(doc(db, 'users', firebaseUser.uid), {
       uid: firebaseUser.uid,
       name: `${firstName} ${lastName}`,
       email: firebaseUser.email,
       createdAt: new Date().toISOString()
-    });
+    }).catch(() => {});
 
-    // 4. Send email verification request
-    await sendEmailVerification(firebaseUser);
-
-    // 5. Force-refresh the token AFTER setting displayName so the JWT now contains
-    //    the name. Without this, the token still has no displayName and the backend
-    //    middleware would auto-create the user with empty strings.
-    const idToken = await firebaseUser.getIdToken(true); // true = force refresh
-    localStorage.setItem('token', idToken);
-
-    // 6. Sync register with backend MongoDB (backend will set firstName/lastName)
+    // 4. Sync register with backend MongoDB (fast single POST call)
     const res = await api.post('/auth/register', {
       firstName,
       lastName,
       email,
       mobile
     }, {
-      headers: {
-        'Authorization': `Bearer ${idToken}`
-      }
+      headers: { 'Authorization': `Bearer ${idToken}` }
     });
 
-    // Always use the firstName/lastName the user typed — not whatever the backend
-    // auto-created — as the definitive source of truth for the local user state.
     const syncedUser = {
       ...res.data.user,
-      firstName,   // guarantee real name is used
-      lastName,    // guarantee real name is used
+      firstName,
+      lastName,
       emailVerified: firebaseUser.emailVerified
     };
 
