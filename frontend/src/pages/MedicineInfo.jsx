@@ -270,8 +270,13 @@ export default function MedicineInfo() {
                   <button 
                     key={s._id}
                     type="button"
-                    onClick={() => handleSelectMed(s._id, s.medicineName)}
-                    className="w-full text-left p-4 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer border-b border-slate-100 dark:border-slate-800/50 text-sm flex justify-between items-center transition-colors"
+                    // Use onMouseDown instead of onClick so it fires BEFORE the input blur
+                    // which would otherwise close the dropdown before the click registers
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      handleSelectMed(s._id, s.medicineName);
+                    }}
+                    className="w-full text-left p-4 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/5 cursor-pointer border-b border-slate-100 dark:border-slate-800/50 text-sm flex justify-between items-center transition-colors"
                   >
                     <div>
                       <span className="font-bold text-slate-800 dark:text-white">{s.medicineName}</span>
@@ -282,7 +287,10 @@ export default function MedicineInfo() {
                 ))}
                 <button 
                   type="button"
-                  onClick={() => handleRagLookup(searchQuery)}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleRagLookup(searchQuery);
+                  }}
                   className="w-full text-left p-4 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/5 cursor-pointer text-[#0052CC] dark:text-[#10B981] font-bold text-sm flex items-center justify-between border-t border-slate-200/50 dark:border-slate-800/50 bg-[#0052CC]/[0.02] dark:bg-[#10B981]/[0.02] transition-colors"
                 >
                   <span className="flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">science</span> Ask AI about "{searchQuery}"</span>
@@ -334,171 +342,187 @@ export default function MedicineInfo() {
             </div>
           )}
 
-          {/* High Fidelity Collapsible Medicine Details Panel */}
+          {/* ── Premium Medicine Profile Card ─────────────────────────────────── */}
           {selectedMed && (
-            <div className="glass-card rounded-2xl p-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-md space-y-4">
-              
-              {/* Header card details */}
-              <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-700 pb-3">
-                <div>
-                  <h2 className="text-xl font-extrabold text-primary dark:text-secondary">{selectedMed.medicineName}</h2>
-                  <p className="text-xs text-slate-400 font-semibold mt-0.5">Active Generic ingredient: {selectedMed.genericName}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <span className="bg-primary/10 text-primary dark:text-secondary dark:bg-secondary/10 px-3 py-1 rounded-full font-bold text-[10px]">
-                    {selectedMed.category}
-                  </span>
-                  
-                  {/* Bookmark star */}
-                  <button 
+            <div className="rounded-3xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-xl bg-white dark:bg-slate-900 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+              {/* Hero Header */}
+              <div className="relative bg-gradient-to-br from-[#0052CC] via-[#1a6ef5] to-[#0041a8] dark:from-[#064e3b] dark:via-[#065f46] dark:to-[#047857] p-6 pb-8 overflow-hidden">
+                {/* Ambient glow circles */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+                <div className="relative z-10 flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-white/80 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>pill</span>
+                      <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.25em]">{selectedMed.category || 'MEDICATION'}</span>
+                    </div>
+                    <h2 className="text-2xl font-black text-white leading-tight tracking-tight truncate">{selectedMed.medicineName}</h2>
+                    {selectedMed.genericName && (
+                      <p className="text-sm text-white/70 font-medium mt-1">Generic: <span className="text-white/90 font-semibold">{selectedMed.genericName}</span></p>
+                    )}
+                  </div>
+                  <button
                     onClick={toggleSaveMedicine}
-                    className={`text-xs px-2.5 py-1 rounded-xl font-bold flex items-center gap-1 border transition-all ${isBookmarked ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-250 dark:border-slate-700 text-slate-450 hover:bg-slate-50'}`}
+                    className={`ml-4 flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-all active:scale-90 border-2 ${
+                      isBookmarked
+                        ? 'bg-amber-400 border-amber-300 shadow-lg shadow-amber-500/30'
+                        : 'bg-white/15 border-white/20 hover:bg-white/25 backdrop-blur-sm'
+                    }`}
+                    title={isBookmarked ? 'Remove from saved' : 'Save medicine'}
                   >
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs">{isBookmarked ? 'star' : 'star_border'}</span>
-                      {isBookmarked ? 'Saved' : 'Save'}
-                    </span>
+                    <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: `'FILL' ${isBookmarked ? 1 : 0}` }}>star</span>
                   </button>
                 </div>
               </div>
 
-              {/* Collapsible Section 1: Uses */}
-              <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
-                <button 
-                  onClick={() => toggleSection('uses')}
-                  className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
-                >
-                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-slate-550">assignment</span> Uses & Indications</span>
-                  <span>{expandedSections.uses ? '▼' : '▶'}</span>
-                </button>
-                {expandedSections.uses && (
-                  <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
-                    <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-650 dark:text-slate-200">
-                      {selectedMed.uses?.map((use, idx) => (
-                        <li key={idx} className="leading-relaxed">{use}</li>
+              {/* Content Body */}
+              <div className="p-5 space-y-4">
+
+                {/* ── Uses & Indications */}
+                {selectedMed.uses?.length > 0 && (
+                  <div className="rounded-2xl overflow-hidden border border-blue-100 dark:border-blue-900/40">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-blue-50 dark:bg-blue-950/30">
+                      <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>assignment</span>
+                      </div>
+                      <h3 className="text-[12px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-wider">Uses & Indications</h3>
+                    </div>
+                    <div className="px-4 py-3 bg-white dark:bg-slate-900/60 space-y-2">
+                      {selectedMed.uses.map((use, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{use}</p>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
-              </div>
 
-              {/* Collapsible Section 2: Dosage */}
-              {selectedMed.dosage && (
-                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
-                  <button 
-                    onClick={() => toggleSection('dosage')}
-                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
-                  >
-                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-slate-550">restaurant</span> Dosage Considerations</span>
-                    <span>{expandedSections.dosage ? '▼' : '▶'}</span>
-                  </button>
-                  {expandedSections.dosage && (
-                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
-                      <p className="text-xs leading-relaxed text-slate-650 dark:text-slate-200">{selectedMed.dosage}</p>
+                {/* ── Dosage */}
+                {selectedMed.dosage && (
+                  <div className="rounded-2xl overflow-hidden border border-emerald-100 dark:border-emerald-900/40">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-emerald-50 dark:bg-emerald-950/30">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>medication</span>
+                      </div>
+                      <h3 className="text-[12px] font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Dosage Guidelines</h3>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Collapsible Section 3: Side Effects */}
-              {selectedMed.sideEffects && (
-                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
-                  <button 
-                    onClick={() => toggleSection('sideEffects')}
-                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left text-red-600 dark:text-red-400"
-                  >
-                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-red-500">warning</span> Possible Side Effects</span>
-                    <span>{expandedSections.sideEffects ? '▼' : '▶'}</span>
-                  </button>
-                  {expandedSections.sideEffects && (
-                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
-                      <ul className="list-disc list-inside space-y-1.5 text-xs text-red-700 dark:text-red-300">
-                        {selectedMed.sideEffects.map((side, idx) => (
-                          <li key={idx} className="leading-relaxed">{side}</li>
-                        ))}
-                      </ul>
+                    <div className="px-4 py-3 bg-white dark:bg-slate-900/60">
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{selectedMed.dosage}</p>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Collapsible Section 4: Precautions & Warnings */}
-              {selectedMed.precautions && (
-                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
-                  <button 
-                    onClick={() => toggleSection('precautions')}
-                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left text-amber-600"
-                  >
-                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-amber-500">block</span> Precautions & Warnings</span>
-                    <span>{expandedSections.precautions ? '▼' : '▶'}</span>
-                  </button>
-                  {expandedSections.precautions && (
-                    <div className="p-4 bg-amber-50/40 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700">
-                      <ul className="list-disc list-inside space-y-1.5 text-xs text-amber-900 dark:text-amber-300">
-                        {selectedMed.precautions?.map((prec, idx) => (
-                          <li key={idx} className="leading-relaxed">{prec}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Collapsible Section 5: Drug Interactions */}
-              {selectedMed.interactions && (
-                <div className="border border-slate-100 dark:border-slate-700 rounded-xl overflow-hidden">
-                  <button 
-                    onClick={() => toggleSection('interactions')}
-                    className="w-full flex justify-between items-center p-3.5 bg-slate-50 dark:bg-slate-900 font-bold text-xs text-left"
-                  >
-                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-xs text-slate-550">link</span> Drug Interactions</span>
-                    <span>{expandedSections.interactions ? '▼' : '▶'}</span>
-                  </button>
-                  {expandedSections.interactions && (
-                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
-                      <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-650 dark:text-slate-200">
-                        {selectedMed.interactions.map((inter, idx) => (
-                          <li key={idx} className="leading-relaxed">{inter}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Storage details panel */}
-              {selectedMed.storageInfo && (
-                <div className="bg-slate-50 dark:bg-slate-900 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700 text-xs">
-                  <span className="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider block mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-xs text-slate-400">inventory_2</span> Storage & Manufacturer Details
-                  </span>
-                  <p className="italic text-slate-600 dark:text-slate-350">{selectedMed.storageInfo}</p>
-                </div>
-              )}
-
-              {/* Ask AI Medicine Helper */}
-              <div className="border-t border-slate-100 dark:border-slate-700 pt-5 mt-2">
-                <h3 className="font-extrabold text-sm mb-2">Ask Medicine Helper</h3>
-                <form onSubmit={handleAskSubmit} className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={chatQuestion}
-                    onChange={(e) => setChatQuestion(e.target.value)}
-                    className="flex-grow p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 outline-none text-base md:text-xs" 
-                    placeholder={`e.g. Can I take ${selectedMed.medicineName} with milk?`}
-                  />
-                  <button type="submit" className="bg-primary hover:opacity-95 text-white font-bold px-4 rounded-xl text-xs">
-                    Ask
-                  </button>
-                </form>
-                {chatLoading && <p className="text-slate-400 italic text-[10px] mt-1.5 animate-pulse">Consulting clinical manuals...</p>}
-                {chatAnswer && (
-                  <div className="mt-3 p-3.5 bg-slate-50 dark:bg-slate-900 rounded-xl text-xs border border-slate-100 dark:border-slate-800 leading-relaxed font-medium">
-                    {renderCompareMarkdown(chatAnswer)}
                   </div>
                 )}
-              </div>
 
+                {/* ── Side Effects */}
+                {selectedMed.sideEffects?.length > 0 && (
+                  <div className="rounded-2xl overflow-hidden border border-red-100 dark:border-red-900/40">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-red-50 dark:bg-red-950/30">
+                      <div className="w-7 h-7 rounded-lg bg-red-500/15 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                      </div>
+                      <h3 className="text-[12px] font-black text-red-700 dark:text-red-300 uppercase tracking-wider">Possible Side Effects</h3>
+                    </div>
+                    <div className="px-4 py-3 bg-white dark:bg-slate-900/60">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedMed.sideEffects.map((side, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 text-[11px] font-semibold text-red-700 dark:text-red-300">
+                            <span className="w-1 h-1 rounded-full bg-red-500 flex-shrink-0" />
+                            {side}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Precautions */}
+                {selectedMed.precautions?.length > 0 && (
+                  <div className="rounded-2xl overflow-hidden border border-amber-100 dark:border-amber-900/40">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-amber-50 dark:bg-amber-950/30">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>do_not_touch</span>
+                      </div>
+                      <h3 className="text-[12px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider">Precautions & Warnings</h3>
+                    </div>
+                    <div className="px-4 py-3 bg-white dark:bg-slate-900/60 space-y-2">
+                      {selectedMed.precautions.map((prec, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <span className="material-symbols-outlined text-amber-500 text-[14px] mt-0.5 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+                          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{prec}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Drug Interactions */}
+                {selectedMed.interactions?.length > 0 && (
+                  <div className="rounded-2xl overflow-hidden border border-violet-100 dark:border-violet-900/40">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-violet-50 dark:bg-violet-950/30">
+                      <div className="w-7 h-7 rounded-lg bg-violet-500/15 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-violet-600 dark:text-violet-400 text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>link</span>
+                      </div>
+                      <h3 className="text-[12px] font-black text-violet-700 dark:text-violet-300 uppercase tracking-wider">Drug Interactions</h3>
+                    </div>
+                    <div className="px-4 py-3 bg-white dark:bg-slate-900/60 space-y-2">
+                      {selectedMed.interactions.map((inter, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-violet-500 mt-1.5 flex-shrink-0" />
+                          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{inter}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Storage Info */}
+                {selectedMed.storageInfo && (
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                    <span className="material-symbols-outlined text-slate-400 text-[20px] mt-0.5 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>inventory_2</span>
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Storage Information</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{selectedMed.storageInfo}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Ask AI Helper */}
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-800 dark:to-slate-950">
+                    <span className="material-symbols-outlined text-[#10B981] text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
+                    <h3 className="text-[12px] font-black text-white uppercase tracking-wider">Ask AI Medicine Helper</h3>
+                    <span className="ml-auto text-[9px] bg-[#10B981] text-white px-2 py-0.5 rounded font-extrabold tracking-widest">GEMINI</span>
+                  </div>
+                  <div className="p-4 bg-white dark:bg-slate-900">
+                    <form onSubmit={handleAskSubmit} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatQuestion}
+                        onChange={(e) => setChatQuestion(e.target.value)}
+                        className="flex-grow p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 outline-none text-base md:text-sm focus:border-[#0052CC] dark:focus:border-[#10B981] focus:ring-2 focus:ring-[#0052CC]/10 transition-all"
+                        placeholder={`e.g. Can I take ${selectedMed.medicineName} with milk?`}
+                      />
+                      <button type="submit" className="bg-slate-900 dark:bg-[#10B981] text-white font-bold px-4 rounded-xl text-xs hover:opacity-90 active:scale-95 transition-all flex-shrink-0">
+                        Ask
+                      </button>
+                    </form>
+                    {chatLoading && (
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="w-4 h-4 border-2 border-slate-200 border-t-[#10B981] rounded-full animate-spin" />
+                        <p className="text-slate-400 italic text-xs animate-pulse">Consulting clinical manuals...</p>
+                      </div>
+                    )}
+                    {chatAnswer && (
+                      <div className="mt-3 p-3.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 leading-relaxed">
+                        {renderCompareMarkdown(chatAnswer)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
             </div>
           )}
 
