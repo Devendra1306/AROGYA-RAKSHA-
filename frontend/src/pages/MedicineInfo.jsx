@@ -46,6 +46,7 @@ export default function MedicineInfo() {
   const [med2, setMed2] = useState('');
   const [comparison, setComparison] = useState(null);
   const [compareError, setCompareError] = useState('');
+  const [loadError, setLoadError] = useState(''); // error shown to user when lookup fails
 
   // AI Chat state
   const [chatQuestion, setChatQuestion] = useState('');
@@ -90,7 +91,13 @@ export default function MedicineInfo() {
   };
 
   const handleSelectMed = async (id, name) => {
+    // OpenFDA suggestions have IDs prefixed with 'fda_' and are slow to resolve
+    // via the full detail pipeline. Route them through RAG lookup for speed & reliability.
+    if (id && String(id).startsWith('fda_')) {
+      return handleRagLookup(name);
+    }
     setLoading(true);
+    setLoadError('');
     setSearchQuery('');
     setSuggestions([]);
     setComparison(null);
@@ -98,16 +105,17 @@ export default function MedicineInfo() {
     try {
       const res = await api.get(`/medicine/${id}`);
       setSelectedMed(res.data);
-      // Reset expanded sections
-      setExpandedSections({
-        uses: true,
-        dosage: false,
-        sideEffects: false,
-        precautions: false,
-        interactions: false
-      });
+      setExpandedSections({ uses: true, dosage: false, sideEffects: false, precautions: false, interactions: false });
     } catch (err) {
       console.error(err);
+      // Fallback: if direct ID lookup fails, try RAG lookup by name
+      try {
+        const res = await api.get(`/medicine/rag-lookup?q=${encodeURIComponent(name)}`);
+        setSelectedMed(res.data);
+        setExpandedSections({ uses: true, dosage: false, sideEffects: false, precautions: false, interactions: false });
+      } catch (ragErr) {
+        setLoadError(`Could not load details for "${name}". Please try searching by the generic name.`);
+      }
     } finally {
       setLoading(false);
     }
@@ -115,6 +123,7 @@ export default function MedicineInfo() {
   
   const handleRagLookup = async (name) => {
     setLoading(true);
+    setLoadError('');
     setSearchQuery('');
     setSuggestions([]);
     setComparison(null);
@@ -122,16 +131,10 @@ export default function MedicineInfo() {
     try {
       const res = await api.get(`/medicine/rag-lookup?q=${encodeURIComponent(name)}`);
       setSelectedMed(res.data);
-      setExpandedSections({
-        uses: true,
-        dosage: false,
-        sideEffects: false,
-        precautions: false,
-        interactions: false
-      });
+      setExpandedSections({ uses: true, dosage: false, sideEffects: false, precautions: false, interactions: false });
     } catch (err) {
       console.error(err);
-      alert('RAG Medicine search failed. Please verify that the name matches a valid drug.');
+      setLoadError(`Could not load details for "${name}". The AI service may be unavailable. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -270,19 +273,35 @@ export default function MedicineInfo() {
                   <button 
                     key={s._id}
                     type="button"
-                    // Use onMouseDown instead of onClick so it fires BEFORE the input blur
-                    // which would otherwise close the dropdown before the click registers
+                    // Use onMouseDown so it fires BEFORE the input blur closes the dropdown
                     onMouseDown={(e) => {
                       e.preventDefault();
-                      handleSelectMed(s._id, s.medicineName);
+                      // OpenFDA results (fda_ prefix) → use RAG for speed & reliability
+                      // DB results (MongoDB ObjectId) → use direct ID fetch
+                      if (String(s._id).startsWith('fda_')) {
+                        handleRagLookup(s.medicineName);
+                      } else {
+                        handleSelectMed(s._id, s.medicineName);
+                      }
                     }}
-                    className="w-full text-left p-4 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/5 cursor-pointer border-b border-slate-100 dark:border-slate-800/50 text-sm flex justify-between items-center transition-colors"
+                    className="w-full text-left p-3.5 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/5 cursor-pointer border-b border-slate-100 dark:border-slate-800/50 flex items-center gap-3 transition-colors"
                   >
-                    <div>
-                      <span className="font-bold text-slate-800 dark:text-white">{s.medicineName}</span>
-                      <span className="text-[11px] text-slate-500 ml-2 font-medium">({s.genericName})</span>
+                    {/* Source badge */}
+                    <span className={`flex-shrink-0 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${String(s._id).startsWith('fda_') ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
+                      {String(s._id).startsWith('fda_') ? 'FDA' : 'DB'}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-bold text-slate-800 dark:text-white text-sm">{s.medicineName}</span>
+                      {/* Truncate long generic name (FDA medicines have huge ingredient lists) */}
+                      {s.genericName && s.genericName !== 'Unknown Generic' && (
+                        <span className="text-[11px] text-slate-500 ml-2 font-medium">
+                          ({s.genericName.length > 40 ? s.genericName.substring(0, 40) + '…' : s.genericName})
+                        </span>
+                      )}
                     </div>
-                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">{s.category}</span>
+                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex-shrink-0">
+                      {s.category?.length > 20 ? s.category.substring(0, 20) + '…' : s.category}
+                    </span>
                   </button>
                 ))}
                 <button 
@@ -321,6 +340,16 @@ export default function MedicineInfo() {
               >
                 Clear
               </button>
+            </div>
+          )}
+
+          {loadError && (
+            <div className="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-2xl flex items-start gap-3">
+              <span className="material-symbols-outlined text-red-500 text-xl mt-0.5">error</span>
+              <div>
+                <h4 className="text-sm font-bold text-red-700 dark:text-red-300">Lookup Error</h4>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-0.5 leading-relaxed">{loadError}</p>
+              </div>
             </div>
           )}
 
