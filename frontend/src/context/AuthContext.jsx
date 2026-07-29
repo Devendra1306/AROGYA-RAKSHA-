@@ -335,7 +335,7 @@ export const AuthProvider = ({ children }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const firebaseUser = userCredential.user;
 
-    // 2. Set user's name in Firebase Auth
+    // 2. Set user's name in Firebase Auth (displayName)
     await updateFirebaseProfile(firebaseUser, {
       displayName: `${firstName} ${lastName}`
     });
@@ -351,11 +351,13 @@ export const AuthProvider = ({ children }) => {
     // 4. Send email verification request
     await sendEmailVerification(firebaseUser);
 
-    // 5. Get ID Token
-    const idToken = await firebaseUser.getIdToken();
+    // 5. Force-refresh the token AFTER setting displayName so the JWT now contains
+    //    the name. Without this, the token still has no displayName and the backend
+    //    middleware would auto-create the user with empty strings.
+    const idToken = await firebaseUser.getIdToken(true); // true = force refresh
     localStorage.setItem('token', idToken);
 
-    // 6. Sync register with backend MongoDB
+    // 6. Sync register with backend MongoDB (backend will set firstName/lastName)
     const res = await api.post('/auth/register', {
       firstName,
       lastName,
@@ -367,8 +369,12 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
+    // Always use the firstName/lastName the user typed — not whatever the backend
+    // auto-created — as the definitive source of truth for the local user state.
     const syncedUser = {
       ...res.data.user,
+      firstName,   // guarantee real name is used
+      lastName,    // guarantee real name is used
       emailVerified: firebaseUser.emailVerified
     };
 

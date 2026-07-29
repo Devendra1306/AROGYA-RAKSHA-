@@ -51,9 +51,13 @@ async function protect(req, res, next) {
 
       // Auto-create user in MongoDB if not found (sync Firebase user state)
       if (!user) {
-        const nameParts = (decoded.name || '').split(' ');
-        const firstName = nameParts[0] || 'FirebaseUser';
-        const lastName = nameParts.slice(1).join(' ') || 'Account';
+        // decoded.name may be empty for email/password signups at token-issue time
+        // (displayName is set AFTER the token is issued). We use empty strings as
+        // the fallback — the /auth/register POST will immediately overwrite them
+        // with the real firstName/lastName from the request body.
+        const nameParts = (decoded.name || '').split(' ').filter(Boolean);
+        const firstName = nameParts[0] || '';
+        const lastName  = nameParts.slice(1).join(' ') || '';
 
         const userData = {
           firstName,

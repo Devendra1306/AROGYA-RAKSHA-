@@ -55,11 +55,13 @@ const authController = {
       const user = req.user;
       let updated = false;
 
-      if (firstName && user.firstName !== firstName) {
+      // Always overwrite name if provided — the auto-create in protect middleware
+      // may have stored empty strings when the Firebase token had no displayName yet.
+      if (firstName !== undefined && firstName !== null) {
         user.firstName = firstName;
         updated = true;
       }
-      if (lastName && user.lastName !== lastName) {
+      if (lastName !== undefined && lastName !== null) {
         user.lastName = lastName;
         updated = true;
       }
