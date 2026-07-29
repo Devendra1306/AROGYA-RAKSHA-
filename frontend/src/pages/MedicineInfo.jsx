@@ -229,15 +229,39 @@ export default function MedicineInfo() {
         <div className="lg:col-span-8 space-y-5">
           
           {/* Autocomplete Search Bar Container */}
-          <div className="relative group">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim().length > 1) handleRagLookup(searchQuery.trim());
+            }}
+            className="relative group"
+          >
             <input 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-5 pl-14 rounded-2xl glass-card dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm outline-none text-base md:text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 transition-all premium-hover"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim().length > 1) {
+                  e.preventDefault();
+                  setSuggestions([]);
+                  handleRagLookup(searchQuery.trim());
+                }
+              }}
+              className="w-full p-5 pl-14 pr-14 rounded-2xl glass-card dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/50 shadow-sm outline-none text-base md:text-sm font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:border-[#0052CC]/50 focus:ring-4 focus:ring-[#0052CC]/10 dark:focus:border-[#10B981]/50 dark:focus:ring-[#10B981]/10 transition-all premium-hover"
               placeholder="Search medicines (e.g. Paracetamol, Cetirizine)..."
             />
             <span className="absolute left-5 top-5 text-[22px] text-slate-400 select-none material-symbols-outlined group-focus-within:text-[#0052CC] dark:group-focus-within:text-[#10B981] transition-colors">search</span>
+            
+            {/* Search / Submit button */}
+            {searchQuery.trim().length > 1 && (
+              <button
+                type="submit"
+                title="Search"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-xl bg-[#0052CC] dark:bg-[#10B981] text-white shadow-md hover:opacity-90 active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            )}
             
             {/* Search autocomplete suggestion list */}
             {(suggestions.length > 0 || searchQuery.length > 1) && (
@@ -245,6 +269,7 @@ export default function MedicineInfo() {
                 {suggestions.map((s) => (
                   <button 
                     key={s._id}
+                    type="button"
                     onClick={() => handleSelectMed(s._id, s.medicineName)}
                     className="w-full text-left p-4 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer border-b border-slate-100 dark:border-slate-800/50 text-sm flex justify-between items-center transition-colors"
                   >
@@ -256,6 +281,7 @@ export default function MedicineInfo() {
                   </button>
                 ))}
                 <button 
+                  type="button"
                   onClick={() => handleRagLookup(searchQuery)}
                   className="w-full text-left p-4 hover:bg-[#0052CC]/5 dark:hover:bg-[#10B981]/5 cursor-pointer text-[#0052CC] dark:text-[#10B981] font-bold text-sm flex items-center justify-between border-t border-slate-200/50 dark:border-slate-800/50 bg-[#0052CC]/[0.02] dark:bg-[#10B981]/[0.02] transition-colors"
                 >
@@ -264,7 +290,7 @@ export default function MedicineInfo() {
                 </button>
               </div>
             )}
-          </div>
+          </form>
 
           {/* Recent Searches Chips */}
           {recentSearches.length > 0 && (
