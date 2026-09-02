@@ -430,9 +430,13 @@ Format:
     if (!medicineName || !question) return res.status(400).json({ error: 'Medicine name and question are required.' });
 
     try {
-      const prompt = `Answer this specific question regarding the medicine "${medicineName}".
+      const prompt = `You are a concise clinical AI pharmacist. Answer this question about "${medicineName}":
 Question: "${question}"
-Keep your answer clear, clinical, objective, and outline precautions.`;
+
+STRICT RULES:
+1. Give a direct 1-sentence answer first (e.g., "Do not take with hot water..." or "Yes, you can take it...").
+2. Follow with at most 2 brief bullet points on key reason or precaution.
+3. Total response MUST be under 50 words. Do NOT output long generic essays, lengthy medical history, or repetitive paragraphs.`;
 
       let healthProfile = null;
       if (req.user) {
@@ -443,7 +447,7 @@ Keep your answer clear, clinical, objective, and outline precautions.`;
         }
       }
 
-      const aiResponseText = await aiGateway.generateRaw(null, prompt);
+      const aiResponseText = await aiGateway.generateRaw(null, prompt, 0.2, 140);
       res.json({
         medicineName,
         question,

@@ -73,7 +73,7 @@ function fetchWithTimeout(url, options, timeoutMs = 8000) {
 }
 
 // Helper to call Gemini models
-async function callGemini(systemInstruction, userPrompt, temperature = 0.2) {
+async function callGemini(systemInstruction, userPrompt, temperature = 0.2, maxTokens = 250) {
   // Ultra-fast sub-2s latency models first for instant medical chat responses
   const geminiModels = [
     'gemini-3.5-flash-lite',
@@ -97,11 +97,12 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.2) {
         model: modelName,
         systemInstruction: systemInstruction || undefined,
         generationConfig: {
-          temperature: temperature
+          temperature: temperature,
+          maxOutputTokens: maxTokens || 250
         }
       });
       // Call with timeout
-      const result = await promiseWithTimeout(model.generateContent(userPrompt), 10000);
+      const result = await promiseWithTimeout(model.generateContent(userPrompt), 8000);
       const text = result.response.text();
       if (text) {
         return text;
@@ -116,7 +117,7 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.2) {
 }
 
 // Helper to call Groq API
-async function callGroq(systemInstruction, userPrompt, temperature = 0.2) {
+async function callGroq(systemInstruction, userPrompt, temperature = 0.2, maxTokens = 250) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error('Groq API Key is not configured in environment.');
@@ -142,9 +143,10 @@ async function callGroq(systemInstruction, userPrompt, temperature = 0.2) {
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: temperature
+          temperature: temperature,
+          max_tokens: maxTokens || 250
         })
-      }, 8000);
+      }, 7000);
 
       if (!response.ok) {
         const errText = await response.text();
@@ -166,7 +168,7 @@ async function callGroq(systemInstruction, userPrompt, temperature = 0.2) {
 }
 
 // Helper to call OpenRouter API
-async function callOpenRouter(systemInstruction, userPrompt, temperature = 0.2) {
+async function callOpenRouter(systemInstruction, userPrompt, temperature = 0.2, maxTokens = 250) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error('OpenRouter API Key is not configured in environment.');
@@ -200,9 +202,10 @@ async function callOpenRouter(systemInstruction, userPrompt, temperature = 0.2) 
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: temperature
+          temperature: temperature,
+          max_tokens: maxTokens || 250
         })
-      }, 8000);
+      }, 7000);
 
       if (!response.ok) {
         const errText = await response.text();
@@ -224,7 +227,7 @@ async function callOpenRouter(systemInstruction, userPrompt, temperature = 0.2) 
 }
 
 // Core multi-provider fallback orchestrator with retries
-async function generateContentWithFallback(systemInstruction, userPrompt, temperature = 0.2) {
+async function generateContentWithFallback(systemInstruction, userPrompt, temperature = 0.2, maxTokens = 250) {
   // Prioritize Gemini (verified fast and accurate with user key), fallback to Groq, then OpenRouter
   const providers = [
     { name: 'Gemini', fn: callGemini },
@@ -243,7 +246,7 @@ async function generateContentWithFallback(systemInstruction, userPrompt, temper
     // Try up to 2 times for each provider (retry transient failures)
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const text = await provider.fn(systemInstruction, userPrompt, temperature);
+        const text = await provider.fn(systemInstruction, userPrompt, temperature, maxTokens);
         if (text) {
           console.log(`[AI Gateway] Success using provider: ${provider.name} (Attempt ${attempt})`);
           return text;
@@ -253,7 +256,7 @@ async function generateContentWithFallback(systemInstruction, userPrompt, temper
         lastError = err;
         // Wait briefly on retry
         if (attempt < 2) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
       }
     }
@@ -321,46 +324,29 @@ const aiGateway = {
     }
 
     // 2. Assemble System Prompt with Context Injection
-    let systemPrompt = `You are the Arogya Raksha AI Healthcare Assistant, a professional, empathetic, and medically responsible AI companion.
-Your goal is to provide fast, short, practical, and easy-to-read medical assistant responses.
+    let systemPrompt = `You are the Arogya Raksha AI Healthcare Assistant.
+Your goal is to provide fast, short, direct, and easy-to-read medical assistance under 75 words total.
 
 CRITICAL RULES:
-- Keep responses under 150 words whenever possible. Avoid lengthy medical explanations because detailed information already exists in specialized modules (Medicine Info, Emergency Help, Home Remedies).
-- You MUST output exactly six numbered sections formatted EXACTLY with standard markdown headers ###. If a section is not applicable (like Doctor Visit or Emergency Alert for minor symptoms), output "N/A" under it. Do NOT omit any section header.
-- The sections are:
+- Keep the entire response strictly under 75 words. No fluff or repetitive text.
+- Format using exactly these 4 clean markdown headers:
 
-### 1. POSSIBLE CONDITION
-Brief explanation in 1-2 lines. Use language like "Possible Condition: Your symptoms may be related to..." and NEVER give a definitive diagnosis.
+### 1. POSSIBLE CAUSE
+1 concise sentence on what the symptoms might relate to (never give a definitive diagnosis).
 
-### 2. SEVERITY LEVEL
-Mild
-(Choose only one from: Mild, Moderate, High Risk)
+### 2. SEVERITY
+[Mild / Moderate / High Risk]
 
-### 3. SUGGESTED MEDICINES
-Provide 1-2 suggestions. Format EXACTLY as:
-Medicine: [Medicine Name]
-Used for:
-[Brief Purpose]
+### 3. QUICK CARE & ACTIONS
+2-3 brief practical bullet points starting with ✓ (hydration, rest, or common OTC care).
 
-### 4. QUICK CARE TIPS
-Show 3-4 points starting with ✓. Example:
-✓ Drink plenty of water
-✓ Get enough rest
-✓ Eat light meals
-✓ Monitor symptoms
-
-### 5. DOCTOR VISIT INDICATOR
-Show only when necessary (e.g. if symptoms persist or worsen). Otherwise write "N/A".
-
-### 6. EMERGENCY ALERT
-Show only if dangerous/high-risk symptoms are detected. Otherwise write "N/A".
+### 4. WHEN TO SEE A DOCTOR
+1 short line on when to seek in-person medical consultation.
 
 DIRECTIONS:
-- Prioritize: Condition, Severity, Medicine, Quick Tips.
-- Guide users to the appropriate module (Medicine Info, Emergency Help, Home Remedies) when needed.
-- Do NOT prescribe prescription-only medications or recommend unsafe dosages.
-- ALWAYS consider the user's Health Profile context if provided. For example, if the user is diabetic, highlight glycemic precautions. If they are hypertensive, caution against high-sodium suggestions.
-- Do NOT add a lengthy medical disclaimer within the response text, as the app renders one automatically at the bottom. Keep the response clean.
+- Do NOT prescribe prescription-only drugs. Keep guidance safe and practical.
+- Keep user profile context (allergies/conditions) in mind if provided.
+- Do NOT add a lengthy disclaimer at the bottom (the UI displays one automatically).
 `;
 
     // Inject User Profile Context & Dynamic BMI
@@ -397,7 +383,7 @@ DIRECTIONS:
 
     try {
       const prompt = `User Query: "${userQuery}"\nAnalyze the query, customize for the profile context, incorporate RAG guidelines, and write the structured response.`;
-      const textResponse = await generateContentWithFallback(systemPrompt, prompt, temperature);
+      const textResponse = await generateContentWithFallback(systemPrompt, prompt, temperature, 220);
 
       // Classify concern level based on text
       let urgencyLevel = 'Low Concern';
@@ -628,8 +614,8 @@ JSON schema:
     }
   },
 
-  generateRaw: async (systemInstruction, userPrompt, temperature = 0.2) => {
-    return await generateContentWithFallback(systemInstruction, userPrompt, temperature);
+  generateRaw: async (systemInstruction, userPrompt, temperature = 0.2, maxTokens = 200) => {
+    return await generateContentWithFallback(systemInstruction, userPrompt, temperature, maxTokens);
   }
 };
 
