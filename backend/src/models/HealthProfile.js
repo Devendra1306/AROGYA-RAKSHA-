@@ -19,6 +19,10 @@ const healthProfileSchema = new mongoose.Schema({
   medications: [{ type: String }],
   familyHistory: [{ type: String }],
   
+  emergencyContactName: { type: String, default: '' },
+  emergencyContactPhone: { type: String, default: '' },
+  emergencyContactRelationship: { type: String, default: 'Family' },
+  
   dietPreference: { type: String, enum: ['Vegetarian', 'Non-Vegetarian', 'Vegan', 'Eggetarian'], default: 'Vegetarian' },
   foodRestrictions: [{ type: String }],
   favoriteFoods: [{ type: String }],

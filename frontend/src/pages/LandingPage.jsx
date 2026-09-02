@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'fra
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  HeartPulse, ShieldPlus, Stethoscope, Brain, Pill, Salad,
+  HeartPulse, ShieldPlus, Stethoscope, Brain, Pill,
   Siren, Home, Activity, Zap, Star,
   ArrowRight, Check, ChevronDown, BarChart3,
   MessageCircle, Shield, Lock, Clock,
@@ -238,7 +238,7 @@ export default function LandingPage() {
   // ─── Bento cards ────────────────────────────────────────────────────────────
   const bentoCards = [
     { title: 'Medical Assistant', desc: 'Receive trusted AI-powered healthcare guidance in seconds.', icon: Stethoscope, color: 'from-violet-500 to-purple-700', path: '/medical-assistant', size: 'col-span-2 row-span-2', emoji: '🩺' },
-    { title: 'Diet Planner', desc: 'Achieve your fitness goals with AI-tailored nutrition plans.', icon: Salad, color: 'from-emerald-400 to-teal-600', path: '/diet-planner', size: 'col-span-2 row-span-1', emoji: '🥗' },
+    { title: 'Healthcare Directory', desc: 'Locate top-rated hospitals, clinics, and pharmacies nearby.', icon: Globe2, color: 'from-emerald-400 to-teal-600', path: '/nearby', size: 'col-span-2 row-span-1', emoji: '🏥' },
     { title: 'Health Assessment', desc: 'Track and optimize your overall health score continuously.', icon: Activity, color: 'from-blue-400 to-indigo-600', path: '/health-assessment', size: 'col-span-1 row-span-1', emoji: '📊' },
     { title: 'Medicine Search', desc: 'Understand medicines, dosage, and side effects instantly.', icon: Pill, color: 'from-sky-400 to-cyan-600', path: '/medicine-info', size: 'col-span-1 row-span-1', emoji: '💊' },
     { title: 'Home Remedies', desc: 'Discover safe, natural cures from traditional wisdom.', icon: Home, color: 'from-amber-400 to-orange-600', path: '/home-remedies', size: 'col-span-1 row-span-1', emoji: '🏠' },
@@ -249,7 +249,7 @@ export default function LandingPage() {
   const stats = [
     { value: '100000', prefix: '', suffix: '+', label: 'Health Queries', icon: MessageCircle },
     { value: '50000', prefix: '', suffix: '+', label: 'Assessments', icon: Shield },
-    { value: '20000', prefix: '', suffix: '+', label: 'Diet Plans', icon: Salad },
+    { value: '25000', prefix: '', suffix: '+', label: 'Medicines Indexed', icon: Pill },
     { value: '99', prefix: '', suffix: '.9%', label: 'Platform Uptime', icon: Server },
   ];
 

@@ -46,7 +46,7 @@ export default function Dashboard() {
   const quickActions = [
     { name: 'Ask AI', icon: Sparkles, color: 'text-violet-500', bg: 'bg-violet-500/10', path: '/medical-assistant' },
     { name: 'Medicine', icon: Pill, color: 'text-sky-500', bg: 'bg-sky-500/10', path: '/medicine-info' },
-    { name: 'Diet Plan', icon: Utensils, color: 'text-emerald-500', bg: 'bg-emerald-500/10', path: '/diet-planner' },
+    { name: 'Remedies', icon: Sparkles, color: 'text-emerald-500', bg: 'bg-emerald-500/10', path: '/home-remedies' },
     { name: 'Vitals', icon: HeartPulse, color: 'text-rose-500', bg: 'bg-rose-500/10', path: '/health-assessment' },
   ];
 
@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   const timelineData = [
     { id: 1, date: 'Today, 9:00 AM', title: 'Daily Health Assessment', desc: 'Score improved to 85. Keep hydrating.', icon: HeartPulse, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-    { id: 2, date: 'Yesterday, 8:30 PM', title: 'Diet Plan Updated', desc: 'Switched to High Protein, Low Carb.', icon: Utensils, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { id: 2, date: 'Yesterday, 8:30 PM', title: 'Vitals Synchronized', desc: 'Health profile and clinical vitals up to date.', icon: HeartPulse, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     { id: 3, date: 'Yesterday, 2:15 PM', title: 'AI Consultation', desc: 'Asked about persistent headaches. Recommended hydration.', icon: Sparkles, color: 'text-violet-500', bg: 'bg-violet-500/10' },
     { id: 4, date: 'Oct 12, 10:00 AM', title: 'Medicine Reminder Set', desc: 'Added Vitamin D (1x Daily).', icon: Pill, color: 'text-sky-500', bg: 'bg-sky-500/10' },
   ];

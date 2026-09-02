@@ -16,7 +16,6 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const EmergencyHelp = lazy(() => import('./pages/EmergencyHelp'));
 const MedicalAssistant = lazy(() => import('./pages/MedicalAssistant'));
 const HealthAssessment = lazy(() => import('./pages/HealthAssessment'));
-const DietPlanner = lazy(() => import('./pages/DietPlanner'));
 const MedicineInfo = lazy(() => import('./pages/MedicineInfo'));
 const HomeRemedies = lazy(() => import('./pages/HomeRemedies'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -103,7 +102,6 @@ const GlobalLayout = ({ children }) => {
     { path: '/medical-assistant',label: 'AI Assistant',     icon: 'smart_toy'       },
     { path: '/medicine-info',    label: 'Medicines',        icon: 'pill'            },
     { path: '/home-remedies',    label: 'Home Remedies',    icon: 'eco'             },
-    { path: '/diet-planner',     label: 'Diet Planner',     icon: 'nutrition'       },
     { path: '/health-assessment',label: 'Health Assessment',icon: 'monitor_heart'   },
     { path: '/nearby',           label: 'Nearby Healthcare',icon: 'location_on'     },
     { path: '/profile',          label: 'My Profile',       icon: 'manage_accounts' },
@@ -609,7 +607,7 @@ const GlobalLayout = ({ children }) => {
             <Link to="/medical-assistant" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">AI Assistant</Link>
             <Link to="/dashboard" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Dashboard</Link>
             <Link to="/health-assessment" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Health Assessment</Link>
-            <Link to="/diet-planner" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Diet Planner</Link>
+            <Link to="/home-remedies" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Home Remedies</Link>
             <Link to="/emergency" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Emergency Center</Link>
             <Link to="/nearby" className="text-[13px] font-medium text-slate-400 hover:text-white transition-colors">Nearby Hospitals</Link>
           </div>
@@ -718,7 +716,6 @@ function AppWithRouter() {
             <Route path="/emergency"         element={<EmergencyHelp />} />
             <Route path="/medical-assistant" element={<ProtectedRoute><MedicalAssistant /></ProtectedRoute>} />
             <Route path="/health-assessment" element={<ProtectedRoute><HealthAssessment /></ProtectedRoute>} />
-            <Route path="/diet-planner"      element={<ProtectedRoute><DietPlanner /></ProtectedRoute>} />
             <Route path="/medicine-info"     element={<MedicineInfo />} />
             <Route path="/home-remedies"     element={<HomeRemedies />} />
             <Route path="/nearby"            element={<HealthcareDirectory />} />
