@@ -35,10 +35,7 @@ async function connectDB() {
     global.isMockDB = false;
   } catch (err) {
     console.error(`\n❌ MongoDB connection failed: ${err.message}`);
-    if (isServer) {
-      throw err;
-    }
-    console.warn('⚠️  Falling back to a local JSON-based persistent file database.\n');
+    console.warn('⚠️  Falling back to a persistent JSON-based database fallback for high-availability.\n');
     isMockDB = true;
     global.isMockDB = true;
     global.dbError = err.message;

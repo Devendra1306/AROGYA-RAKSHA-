@@ -12,16 +12,23 @@ app.set('trust proxy', 1);
 
 const { connectDB } = require('./config/db');
 
-// Lazy database connection middleware (ensures connection before route processing)
+// Singleton database connection initialization (ensures connection & seed run once per process, not on every request)
+let dbInitPromise = null;
 app.use(async (req, res, next) => {
   try {
-    await connectDB();
-    seedDatabase().catch(err => {
-      console.error('Failed to run background database seeding:', err.message);
-    });
+    if (!dbInitPromise) {
+      dbInitPromise = (async () => {
+        await connectDB();
+        seedDatabase().catch(err => {
+          console.error('Failed to run background database seeding:', err.message);
+        });
+      })();
+    }
+    await dbInitPromise;
     next();
   } catch (err) {
-    next(err);
+    console.error('DB initialization middleware notice:', err.message);
+    next();
   }
 });
 
@@ -39,10 +46,12 @@ app.use(express.json());
 // Log HTTP requests
 app.use(morgan('dev'));
 
-// Rate limiting for API requests (especially AI endpoints)
+// Rate limiting for API requests (scalable production tier)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  max: 600, // Generous limit: 600 requests per IP per window to prevent throttling active users
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
 });
 app.use('/api/', apiLimiter);

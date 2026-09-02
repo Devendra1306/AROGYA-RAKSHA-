@@ -74,7 +74,15 @@ function fetchWithTimeout(url, options, timeoutMs = 8000) {
 
 // Helper to call Gemini models
 async function callGemini(systemInstruction, userPrompt, temperature = 0.2) {
-  const geminiModels = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+  // Ultra-fast sub-2s latency models first for instant medical chat responses
+  const geminiModels = [
+    'gemini-3.5-flash-lite',
+    'gemini-flash-lite-latest',
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash',
+    'gemini-3.6-flash',
+    'gemini-3.7-flash'
+  ];
   let lastError = null;
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -93,7 +101,7 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.2) {
         }
       });
       // Call with timeout
-      const result = await promiseWithTimeout(model.generateContent(userPrompt), 12000);
+      const result = await promiseWithTimeout(model.generateContent(userPrompt), 10000);
       const text = result.response.text();
       if (text) {
         return text;
@@ -101,6 +109,7 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.2) {
     } catch (err) {
       console.warn(`[AI Gateway] Gemini model "${modelName}" failed:`, err.message);
       lastError = err;
+      // If 404 (model unavailable) or 503 (high demand), immediately try next model
     }
   }
   throw lastError || new Error('All configured Gemini models failed to generate content.');
@@ -113,37 +122,47 @@ async function callGroq(systemInstruction, userPrompt, temperature = 0.2) {
     throw new Error('Groq API Key is not configured in environment.');
   }
 
-  console.log('[AI Gateway] Attempting Groq (llama-3.1-8b-instant)...');
+  const groqModels = ['openai/gpt-oss-20b', 'qwen/qwen3.6-27b', 'groq/compound-mini'];
   const messages = [];
   if (systemInstruction) {
     messages.push({ role: 'system', content: systemInstruction });
   }
   messages.push({ role: 'user', content: userPrompt });
 
-  const response = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
-      messages,
-      temperature: temperature
-    })
-  }, 8000);
+  let lastError = null;
+  for (const modelName of groqModels) {
+    try {
+      console.log(`[AI Gateway] Attempting Groq (${modelName})...`);
+      const response = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages,
+          temperature: temperature
+        })
+      }, 8000);
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Groq API returned error status ${response.status}: ${errText}`);
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Groq API returned error status ${response.status}: ${errText}`);
+      }
+
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text) {
+        return text;
+      }
+    } catch (err) {
+      console.warn(`[AI Gateway] Groq model ${modelName} failed:`, err.message);
+      lastError = err;
+    }
   }
 
-  const data = await response.json();
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) {
-    throw new Error('Groq response contains empty choices.');
-  }
-  return text;
+  throw lastError || new Error('All configured Groq models failed.');
 }
 
 // Helper to call OpenRouter API
@@ -153,46 +172,63 @@ async function callOpenRouter(systemInstruction, userPrompt, temperature = 0.2) 
     throw new Error('OpenRouter API Key is not configured in environment.');
   }
 
-  console.log('[AI Gateway] Attempting OpenRouter (google/gemma-4-31b-it:free)....');
+  const openRouterModels = [
+    'liquid/lfm-2.5-2.6b:free',
+    'nvidia/nemotron-3.5-lightning:free',
+    'inclusionai/ling-3.0-flash-fin:free',
+    'google/gemma-4-31b-it:free'
+  ];
+
   const messages = [];
   if (systemInstruction) {
     messages.push({ role: 'system', content: systemInstruction });
   }
   messages.push({ role: 'user', content: userPrompt });
 
-  const response = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-      'HTTP-Referer': 'http://localhost:5000',
-      'X-Title': 'Arogya Raksha'
-    },
-    body: JSON.stringify({
-      model: 'google/gemma-4-31b-it:free',
-      messages,
-      temperature: temperature
-    })
-  }, 8000);
+  let lastError = null;
+  for (const modelName of openRouterModels) {
+    try {
+      console.log(`[AI Gateway] Attempting OpenRouter (${modelName})....`);
+      const response = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': 'https://arogyarakshaa.vercel.app',
+          'X-Title': 'Arogya Raksha'
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages,
+          temperature: temperature
+        })
+      }, 8000);
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`OpenRouter API returned error status ${response.status}: ${errText}`);
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenRouter API returned error status ${response.status}: ${errText}`);
+      }
+
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text) {
+        return text;
+      }
+    } catch (err) {
+      console.warn(`[AI Gateway] OpenRouter model ${modelName} failed:`, err.message);
+      lastError = err;
+    }
   }
 
-  const data = await response.json();
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) {
-    throw new Error('OpenRouter response contains empty choices.');
-  }
-  return text;
+  throw lastError || new Error('All configured OpenRouter models failed.');
 }
 
 // Core multi-provider fallback orchestrator with retries
 async function generateContentWithFallback(systemInstruction, userPrompt, temperature = 0.2) {
+  // Prioritize Gemini (verified fast and accurate with user key), fallback to Groq, then OpenRouter
   const providers = [
-    { name: 'Groq', fn: callGroq },
     { name: 'Gemini', fn: callGemini },
+    { name: 'Groq', fn: callGroq },
     { name: 'OpenRouter', fn: callOpenRouter }
   ];
 

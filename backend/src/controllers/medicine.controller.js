@@ -388,6 +388,7 @@ Format:
 
       let healthProfile = null;
       if (req.user) {
+        const isMock = global.isMockDB;
         if (isMock) {
           healthProfile = localDb.findOne('healthProfiles', { userId: req.user._id });
         } else {
