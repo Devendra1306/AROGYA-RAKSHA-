@@ -532,20 +532,35 @@ const GlobalLayout = ({ children }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.9 }}
               transition={{ type: 'spring', damping: 22, stiffness: 260 }}
-              className={`mb-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 min-w-[180px] origin-bottom ${sosOpen ? 'cursor-default' : 'cursor-grab'}`}
+              className="mb-3 bg-white dark:bg-slate-900 border border-red-200 dark:border-red-900/60 rounded-2xl shadow-2xl p-4 flex flex-col gap-3 min-w-[240px] max-w-[280px] origin-bottom"
             >
-              {[
-                { label: 'Call Ambulance',     icon: 'ambulance',   href: 'tel:108',     color: 'text-red-600 bg-red-50 dark:bg-red-950/30'     },
-                { label: 'Call Police',        icon: 'local_police',href: 'tel:100',     color: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30'   },
-                { label: 'Emergency Guide',    icon: 'emergency',   href: '/emergency',  color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30' },
-              ].map(({ label, icon, href, color }) => (
-                <a key={label} href={href}
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>e911_emergency</span>
+                <h4 className="font-bold text-xs uppercase tracking-wider">Emergency Assistance</h4>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                Need immediate medical help? Proceed to the dedicated Emergency Support Center for triage and hospital routing.
+              </p>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSosOpen(false);
+                    navigate('/emergency');
+                  }}
+                  className="flex-1 py-2 px-3 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-sm">emergency</span>
+                  Open Emergency
+                </button>
+                <button
+                  type="button"
                   onClick={() => setSosOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-[12px] transition-all hover:opacity-80 ${color}`}>
-                  <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
-                  {label}
-                </a>
-              ))}
+                  className="py-2 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-xs rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -555,9 +570,10 @@ const GlobalLayout = ({ children }) => {
           className={`w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center font-black text-white text-[13px] tracking-wider transition-all duration-300 cursor-pointer ${
             sosOpen
               ? 'bg-slate-700 dark:bg-slate-800 shadow-slate-400/30 ring-4 ring-slate-500/30'
-              : 'bg-gradient-to-br from-red-500 to-red-700 shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105 ring-4 ring-red-500/20'
+              : 'bg-gradient-to-br from-red-600 via-rose-600 to-red-700 shadow-red-500/50 hover:shadow-red-500/70 hover:scale-105 ring-4 ring-red-500/25'
           }`}
-          title="Emergency SOS (Drag to move)"
+          title="Emergency Assistance"
+          aria-label="Emergency Assistance"
         >
           {sosOpen ? (
             <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>

@@ -12,6 +12,7 @@ const optionalAuth = (req, res, next) => {
 
 router.get('/search', medicineController.search);
 router.post('/compare', medicineController.compare);
+router.post('/check-interactions', optionalAuth, medicineController.checkInteractions);
 router.post('/scan', optionalAuth, medicineController.scan);
 router.post('/ask', optionalAuth, medicineController.ask);
 router.get('/rag-lookup', medicineController.ragLookup);

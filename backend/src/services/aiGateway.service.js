@@ -629,14 +629,14 @@ JSON schema:
   },
 
   compareMedicines: async (med1, med2, temperature = 0.2) => {
-    const prompt = `You are a clinical pharmacologist. Compare the following two medications:
+    const prompt = `You are a clinical pharmacologist and medical educator. Compare the following two medications objectively and factually:
     
     Medication 1:
     - Name: ${med1.medicineName}
     - Generic Name: ${med1.genericName}
     - Category: ${med1.category}
     - Uses: ${med1.uses ? med1.uses.join(', ') : 'N/A'}
-    - Dosage: ${med1.dosage || 'N/A'}
+    - Dosage Reference: ${med1.dosage || 'Follow physician prescription'}
     - Side Effects: ${med1.sideEffects ? med1.sideEffects.join(', ') : 'N/A'}
     - Precautions: ${med1.precautions ? med1.precautions.join(', ') : 'N/A'}
     
@@ -645,25 +645,75 @@ JSON schema:
     - Generic Name: ${med2.genericName}
     - Category: ${med2.category}
     - Uses: ${med2.uses ? med2.uses.join(', ') : 'N/A'}
-    - Dosage: ${med2.dosage || 'N/A'}
+    - Dosage Reference: ${med2.dosage || 'Follow physician prescription'}
     - Side Effects: ${med2.sideEffects ? med2.sideEffects.join(', ') : 'N/A'}
     - Precautions: ${med2.precautions ? med2.precautions.join(', ') : 'N/A'}
     
-    Analyze and output a clean, patient-friendly markdown comparison summary that answers:
-    1. Which medicine is stronger or more powerful/potent (including their speed of action and typical clinical efficacy differences)?
-    2. Which one is better suited for specific indications or patient scenarios (e.g. chronic vs acute pain, mild vs severe symptoms, etc.)?
-    3. Are there any critical differences in side effects, precautions, or contraindications?
-    
-    Output rules:
-    - Provide a short, structured, and easy-to-read comparison.
-    - Keep it under 150 words.
-    - Return plain Markdown (do not use markdown json code block wrapper, just standard headings like ### and lists).
+    STRICT CLINICAL RULES:
+    1. Do NOT declare one medicine as "better", "superior", or strictly "stronger".
+    2. Focus on objective clinical differences: therapeutic mechanism, indications, onset/duration nuances, and primary precautions.
+    3. Keep explanations clear, balanced, and under 160 words.
+    4. Conclude with this exact phrase: "Which medicine is appropriate depends on the individual's condition and medical history. Consult a healthcare professional."
+    5. Return plain markdown with clear headings (###) and bullet points. Do not wrap in JSON or code blocks.
     `;
     try {
-      return await generateContentWithFallback(null, prompt, temperature);
+      return await generateContentWithFallback(null, prompt, temperature, 500);
     } catch (err) {
       console.error('[AI Gateway] Error comparing medicines:', err.message);
-      return 'AI Potency Comparison: Not available at this time. Please consult your physician or pharmacist.';
+      return `### Clinical Comparison Overview\n\n- **${med1.medicineName}** (${med1.genericName}) is indicated for ${med1.uses?.[0] || 'designated conditions'} under the ${med1.category} class.\n- **${med2.medicineName}** (${med2.genericName}) is classified under ${med2.category}.\n\nBoth medications possess distinct pharmacological properties and contraindication profiles.\n\n*Which medicine is appropriate depends on the individual's condition and medical history. Consult a healthcare professional.*`;
+    }
+  },
+
+  checkInteractions: async (medicines, temperature = 0.2) => {
+    const medList = medicines.join(', ');
+    const systemPrompt = `You are a clinical pharmacologist and drug safety specialist.
+Analyze potential drug-drug and drug-substance interactions between the following medications:
+Medications: [${medList}]
+
+STRICT RULES:
+1. Examine interactions between all pairs of medications listed.
+2. Return ONLY a valid JSON object matching the schema below. No markdown backticks, no explanatory preamble.
+3. For each real interaction found, determine:
+   - "pair": "Drug A + Drug B"
+   - "severity": "Major" (contraindicated or significant risk), "Moderate" (requires monitoring or dose adjustment), or "Minor" (low clinical impact)
+   - "description": Mechanism and clinical significance in plain, patient-friendly language (under 40 words).
+   - "action": Specific practical recommendation (e.g. "Discuss timing with doctor", "Avoid concurrent use", or "Monitor blood glucose closely").
+4. If no significant known interactions exist between these specific medications, return an empty "interactions" array and state in "summary" that no major interactions were identified among the listed items.
+5. Always include the standard disclaimer: "The absence of a displayed interaction does not mean no interaction exists. Always verify all concurrent medications, supplements, and herbal products with your doctor or pharmacist."
+
+JSON Schema:
+{
+  "hasInteractions": true,
+  "interactions": [
+    {
+      "pair": "string",
+      "severity": "Major",
+      "description": "string",
+      "action": "string"
+    }
+  ],
+  "summary": "string",
+  "disclaimer": "The absence of a displayed interaction does not mean no interaction exists. Always verify all concurrent medications, supplements, and herbal products with your doctor or pharmacist."
+}`;
+
+    try {
+      let text = await generateContentWithFallback(null, systemPrompt, temperature, 800);
+      text = text.trim();
+      const firstBrace = text.indexOf('{');
+      const lastBrace = text.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        text = text.substring(firstBrace, lastBrace + 1);
+      }
+      text = text.replace(/,\s*([\]}])/g, '$1');
+      return JSON.parse(text);
+    } catch (err) {
+      console.error('[AI Gateway] Error checking interactions:', err.message);
+      return {
+        hasInteractions: false,
+        interactions: [],
+        summary: `No critical automated interaction warnings recorded for ${medList}.`,
+        disclaimer: 'The absence of a displayed interaction does not mean no interaction exists. Always verify all concurrent medications, supplements, and herbal products with your doctor or pharmacist.'
+      };
     }
   },
 

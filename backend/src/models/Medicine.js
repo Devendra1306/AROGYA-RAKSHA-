@@ -11,7 +11,11 @@ const medicineSchema = new mongoose.Schema({
   precautions: [{ type: String }],
   interactions: [{ type: String }],
   contraindications: [{ type: String }],
-  storageInfo: { type: String }
+  storageInfo: { type: String },
+  route: { type: String },
+  prescriptionStatus: { type: String },
+  source: { type: String, default: 'U.S. FDA Drug Label Database (OpenFDA)' },
+  lastUpdated: { type: String }
 }, {
   timestamps: true
 });

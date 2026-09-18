@@ -93,7 +93,22 @@ ${storage ? `- Storage & Handling: ${storage.slice(0, 400)}` : ''}
   console.log(`[Medicine Service] Refining OpenFDA details with Gemini API for: ${brandName}`);
   const aiResult = await aiGateway.generateStructuredMedicine(brandName, rawFDAContext);
   
+  const route = label?.openfda?.route?.[0] || 'Oral';
+  const productType = label?.openfda?.product_type?.[0] || '';
+  const prescriptionStatus = productType.includes('OTC') 
+    ? 'Over-The-Counter (OTC)' 
+    : (productType.includes('PRESCRIPTION') ? 'Prescription Required (Rx)' : 'Prescription (Rx)');
+  const source = 'U.S. FDA Drug Label Database (OpenFDA)';
+  const lastUpdated = label?.effective_time 
+    ? label.effective_time.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3') 
+    : new Date().toISOString().split('T')[0];
+
   if (aiResult) {
+    aiResult.route = route;
+    aiResult.prescriptionStatus = prescriptionStatus;
+    aiResult.source = source;
+    aiResult.lastUpdated = lastUpdated;
+
     if (manufacturer && !aiResult.storageInfo?.includes(manufacturer)) {
       aiResult.storageInfo = `${aiResult.storageInfo || 'Store in a cool, dry place.'} Manufactured by ${manufacturer}.`.trim();
     }
@@ -472,30 +487,72 @@ Format:
     if (!medicineName || !question) return res.status(400).json({ error: 'Medicine name and question are required.' });
 
     try {
-      const prompt = `You are a concise clinical AI pharmacist. Answer this question about "${medicineName}":
-Question: "${question}"
+      // Screen for life-threatening emergency symptoms
+      const emergencyKeywords = [
+        'chest pain', 'shortness of breath', 'cannot breathe', "can't breathe", 'trouble breathing',
+        'difficulty breathing', 'swelling of throat', 'swelling of tongue', 'swelling of face',
+        'anaphylaxis', 'overdose', 'took too much', 'unconscious', 'passed out', 'seizure',
+        'severe bleeding', 'coughing blood'
+      ];
+      const lowerQ = question.toLowerCase();
+      const isEmergency = emergencyKeywords.some(kw => lowerQ.includes(kw));
 
-STRICT RULES:
-1. Give a direct 1-sentence answer first (e.g., "Do not take with hot water..." or "Yes, you can take it...").
-2. Follow with at most 2 brief bullet points on key reason or precaution.
-3. Total response MUST be under 50 words. Do NOT output long generic essays, lengthy medical history, or repetitive paragraphs.`;
-
-      let healthProfile = null;
-      if (req.user) {
-        if (global.isMockDB) {
-          healthProfile = localDb.findOne('healthProfiles', { userId: req.user._id });
-        } else {
-          healthProfile = await HealthProfile.findOne({ userId: req.user._id });
+      // Retrieve medicine context if available
+      let medContext = '';
+      if (global.isMockDB) {
+        const found = localDb.findOne('medicines', { medicineName });
+        if (found) {
+          medContext = `Active Generic: ${found.genericName}, Class: ${found.category}, Known Side Effects: ${found.sideEffects?.join(', ')}, Warnings: ${found.precautions?.join(', ')}`;
+        }
+      } else {
+        const found = await Medicine.findOne({ medicineName });
+        if (found) {
+          medContext = `Active Generic: ${found.genericName}, Class: ${found.category}, Known Side Effects: ${found.sideEffects?.join(', ')}, Warnings: ${found.precautions?.join(', ')}`;
         }
       }
 
-      const aiResponseText = await aiGateway.generateRaw(null, prompt, 0.2, 140);
+      const prompt = `You are a clinical AI medical educator for Arogya Raksha.
+Medicine: "${medicineName}"
+${medContext ? `Verified Drug Profile: ${medContext}` : ''}
+Patient Question: "${question}"
+
+STRICT SAFETY & REGULATORY RULES:
+1. Provide a direct, empathetic, and clear response in 2-4 sentences (under 90 words).
+2. DO NOT formulate a medical diagnosis or prescribe personalized treatment.
+3. DO NOT alter, compute, or invent custom dosages.
+4. Distinguish established pharmacological facts from educational guidance.
+5. If the user asks about symptoms that could be an allergic reaction or side effect, clarify that immediate professional evaluation is required.
+6. Always remind the user to confirm with their attending physician or licensed pharmacist.
+${isEmergency ? '7. CRITICAL: The user has mentioned potentially life-threatening emergency symptoms. Lead with an URGENT notice to call emergency services (108 / 112) or go to the nearest emergency facility immediately.' : ''}`;
+
+      let aiResponseText = await aiGateway.generateRaw(null, prompt, 0.2, 220);
+
+      if (isEmergency) {
+        aiResponseText = `🚨 **EMERGENCY WARNING**: The symptoms described may indicate an acute medical emergency. Please seek immediate emergency medical evaluation (Dial 108 / 112 or visit the nearest emergency department) right away.\n\n${aiResponseText}`;
+      }
+
       res.json({
         medicineName,
         question,
         answer: aiResponseText,
-        disclaimer: "Consult a healthcare professional for specific medical advice."
+        isEmergency,
+        disclaimer: "AI-generated educational explanation based on available drug data. Does not substitute for professional medical diagnosis or personalized treatment."
       });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  checkInteractions: async (req, res) => {
+    const { medicines } = req.body;
+    if (!Array.isArray(medicines) || medicines.length < 2) {
+      return res.status(400).json({ error: 'Please provide at least two medicine names to check for interactions.' });
+    }
+
+    try {
+      const cleanMeds = medicines.map(m => String(m).trim()).filter(Boolean);
+      const result = await aiGateway.checkInteractions(cleanMeds);
+      res.json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
