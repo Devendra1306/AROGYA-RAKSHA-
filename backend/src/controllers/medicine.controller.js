@@ -17,103 +17,117 @@ const fetchWithTimeout = async (url, options = {}) => {
   }
 };
 
+const isBadCache = (m) => {
+  if (!m) return true;
+  if (m.genericName === 'Unknown Active Ingredient') return true;
+  if (m.category === 'General Therapeutics') return true;
+  if (Array.isArray(m.uses) && m.uses[0] === 'General health management') return true;
+  return false;
+};
+
 const fetchOpenFDADetailsAndCache = async (fdaId, fallbackName) => {
   const isMock = global.isMockDB;
   
-  let labelUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=id:${fdaId}`;
-  let response = await fetchWithTimeout(labelUrl).catch(() => ({ ok: false }));
-  
-  if (!response.ok && fallbackName) {
-    labelUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=openfda.brand_name:"${encodeURIComponent(fallbackName)}"&limit=1`;
-    response = await fetchWithTimeout(labelUrl).catch(() => ({ ok: false }));
+  let label = null;
+  const cleanName = (fallbackName || '').trim();
+
+  // 1. Try fetching by OpenFDA ID
+  if (fdaId) {
+    const labelUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=id:${fdaId}`;
+    const response = await fetchWithTimeout(labelUrl, { timeout: 4000 }).catch(() => ({ ok: false }));
+    if (response.ok) {
+      const data = await response.json();
+      label = data.results?.[0];
+    }
   }
-
-  if (!response.ok) {
-    throw new Error('Medicine details could not be found on OpenFDA.');
-  }
-
-  const data = await response.json();
-  const label = data.results?.[0];
-  if (!label) {
-    throw new Error('Empty label results from OpenFDA.');
-  }
-
-  const brandName = label.openfda?.brand_name?.[0] || fallbackName || 'Unknown Medication';
-  const genericName = label.openfda?.generic_name?.[0] || 'Unknown Active Ingredient';
-  const manufacturer = label.openfda?.manufacturer_name?.[0] || 'Unknown Manufacturer';
   
-  // Extract text fields safely
-  const indications = label.indications_and_usage?.[0] || label.purpose?.[0] || 'General therapeutic use.';
-  const dosage = label.dosage_and_administration?.[0] || 'Consult a healthcare professional for exact dosage instructions.';
-  const sideEffects = label.adverse_reactions?.[0] || 'Possible side effects may vary.';
-  const warnings = label.warnings?.[0] || label.warnings_and_cautions?.[0] || 'Use with appropriate clinical caution.';
-  const interactions = label.drug_interactions?.[0] || 'Consult pharmacist or doctor for active interactions.';
-  const storage = label.how_supplied?.[0] || label.storage_and_handling?.[0] || 'Store in standard recommended conditions.';
+  // 2. If not found by ID, search OpenFDA by both brand_name and generic_name
+  if (!label && cleanName) {
+    const searchQueries = [
+      `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.generic_name:"${encodeURIComponent(cleanName)}"+openfda.brand_name:"${encodeURIComponent(cleanName)}"+openfda.substance_name:"${encodeURIComponent(cleanName)}")&limit=1`,
+      `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.generic_name:${encodeURIComponent(cleanName)}*+openfda.brand_name:${encodeURIComponent(cleanName)}*)&limit=1`
+    ];
 
-  const prompt = `You are a clinical pharmacist. Parse this raw OpenFDA label information and write a simplified, patient-friendly, and highly structured medicine profile sheet.
-   
-Raw OpenFDA Label Data:
-- Medicine Name: ${brandName}
-- Generic Name: ${genericName}
-- Manufacturer: ${manufacturer}
-- Indications/Uses: ${indications}
-- Dosage instructions: ${dosage}
-- Adverse reactions/Side effects: ${sideEffects}
-- Warnings/Cautions: ${warnings}
-- Drug interactions: ${interactions}
-- Storage/Packaging: ${storage}
-
-RULES:
-- Return ONLY a valid JSON block matching the schema below.
-- Keep each array (uses, sideEffects, precautions, interactions, contraindications) to a maximum of 3 highly concise bullet points (maximum 10 words per bullet).
-- Keep the dosage and storageInfo descriptions to a single short sentence (maximum 15 words).
-- This is critical for response speed (< 2 seconds).
-
-JSON schema:
-{
-  "medicineName": "Simplified Brand/Common Name",
-  "genericName": "Generic active chemical",
-  "brandNames": ["Common Brand 1", "Common Brand 2"],
-  "category": "Therapeutic class (e.g. Analgesic, Beta Blocker, Antihistamine)",
-  "uses": ["Simplified list of main uses"],
-  "dosage": "Simplified adult dosage explanation",
-  "sideEffects": ["Simplified list of common side effects"],
-  "precautions": ["Simplified list of clinical warnings & precautions"],
-  "interactions": ["Simplified list of major drug/food interactions"],
-  "contraindications": ["Simplified list of major contraindications"],
-  "storageInfo": "Simplified storage instructions"
-}
-`;
-
-  const aiResult = await aiGateway.generateStructuredMedicine(brandName, prompt);
-  
-  if (aiResult) {
-    aiResult.storageInfo = `${aiResult.storageInfo || 'Store in a cool dry place.'} Manufactured by ${manufacturer}.`;
-    if (!aiResult.brandNames) aiResult.brandNames = [];
-    if (fallbackName && !aiResult.brandNames.some(b => b.toLowerCase() === fallbackName.toLowerCase())) {
-      aiResult.brandNames.push(fallbackName);
+    for (const url of searchQueries) {
+      const response = await fetchWithTimeout(url, { timeout: 4000 }).catch(() => ({ ok: false }));
+      if (response.ok) {
+        const data = await response.json();
+        if (data.results?.[0]) {
+          label = data.results[0];
+          break;
+        }
+      }
     }
   }
 
-  // Cache to DB
+  // 3. Extract OpenFDA label sections
+  const brandName = label?.openfda?.brand_name?.[0] || fallbackName || 'Unknown Medication';
+  const genericName = label?.openfda?.generic_name?.[0] || label?.openfda?.substance_name?.[0] || fallbackName;
+  const manufacturer = label?.openfda?.manufacturer_name?.[0] || '';
+  const pharmClass = label?.openfda?.pharm_class_epc?.[0] || label?.openfda?.pharm_class_cs?.[0] || '';
+  
+  const indications = label?.indications_and_usage?.[0] || label?.purpose?.[0] || label?.description?.[0] || '';
+  const dosage = label?.dosage_and_administration?.[0] || '';
+  const sideEffects = label?.adverse_reactions?.[0] || '';
+  const warnings = label?.warnings?.[0] || label?.warnings_and_cautions?.[0] || label?.boxed_warning?.[0] || '';
+  const interactions = label?.drug_interactions?.[0] || '';
+  const contraindications = label?.contraindications?.[0] || '';
+  const storage = label?.how_supplied?.[0] || label?.storage_and_handling?.[0] || '';
+
+  // Prepare clinical context from OpenFDA to feed into Gemini
+  let rawFDAContext = `
+- Official Medicine Name: ${brandName}
+- Generic Active Ingredient: ${genericName}
+- Manufacturer: ${manufacturer || 'FDA Registered Facility'}
+${pharmClass ? `- Pharmacological Class: ${pharmClass}` : ''}
+${indications ? `- Indications & Usage: ${indications.slice(0, 1200)}` : ''}
+${dosage ? `- Dosage & Administration: ${dosage.slice(0, 800)}` : ''}
+${sideEffects ? `- Adverse Reactions & Side Effects: ${sideEffects.slice(0, 800)}` : ''}
+${warnings ? `- Warnings & Precautions: ${warnings.slice(0, 800)}` : ''}
+${interactions ? `- Drug Interactions: ${interactions.slice(0, 600)}` : ''}
+${contraindications ? `- Contraindications: ${contraindications.slice(0, 600)}` : ''}
+${storage ? `- Storage & Handling: ${storage.slice(0, 400)}` : ''}
+`.trim();
+
+  // 4. Refine OpenFDA label data with Gemini API
+  console.log(`[Medicine Service] Refining OpenFDA details with Gemini API for: ${brandName}`);
+  const aiResult = await aiGateway.generateStructuredMedicine(brandName, rawFDAContext);
+  
+  if (aiResult) {
+    if (manufacturer && !aiResult.storageInfo?.includes(manufacturer)) {
+      aiResult.storageInfo = `${aiResult.storageInfo || 'Store in a cool, dry place.'} Manufactured by ${manufacturer}.`.trim();
+    }
+    if (!aiResult.brandNames) aiResult.brandNames = [];
+    if (fallbackName && !aiResult.brandNames.some(b => b.toLowerCase() === fallbackName.toLowerCase())) {
+      aiResult.brandNames.unshift(fallbackName);
+    }
+    if (label?.id && !aiResult.fdaId) {
+      aiResult.fdaId = label.id;
+    }
+  }
+
+  // 5. Cache or update in DB (overwriting any previous bad cache)
   let cached = null;
+  const targetId = fdaId ? `fda_cache_${fdaId}` : (label?.id ? `fda_cache_${label.id}` : `med_${cleanName.toLowerCase()}`);
+
   if (isMock) {
-    aiResult._id = 'fda_cache_' + fdaId;
-    cached = localDb.create('medicines', aiResult);
-  } else {
-    const exists = await Medicine.findOne({ medicineName: aiResult.medicineName });
-    if (exists) {
-      cached = exists;
+    aiResult._id = targetId;
+    const existing = localDb.findOne('medicines', { _id: targetId }) || localDb.findOne('medicines', { medicineName: aiResult.medicineName });
+    if (existing) {
+      cached = localDb.findByIdAndUpdate('medicines', existing._id, aiResult);
     } else {
-      try {
-        cached = await Medicine.create(aiResult);
-      } catch (err) {
-        if (err.code === 11000) {
-          cached = await Medicine.findOne({ medicineName: aiResult.medicineName }) || aiResult;
-        } else {
-          throw err;
-        }
-      }
+      cached = localDb.create('medicines', aiResult);
+    }
+  } else {
+    try {
+      cached = await Medicine.findOneAndUpdate(
+        { $or: [{ medicineName: aiResult.medicineName }, { medicineName: fallbackName }] },
+        { $set: aiResult },
+        { new: true, upsert: true }
+      );
+    } catch (err) {
+      console.warn('[Medicine Service] DB upsert notice:', err.message);
+      cached = aiResult;
     }
   }
 
@@ -200,13 +214,13 @@ const medicineController = {
           med = await Medicine.findOne({ _id: 'fda_cache_' + fdaId }) || await Medicine.findById(id).catch(() => null);
         }
 
-        if (med) {
+        if (med && !isBadCache(med)) {
           console.log(`Cache hit for cached OpenFDA medicine: ${med.medicineName}`);
           return res.json(med);
         }
 
         // Fetch label from OpenFDA, format via Gemini, cache in database, and return
-        console.log(`Cache miss. Fetching details from OpenFDA for ID: ${fdaId}`);
+        console.log(`Cache miss or bad cache. Fetching details from OpenFDA for ID: ${fdaId}`);
         const newMed = await fetchOpenFDADetailsAndCache(fdaId);
         return res.json(newMed);
       }
@@ -235,17 +249,29 @@ const medicineController = {
         }
       }
 
-      // 3. Fallback: If not found locally, query OpenFDA by name
+      // If cached data contains placeholder/corrupted data, invalidate and refetch
+      if (med && isBadCache(med)) {
+        console.log(`Cached medicine "${med.medicineName}" contains placeholder data. Invalidate & refetching...`);
+        med = null;
+      }
+
+      // 3. Fallback: If not found locally (or was bad cache), query OpenFDA by name
       if (!med) {
-        console.log(`Medicine not found in local DB. Querying OpenFDA by name: ${id}`);
-        const searchUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=openfda.brand_name:"${encodeURIComponent(id)}"&limit=1`;
-        const searchRes = await fetchWithTimeout(searchUrl, { timeout: 4000 }).catch(() => ({ ok: false }));
-        if (searchRes.ok) {
-          const searchData = await searchRes.json();
-          const fdaId = searchData.results?.[0]?.id;
-          if (fdaId) {
-            const newMed = await fetchOpenFDADetailsAndCache(fdaId, id);
-            return res.json(newMed);
+        console.log(`Medicine not found in local DB or invalidated. Querying OpenFDA by name: ${id}`);
+        const searchQueries = [
+          `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.generic_name:"${encodeURIComponent(id)}"+openfda.brand_name:"${encodeURIComponent(id)}"+openfda.substance_name:"${encodeURIComponent(id)}")&limit=1`,
+          `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.generic_name:${encodeURIComponent(id)}*+openfda.brand_name:${encodeURIComponent(id)}*)&limit=1`
+        ];
+
+        for (const searchUrl of searchQueries) {
+          const searchRes = await fetchWithTimeout(searchUrl, { timeout: 4000 }).catch(() => ({ ok: false }));
+          if (searchRes.ok) {
+            const searchData = await searchRes.json();
+            const fdaId = searchData.results?.[0]?.id;
+            if (fdaId) {
+              const newMed = await fetchOpenFDADetailsAndCache(fdaId, id);
+              return res.json(newMed);
+            }
           }
         }
         
@@ -258,16 +284,22 @@ const medicineController = {
         let cached = null;
         if (isMock) {
           generatedData._id = 'mock_' + Date.now();
-          cached = localDb.create('medicines', generatedData);
+          const existing = localDb.findOne('medicines', { medicineName: generatedData.medicineName });
+          if (existing) {
+            cached = localDb.findByIdAndUpdate('medicines', existing._id, generatedData);
+          } else {
+            cached = localDb.create('medicines', generatedData);
+          }
         } else {
           try {
-            cached = await Medicine.create(generatedData);
+            cached = await Medicine.findOneAndUpdate(
+              { medicineName: generatedData.medicineName },
+              { $set: generatedData },
+              { new: true, upsert: true }
+            );
           } catch (err) {
-            if (err.code === 11000) {
-              cached = await Medicine.findOne({ medicineName: generatedData.medicineName }) || generatedData;
-            } else {
-              throw err;
-            }
+            console.warn('[Medicine Service] DB upsert notice:', err.message);
+            cached = generatedData;
           }
         }
         return res.json(cached || generatedData);
@@ -308,15 +340,26 @@ const medicineController = {
           });
         }
 
+        if (med && isBadCache(med)) {
+          med = null;
+        }
+
         if (!med) {
           console.log(`Compare lookup: Dynamic resolving and caching "${name}"`);
-          const searchUrl = `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=openfda.brand_name:"${encodeURIComponent(name)}"&limit=1`;
-          const searchRes = await fetchWithTimeout(searchUrl, { timeout: 3000 }).catch(() => ({ ok: false }));
-          if (searchRes.ok) {
-            const searchData = await searchRes.json();
-            const fdaId = searchData.results?.[0]?.id;
-            if (fdaId) {
-              med = await fetchOpenFDADetailsAndCache(fdaId, name);
+          const searchQueries = [
+            `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.generic_name:"${encodeURIComponent(name)}"+openfda.brand_name:"${encodeURIComponent(name)}"+openfda.substance_name:"${encodeURIComponent(name)}")&limit=1`,
+            `https://api.fda.gov/drug/label.json?api_key=aniNQ7FQNxVgReQg4kQexCzmeqzqDb3mvKnLd5d7&search=(openfda.generic_name:${encodeURIComponent(name)}*+openfda.brand_name:${encodeURIComponent(name)}*)&limit=1`
+          ];
+
+          for (const searchUrl of searchQueries) {
+            const searchRes = await fetchWithTimeout(searchUrl, { timeout: 3000 }).catch(() => ({ ok: false }));
+            if (searchRes.ok) {
+              const searchData = await searchRes.json();
+              const fdaId = searchData.results?.[0]?.id;
+              if (fdaId) {
+                med = await fetchOpenFDADetailsAndCache(fdaId, name);
+                break;
+              }
             }
           }
 
@@ -329,14 +372,13 @@ const medicineController = {
               med = localDb.create('medicines', generatedData);
             } else {
               try {
-                med = await Medicine.create(generatedData);
+                med = await Medicine.findOneAndUpdate(
+                  { medicineName: generatedData.medicineName },
+                  { $set: generatedData },
+                  { new: true, upsert: true }
+                );
               } catch (err) {
-                if (err.code === 11000) {
-                  // If duplicate key race condition occurs, just use the generated data
-                  med = await Medicine.findOne({ medicineName: generatedData.medicineName }) || generatedData;
-                } else {
-                  throw err;
-                }
+                med = generatedData;
               }
             }
           }
